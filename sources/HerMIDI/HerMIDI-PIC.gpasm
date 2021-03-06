@@ -1,0 +1,509 @@
+;*********************************************************************************
+; HerMIDI - a MIDI interface for Commodore 64 Serial port and SID-Wizard by Hermit 
+;*********************************************************************************
+ RADIX dec         ;set decimal numbers as default
+
+
+;========================== PIC12F509 definition ===============================
+LIST P=PIC12F509   ;Give PIC model for compiler (in HerMIDI.lst file)
+
+;Hardware registers:
+INDF  = 0x00    ;Indirect address based on FSR (not a physical register)
+TMR0  = 0x01    ;8 bit realtime clock/counter
+PCL   = 0x02    ;Program Counter low-byte
+STATUS= 0x03    ;Status register of the PIC
+FSR   = 0x04    ;Indirect Data Memory Address pointer
+OSCCAL= 0x05    ;Internal RC oscillator's calibration-register
+GPIO  = 0x06    ;I/O port data register (lower 6 bits only)
+RAM1base = 0x10    ;base address of RAM page 1 (second bank sees 0x07..0x0f as 0x27..0x2F, so we use only registers above 0x10)
+RAM1size = 0x10    ;safely usable RAM1 region is 0x10..0x20
+RAM2base = 0x27    ;base address of second usable bank at RAM page 2 ($20..$26 sees special function registers, $27..$2f is the same as $07..$0f)
+RAM2size = 0x19    ;'MIDI-eventbuffer size' in other words
+ __MAXRAM 0x3F     ;directive: max. address of RAM ; UserRAM=0x07 ;where user-RAM starts
+_CONFIG  = 0xFFF   ;address of CONFIG 'fuses' in Flash address space ;CONFIG Options for the PIC
+
+;STATUS register bits:
+C    = 0        ;Carry-Flag (if byte-overflow happened)
+DC   = 1        ;Digit-Carry-Flag (if nibble-overflow happened)
+Z    = 2        ;Zero-Flag   ;  NOT_PD = 3;Power-Down bit  ;  NOT_TO = 4;Timer-out bit
+PA0  = 5        ;Program-page preselect-bits (0 - 0..$1ff, 1 - $200..$3ff)
+GPWUF= 7        ;GPIO reset-bit ( 0 - after power-up/other reset ; 1 - reset due to pin-change wake-up )
+
+;OPTION (write-only) register bits: ;(Registers outside memory : W, OPTION, TRISA)
+PSA     = 3       ;Prescaler alignment to WDT (1) or timer0 (0) - 0..2 bits select prescaler ratio PS0 = 0 ; PS1 = 1 ; PS2 = 2
+T0SE    = 4       ;Timer0 source edge selector (0:increment on low-to-high pin transition ; 1 - increment on high-to-low)
+T0CS    = 5       ;Timer0 clock-source select (0:transition on int.clock=fosc/4, 1:transition on T0CKI (GPIO2) pin - overrides TRIS on GPIO2)
+NOT_GPPU= 6       ;Enable weak GP0,GP1,GP3 pull-ups bit (0:enabled, 1:disabled) 
+NOT_GPWU= 7       ;Enable Wake-up on Pin Change bit GP0,1,3 (0:enabled, 1:disabled) 
+
+;CONFIG fuse bits:
+_OSC_IntRC= 0xFFE   ;internal RC oscillator ; _OSC_LP   = 0xFFC ; _OSC_XT   = 0xFFD; _OSC_ExtRC= 0xFFF
+_WDT_OFF  = 0xFFB   ;WDT disabled ; _WDT_ON   = 0xFFF    ; WDT enabled
+_CP_OFF   = 0xFFF   ;Code protection off ; _CP_ON    = 0xFF7    ; Code protection on
+_MCLRE_OFF= 0xFEF   ;GP3/MCLR pin function is digital input, MCLR internally tied to VDD ; _MCLRE_ON = 0xFFF
+ __CONFIG ( _OSC_IntRC & _CP_OFF & _MCLRE_OFF) ; & _WDT_OFF)    ;directive for assembler to set fuses
+
+
+;============================= Pinout and Constants ===================================
+CONFpin= 0     ;GPIO pin for DeviceNumber-config (Capacitor timed through built-in pull-up resistor, rise-time determines IEC device-number of HerMIDI)
+LEDpin = 1     ;GPIO pin for the LED which tells if HerMIDI is switched ON
+DATApin= 2     ;GPIO pin for DATA transfer (connected to pin5 of C64 Serial port)
+MIDIpin= 3     ;GPIO pin (GPIO bit) used to read 31.25kHz MIDI signal
+ATNpin = 4     ;GPIO pin for ATN (Attention) , connected to pin3 of C64 Serial interface
+CLKpin = 5     ;GPIO pin for CLK (Clock) line, connected to pin4 of C64 Serial port.
+
+DATAbit= 4     ;would be '2^DATApin' == 'power(2,DATApin)' if it worked well in gpasm
+CLKbit = 0x20  ;would be '2^CLKpin' == 'power(2,CLKpin)' if it worked well in gpasm
+LEDbit = 2     ;would be '2^LEDpin' == 'power(2,LEDpin)' if it worked well in gpasm
+;power ("2^") seems not always working in gpasm, therefore we have to type exact bit-values of GPIO pins :(
+
+MIDIcycles = 32            ;instruction-cycles spent during 1 MIDI clock-cycle (MIDIperiod/InstructionPeriod=32usec/1usec)
+MIDIphase  = 0             ;0:pure MIDI between signal & ground, 1:maybe needed for optocoupler if it turns MIDI-signal upside-down
+EventBuffer_size=RAM2size  ;size of MIDI-event buffer
+IniString_length=IniString_end-IniString ;length of string (DeviceId + ControlCmd) used to switch HerMIDI on
+FlashSpeed=100  ;speed of Stand-by LED flashing when ATN line is down but init-string is not sent
+MIDI_EOD = 0xFD ;used as 'End of Data' signal in Transmission
+
+;================================ Variables ============================================
+cblock RAM1base  ;allocate in RAM bank1 for variables
+ OutTemp         ;temporary storage for emulated Open-Drain output - needed for read or read-and-modify (e.g. BCF/BSF) commands, because TRIS is write-only
+ BitCount        ;counts bit 0..7 in MIDI data-bytes or TALK command
+ DelayCount      ;counter for cycle-waiters
+ FlashCount      ;LED flash-counter (needed to distinguish Stand-by state when ATN-line is low for some time)
+ MIDIindex       ;currently read MIDI-data index in buffer in Transfer-mode
+ MIDIbyte        ;temporary storage for byte that's received thourgh MIDI cable
+ TxIndex         ;index of data being compared with received C64 byte in StandBy-mode, or being sent to C64 in Transfer-mode
+ TxByte          ;temporary storage for byte that's received/sent through IEC bus
+ TxBitCount      ;counts bit 0..7 for data-transmission between HerMIDI and C64
+ PacketSize      ;max. byte count limited by C64 for data-transfer, taken from the last byte ('ControlCmd' of C64) sent in the initilization string
+ DelayCompensate ;will tell MIDI-byte reader when startbit arrived during longer processes, and it will decrease start-bit delay-time accordingly
+endc
+
+cblock RAM2base  ;allocate in RAM bank2 for event-buffer
+ EventBuffer:EventBuffer_size   ;MIDI events are collected into this buffer till C64 request. After C64 is served, buffer pointer is reset
+endc
+EventBuffer_top = (EventBuffer+EventBuffer_size)-1
+
+
+
+ Org 0 ;=================The program execution starts here==============================
+ goto InitPIC ;main program must be after subroutines so they can be entirely in the 1st bank
+
+
+;------------------------------------- Macro Definitions -------------------------------
+InitTx  macro TxStVal  ;initialize upcoming data-transfer, low-nybble will count bit-sending rounds down to zero
+        movlw TxStVal           ;1 cycle
+        movwf TxBitCount        ;1 cycle    ;init Transmit-state to 'waiting for request from C64' TxBitCount0
+        movlw low(EventBuffer+0);1 cycle
+        movwf MIDIindex         ;1 cycle    ;init MIDI-in buffer-index
+        movwf TxIndex           ;1 cycle    ;init C64-out buffer-index to first databyte
+ endm ;this macro is used at init and in synchron & asynchron transfer-routines
+
+skipIfMIDI macro SkipValue ;skip 1 instruction if MIDI-input signal is equal to 'SkipValue'
+      if (SkipValue==0)      ;skip if MIDI-signal=1 (startbit)
+       if (MIDIphase==0)        ;(normal phase of MIDI-signal between GND and signal-pin)
+        btfsc GPIO,MIDIpin
+       else                     ;inverted phase (probably caused by an optocoupler on the input)
+        btfss GPIO,MIDIpin
+       endif
+      else                   ;skip if MIDI-signal=0
+       if (MIDIphase==0)        ;(normal phase of MIDI-signal between GND and signal-pin)
+        btfss GPIO,MIDIpin
+       else                     ;inverted phase (probably caused by an optocoupler on the input)
+        btfsc GPIO,MIDIpin
+       endif
+      endif
+ endm
+ 
+rTxByte macro ;reads 'TxByte' from MIDIevent-buffer in 'TxIndex' position
+        movfw TxIndex           ;1 cycle
+        movwf FSR               ;1 cycle
+        movfw INDF              ;1 cycle
+        clrf FSR                ;1 cycle    ;set back first bank
+        movwf TxByte            ;1 cycle
+ endm ;this macro is used in synchron & asynchron transfer-routines
+
+
+
+;*********************************** SUBROUTINES (max. 2 nested) ****************************************
+;subroutines must be at first bank because 'call' cannot reach the second bank
+
+ReadMIDIbyte ;read one byte from MIDI-input to buffer
+;3..27 cycles delay here after arrival of MIDI-startbit (but max. around 12 cycles between MIDI-startbit checkpoints)
+;delay till 'BitLoop' to be safely inside 1st MIDI-databit (& compensate drift towards MIDI-signal)
+;(delay gets shortened with 0/8/16 cycles if DelayCompensate's bit 0 /& 1 is set when MIDI-startbit arrived inside longer routines)  
+        movlw 28 /4-1           ;1 cycle ;full Delay4x: 41-13 cycles = 32cycle startbit  +  16cycle middle of 1st MIDI-byte  -  ((12-3) cycles jitter / 2) - 3cycle min.delay - (2+9)cycle entry - 2cycle goto
+        btfsc DelayCompensate,0 ;2/1 cycles ;check if should shorten delay with 8 cycles
+        movlw (28-8) /4-1       ;0/1 cycles
+        btfsc DelayCompensate,1 ;2/1 cycles ;check if should shorten delay with 16 cycles
+        movlw (28-16) /4-1      ;0/1 cycles
+SBdelay call Delay4x            ;duration depends on W-register
+        bsf OutTemp,LEDpin      ;1 cycle  ;switch off LED till next C64 request to show MIDI activity
+        clrf DelayCompensate    ;1 cycle  ;seems better, safer inside 1st MIDI-databit with this additional 2 cycles (bsf and nop)
+StrtBit movlw 8                 ;1 cycle - will count from 8 to 0 
+        movwf BitCount          ;1 cycle - BitCount counts bits
+        clrf MIDIbyte           ;1 cycle - pre-init to have Carry=0 on rrf rotation, will be used to hold data-byte
+        bcf STATUS,C            ;1 cycle - init (clear) Carry-flag
+        goto ChkBits            ;2 cycles
+        
+ReadMIDIbyte2 ;Asynchron-mode jitter at entry: 3..12
+        movlw 32 /4-1           ;Asynchron-mode delay needed: 41-10 cycles = 32cycle startbit + 16 cycle middle - ((12-3) cycles jitter / 2) - 3cycle min.delay - (2+6) cycle entry - 2 cycle goto   
+        call Delay4x            ;duration depends on W-register
+        goto StrtBit            ;2 cycles
+
+BitLoop call Delay26         ;32-cycle loop - from here every signal-checking should happen in 32 cycles exactly
+ChkBits skipIfMIDI 0            ;2/1 cycles (together with next instruction/jump) - read upcoming bit
+        bsf STATUS,C            ;0/1 - set Carry if signal is 1
+        rrf MIDIbyte,f          ;1 cycle - rotate right (through Carry)
+        decfsz BitCount,f       ;1/2 cycles - if zero, the whole byte is read, go to next byte
+        goto BitLoop            ;2/0 cycles - if nonzero, loop and read rest of the byte
+                             ;end of 32-cycle loop
+;max 30 cycles can be used here till upcoming start-bit:
+        ;PLACEHOLDER:           ;if ShortEvent-mode is selected, convert MIDI-events to short codes and store & send just them instead
+StorByt movlw low(EventBuffer+0);1 cycle  ;check buffer-limit given in Control-byte by C64 at init
+        addwf PacketSize,w      ;1 cycle 
+        xorwf MIDIindex,w       ;1 cycle  ;compare if equal
+        btfsc STATUS,Z          ;2/1 cycles
+        goto RetMIDI            ;0/2 cycles ;skipping MIDI-bytes that could not fit into packet-size given in Control-byte, avoiding overload
+        movlw EventBuffer_top   ;1 cycle  ;top of buffer?
+        xorwf MIDIindex,w       ;1 cycle  ;compare if equal
+        btfsc STATUS,Z          ;2/1 cycles
+        goto RetMIDI            ;0/2 cycles ;skipping MIDI-bytes that could not fit into the buffer, avoiding overload 
+        movfw MIDIindex         ;1 cycle
+        movwf FSR               ;1 cycle  ;FSR changes bank here!
+        bcf FSR,5               ;1 cycle  ;back to first bank
+        movfw MIDIbyte          ;1 cycle  ;load W-register
+        bsf FSR,5               ;1 cycle  ;back to second bank
+        movwf INDF              ;1 cycle
+        clrf FSR                ;1 cycle  ;init FSR to first bank!
+        incf MIDIindex,f        ;1/0 cycles ;advance in buffer
+RetMIDI skipIfMIDI 1            ;1/2 cycles ;after last bit, wait for MIDI stop-bit (5V) (maybe last bit was also 5V, that saves time)
+        goto $-1                ;2/0 cycles
+        retlw 0                 ;2 cycles
+        
+
+Woutput movfw OutTemp           ;1 cycle ;sum: 2 + 2+2 = 6 cycles ;refresh emulated Open-Drain output from OutTemp
+        tris GPIO               ;1 cycle ;emulated open-drain if all GPIO output-values are 0
+        retlw 0                 ;2 cycles ;return
+
+Delay26 movlw 24 /4-1           ;1 cycle ;value of W implies (W+1)*4=24 cycles delay in Delay4x (including 2 cycles of 'call')
+        nop                     ;1 cycle
+Delay4x movwf DelayCount        ;1 cycle - 4x delayer loop, amount of CYCLES = 2 + 1+4*W -1 + 2 = W*4 + 4 = (W+1)*4
+DlyLoop nop                     ;1 cycle x W in loop
+        decfsz DelayCount,f     ;1/2 cycle x W in loop, 2 cycles at end of loop (compensates movwf a the beginning)
+        goto DlyLoop            ;2/0 cycles x W in loop
+Delay4  retlw 0                 ;2 cycles ;call caused 4 inst.cycle long delay
+
+GetChar movlw low(IniString)   ;sum: 2 + 3+2 = 7 cycles ;get character indexed by 'TxIndex' into W-register
+        addwf TxIndex,w         ;1 cycle ;add offset of index
+        movwf PCL               ;1 cycle ;jump to return character at position of 'TxIndex'
+IniString                       ;2 cycles 'retlw' ;Initialization-string to turn HerMIDI on by C64 through IEC bus
+        retlw 0xFF ;no sense    ;This is read after DeviceID, when ControlCmd is received from C64, of course not tested for matching
+        retlw 0x43 ;"C" ;pos. 0
+        retlw 0x36 ;"6"
+        retlw 0x34 ;"4"
+        retlw 0x20 ;" "
+        retlw 0x6e ;"n"
+        retlw 0x65 ;"e"
+        retlw 0x65 ;"e"
+        retlw 0x64 ;"d"
+        retlw 0x73 ;"s" ;pos. 8
+        retlw 0x20 ;" "
+        retlw 0x48 ;"H"
+        retlw 0x65 ;"e"
+        retlw 0x72 ;"r"
+        retlw 0x4d ;"M"
+        retlw 0x49 ;"I"
+        retlw 0x44 ;"D"
+        retlw 0x49 ;"I" ;pos. $10
+        retlw 0x20 ;" "
+        retlw 0x69 ;"i"
+        retlw 0x6e ;"n"
+        retlw 0x74 ;"t"
+        retlw 0x65 ;"e"
+        retlw 0x72 ;"r"
+        retlw 0x66 ;"f"
+        retlw 0x61 ;"a" ;pos. $18
+        retlw 0x63 ;"c"
+        retlw 0x65 ;"e"
+        retlw 0x20 ;" "
+        retlw 0x31 ;"1"
+        retlw 0x2e ;"."
+        retlw 0x30 ;"0"
+        retlw 0x21 ;"!" ;pos. $1f       ;CAUTION: don't cross page-boundary with string! (gpasm notifies anyway)
+IniString_end
+
+
+
+;********************************* Synchron Transfer Mode ***************************************************
+IniSync InitTx 0                  ;5 cycles   ;init buffer-indexes, 0 to TxBitCount inits Idle-mode
+InitDly clrf DelayCompensate      ;1 cycle    ;init startbit-timing counter bits
+        bcf OutTemp,LEDpin        ;1 cycle    ;set default LED-state 'ON' at every turn (ReadMIDIbyte may alter it)
+SyncLoop CLRWDT                   ;1 cycle
+        btfss GPIO,ATNpin         ;1/2 cycles ;always check if ATN-pin set TRUE (0V) by C64
+        goto PowrOff              ;2/0 cycles
+_1      skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte         ;0/2 cycles
+        movfw OutTemp             ;1 cycle    ;CLK=0V, default state for idle (HerMIDI tells I'm here and listening)
+        tris GPIO                 ;1 cycle    ;(and perform LED-state set in ReadMIDIbyte to show MIDI activity)
+ChReqst btfss GPIO,DATApin        ;1/2 cycles ;if DATA=5V by C64 (C64 needs data), we go to transmit (Tx) state
+        goto SyncLoop             ;2/0 cycles
+ChNextS bsf TxBitCount,7          ;1 cycle    ;activate transfer-mode
+_2      skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte         ;0/2 cycles
+        movfw MIDIindex           ;1 cycle    ;end of buffered data? or maybe MIDI-byte has arrived meanwhile...
+        xorwf TxIndex,w           ;1 cycle    ;compare if yet smaller
+        btfsc STATUS,Z            ;2/1 cycles
+        goto EndSyTx              ;0/2 cycles ;if we reached last MIDI-event, init buffer-pointer for upcoming fresh data
+        rTxByte                   ;5 cycles   ;macro: reads 'TxByte' from MIDIevent-buffer in 'TxIndex' position
+        incf TxIndex,f            ;1 cycle    ;advance in buffer
+SendByt skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+_3      call ReadMIDIbyte         ;0/2 cycles 
+NybbleL movlw 0xFF-LEDbit         ;1 cycle   
+        btfss TxByte,0            ;1/2 cycles
+        xorlw CLKbit              ;1/0 cycles ;set databit0 in CLK
+        tris GPIO                 ;1 cycle    ;databit must be at bus before clock
+        xorlw DATAbit             ;1 cycle    ;DATA=0V -> clocking NybbleL
+        tris GPIO                 ;1 cycle ;!Ensure min. 22 cycles since first DATA=5V of C64
+_4_     skipIfMIDI 1              ;2/1 cycles
+        bsf DelayCompensate,1     ;0/1 cycles ;will tell MIDI-byte reader when we had startbit inbetween
+        movlw 0xFF-LEDbit         ;1 cycle
+        btfss TxByte,1            ;1/2 cycles
+        xorlw CLKbit              ;1/0 cycles
+        btfss TxByte,2            ;1/2 cycles
+        xorlw DATAbit             ;1/0 cycles
+        tris GPIO                 ;1 cycle ;!This 'tris GPIO' should be exactly 8 cycles far from the previous one!
+_5_     skipIfMIDI 1              ;2/1 cycles
+        bsf DelayCompensate,0     ;0/1 cycles ;will tell MIDI-byte reader when we had startbit inbetween
+        goto $+1                  ;2 cycles
+        movlw 0xFF-LEDbit         ;1 cycle    ;DATA=5V - preparing for next clocking, light up LED again
+        btfss TxByte,3            ;1/2 cycles
+        xorlw CLKbit              ;1/0 cycles ;databit in CLK
+        tris GPIO                 ;1 cycle ;!This 'tris GPIO' should be exactly 8 cycles far from the previous one!
+_6      skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte         ;0/2 cycles
+        call Delay4               ;4 cycles
+_7      skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte         ;0/2 cycles
+NybbleH movlw 0xFF-LEDbit         ;1 cycle   
+        btfss TxByte,6            ;1/2 cycles
+        xorlw CLKbit              ;1/0 cycles ;set databit6 in CLK
+        tris GPIO                 ;1 cycle    ;databit must be at bus before clock
+        xorlw DATAbit             ;1 cycle    ;DATA=0V -> clocking NybbleH
+        tris GPIO                 ;1 cycle ;!Ensure min. 9 cycles since NybbleL's last 'tris GPIO'
+_8_     skipIfMIDI 1              ;2/1 cycles
+        bsf DelayCompensate,1     ;0/1 cycles ;will tell MIDI-byte reader when we had startbit inbetween
+        movlw 0xFF-LEDbit         ;1 cycle
+        btfss TxByte,4            ;1/2 cycles
+        xorlw CLKbit              ;1/0 cycles
+        btfss TxByte,5            ;1/2 cycles
+        xorlw DATAbit             ;1/0 cycles
+        tris GPIO                 ;1 cycle ;!This 'tris GPIO' should be exactly 8 cycles far from the previous one!
+_9_     skipIfMIDI 1              ;2/1 cycles
+        bsf DelayCompensate,0     ;0/1 cycles ;will tell MIDI-byte reader when we had startbit inbetween
+        goto $+1                  ;2 cycles
+        movlw 0xFF-LEDbit         ;1 cycle    ;DATA=5V - preparing for next clocking
+        btfss TxByte,7            ;1/2 cycles
+        xorlw CLKbit              ;1/0 cycles
+        tris GPIO                 ;1 cycle ;!This 'tris GPIO' should be exactly 8 cycles far from the previous one!
+        ;!ensure minimum 25 cycles till next setting DATA=0V ('tris GPIO'), wait for C64 to be ready for next byte
+_10     skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte         ;0/2 cycles
+        call Delay4               ;4 cycles
+        btfss TxBitCount,7        ;1/2 cycles ;are we sending valuable Databyte or 'EOD'
+        goto WaiIdle              ;2/0 cycles
+        goto ChNextS              ;2 cycles
+EndSyTx InitTx 0                  ;5 cycles   ;init buffer-indexes, activate Idle mode after sending EOD
+_11     skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte         ;0/2 cycles
+        movlw MIDI_EOD            ;1 cycle
+        movwf TxByte              ;1 cycle
+        goto SendByt              ;2 cycles   ;send MIDI 'End Of Data' message to C64
+WaiIdle ;wait 25 cycles more for C64 to pull down DATA-pin to 0V default state
+_12     skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte         ;0/2 cycles        
+        call Delay4               ;4 cycles            
+        call Delay4               ;4 cycles 
+_13     skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte         ;0/2 cycles   
+        call Delay4               ;4 cycles            
+        call Delay4               ;4 cycles 
+_14     skipIfMIDI 1              ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte         ;0/2 cycles 
+        call Delay4               ;4 cycles 
+        goto InitDly              ;2 cycles
+        
+
+;********************************* Asynchron Transfer Mode **************************************************
+IniAsyn InitTx 8
+        bsf OutTemp,CLKpin   ;set CLK=5V, default state for asynchron transfer-mode
+        call Woutput
+WaitReq skipIfMIDI 1         ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+__1     call ReadMIDIbyte2   ;0/2 cycles
+        btfsc GPIO,DATApin   ;2/1 cycles ;wait till C64 asks for data (sets DATA=5V)
+        goto SetSend         ;0/2 cycles
+        btfss GPIO,ATNpin    ;2/1 cycles ;always check if ATN-pin set TRUE (0V) by C64
+        goto PowrOff         ;0/2 cycles
+        CLRWDT               ;1 cycle
+        goto WaitReq         ;2 cycles
+SetSend bsf OutTemp,LEDpin   ;1 cycle    ;set byte-transfer state
+ChkNext skipIfMIDI 1         ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+__2     call ReadMIDIbyte2   ;0/2 cycles
+        CLRWDT               ;1 cycle ;if too many bytes are transferred in asynch.mode it might exceed 18ms watchdog-period
+        movfw MIDIindex      ;1 cycle    ;end of buffered MIDI data?
+        xorwf TxIndex,w      ;1 cycle    ;compare if yet smaller
+        btfsc STATUS,Z       ;2/1 cycles
+        goto EndOfDt         ;0/2 cycles
+NextByt rTxByte              ;5 cycles   ;macro: reads 'TxByte' from MIDIevent-buffer in 'TxIndex' position
+__3     skipIfMIDI 1         ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte2   ;0/2 cycles
+        incf TxIndex,f       ;1 cycle    ;advance in buffer
+SetByte movlw 8              ;1 cycle
+        movwf TxBitCount     ;1 cycle
+NextBit skipIfMIDI 1         ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+__4     call ReadMIDIbyte2   ;0/2 cycles
+ChkBus  btfsc GPIO,DATApin   ;1/2/1 cycles ;wait for clean situation (both CLK and DATA are at 5V) before sending bit
+        btfss GPIO,CLKpin    ;1/0/2 cycles ;(maybe C64 can't pull them back in time after acknowledgement, due to badline)
+        goto NextBit         ;2/2/0 cycles
+SendBit movlw 0xFF-LEDbit    ;1 cycle
+        rrf TxByte,f         ;1 cycle
+SndZero btfss STATUS,C       ;1/2 cycles
+        xorlw CLKbit         ;1/0 cycles ;CLK=0V means '0'
+SendOne btfsc STATUS,C       ;1/2 cycles
+        xorlw DATAbit        ;1/0 cycles ;DATA=0V means '1'
+        tris GPIO            ;1 cycle
+WaitAck skipIfMIDI 1         ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+__5     call ReadMIDIbyte2   ;0/2 cycles
+        btfss GPIO,CLKpin    ;1/2/1 cycles ;check if both lines are at 0V, which means C64 acknowledged the databit
+        btfsc GPIO,DATApin   ;1/0/2 cycles
+        goto WaitAck         ;2/2/0 cycles
+FreeBus movlw 0xFF-LEDbit    ;1 cycle    ;acknowledge to C64 we're ready for next bit
+        tris GPIO            ;1 cycle
+        decfsz TxBitCount,f  ;1/2 cycles
+        goto NextBit         ;2/0 cycles
+ChState btfsc OutTemp,LEDpin ;1/2 cycles ;check whether waiting for DATA=5V by C64 or waiting for DATA=0V by C64 after byte
+        goto ChkNext         ;2/0 cycles
+EndOfTx skipIfMIDI 1         ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+__6     call ReadMIDIbyte2   ;0/2 cycles
+        btfsc GPIO,DATApin   ;1/2 cycles ;wait for C64 to get back to default (DATA=0V, non-transmit) state
+        goto EndOfTx         ;2/0 cycles
+        goto WaitReq         ;2 cycles
+EndOfDt movlw low(EventBuffer+0) ;1 cycle
+        movwf MIDIindex      ;1 cycle    ;init MIDI-in buffer-index
+        movwf TxIndex        ;1 cycle    ;init C64-out buffer-index to first databyte
+__7     skipIfMIDI 1         ;2/1 cycles ;check MIDI signal for data-startbit on PIC input-pin
+        call ReadMIDIbyte2   ;0/2 cycles
+        movlw MIDI_EOD       ;1 cyce
+        movwf TxByte         ;1 cycle
+        bcf OutTemp,LEDpin   ;1 cycle    ;set 'waiting for DATA=5V by C64' state
+        goto SetByte         ;2 cycles
+
+
+
+;******************************************* Direct Transfer Mode *******************************************
+DirecTx                     ;Direct-mode, could be refined or done by hardware (true signal-bypass), coz it has 6-cycle jitter now
+DTxLoop movfw OutTemp           ;1 cycle    ;load OutTemp to W-register, always: DATAbit=1, LEDbit=0 in OutTemp
+        skipIfMIDI 1            ;2/1 cycles ;check MIDI signal and route it to DATA-line, 6 cycles from 3rd signal-check at the end
+        xorlw DATAbit+LEDbit    ;0/1 cycles ;(if MIDI-signal=0V, then DATAbit=0 in W-register so DATApin=0V), use LED to sign data
+        tris GPIO               ;1 cycle
+        CLRWDT                  ;1 cycle
+        movfw OutTemp           ;1 cycle    ;load OutTemp to W-register
+        skipIfMIDI 1            ;2/1 cycles ;2nd signal-check, 5 cycles after the first check
+        xorlw DATAbit+LEDbit    ;0/1 cycles ;(if MIDI-signal=0V, then DATAbit=0 in W-register so DATApin=0V), use LED to sign data
+        tris GPIO               ;1 cycle
+        btfss GPIO,ATNpin       ;2/1 cycles ;always check if ATN-pin set TRUE (0V) by C64 (puts HerMIDI to Stand-by)
+        goto PowrOff            ;0/2 cycles
+        movfw OutTemp           ;1 cycle    ;load OutTemp to W-register
+        skipIfMIDI 1            ;2/1 cycles ;3rd signal-check, 6 cycles after the first check
+        xorlw DATAbit+LEDbit    ;0/1 cycles ;(if MIDI-signal=0V, then DATAbit=0 in W-register so DATApin=0V), use LED to sign data
+        tris GPIO               ;1 cycle
+        goto DTxLoop            ;2 cycles
+
+
+
+;******************************************** MAIN PROGRAM START *********************************************
+InitPIC movwf OSCCAL      ;set RC-oscillator to factory setting read from 0x3FF into W when PIC starts to run
+        clrf FSR          ;set RAM bank1 as default
+        CLRWDT            ;clear Watchdog-timer
+        clrf TMR0         ;clear (init) Timer0 & prescaler
+        movlw 1*(2^NOT_GPWU) + 0*(2^NOT_GPPU) + 0*(2^T0CS) + 0*(2^T0SE) + 1*(2^PSA) + b'000'    ;Prescaler formula: PS=(log2(PrescaleRate)-1)
+        OPTION            ;set bit6=0 to have pullup-resistors on GP0,1,3  ;WDT postscaler=b'000' means 1:1 ratio, 16..18ms (less than a PAL frame) timeout
+InitIO  clrf GPIO         ;!NEVER MODIFY this GPIO=0!!! ;GPIO is always zero, and TRIS GPIO will emulate open-collector states by setting pin as input/output
+
+;================================ MAIN STATES OF HerMIDI =======================================
+StandBy movlw 0xff          ;GP3 input, GP1,2,4,5 are emulated Open-collector pins (0:Output zero, 1:high impedance input)
+        movwf OutTemp       ;needed a temp, because altering TRIS bits might be unreliable as are reading pin-status 
+        call Woutput        ;write OutputTemp to TRIS direction-register, to emulate open-collector/drain outputs
+LEDtest btfsc GPIO,ATNpin   ;if ATN-line is 5V, flash once at start-up anyway
+        goto LED_ON
+        decfsz FlashCount,f ;if ATN-line is 0V continuously without init-string, Watchdog gets here periodically, using WDT as small-scale of flash-timer
+        goto LED_OFF
+        movlw FlashSpeed
+        movwf FlashCount
+LED_ON  bcf OutTemp,LEDpin    ;startup LED-test
+        call Woutput          
+        movlw 255             ;wait (255+1)*4 = 1000 cycles, that 1ms, seems sufficient to see the short blink of the LED
+        call Delay4x          ;this might not be needed if next CONFpin reader routine spends sufficient time with capacitor to blink LED long enough... 
+LED_OFF bsf OutTemp,LEDpin    ;switch off LED, end of LED-test
+        call Woutput
+DetConf ;PLACEHOLDER:         ;detect timing-value of capacitor(s) on CONFpin and use it to determine Device-number (if no capacitor, no drive-emulation)
+        
+Listen  CLRWDT                    ;1 cycle  ;normally waiting for arbitrary amount of time
+        btfsc GPIO,ATNpin         ;1/2 cycles ;wait for ATN-pin to be set TRUE (0V) by C64
+        goto Listen               ;2/0 cycles ;might be better to SLEEP and wait for signal-change on ATN-pin?
+        ;PLACEHOLDER:             ;if CONFpin is signalled by a timing-capacitor, HerMIDI listens for a LOAD"!",DeviceNumber(12..15) IEC-command and sends built-in PRG
+        btfss GPIO,ATNpin         ;1/2 cycles ;wait ATN-pin to be released back to default FALSE (5V) by C64
+        goto $-1                  ;2/0 cycles
+                                  
+InitStr movlw IniString_length    ;1 cycle ;get initialization-string. If any mismatch (except last control-byte), start all over again till match
+        movwf TxIndex             ;1 cycle ;will point to character inside string
+        ;CLK-to-CLK period can take max. 30 cycles in optimal case (C64 sends data in aroud that period wihthout handshake, but badlines might elongate this time)
+StrLoop CLRWDT                    ;1 cycle
+        movlw 8                   ;1 cycle - will count from 8 to 0 
+        movwf BitCount            ;1 cycle - BitCount counts bits
+        clrf TxByte               ;1 cycle - pre-init to have Carry=0 on rrf rotation, will be used to hold data-byte
+        bcf STATUS,C              ;1 cycle - clear Carry-flag
+ChrLoop btfsc GPIO,CLKpin         ;1/2 cycles ;wait for CLK=0V (TRUE) by C64
+        goto $-1                  ;2/0 cycles
+        btfsc GPIO,DATApin        ;2/1 cycles (together with next instriction/jump) - read upcoming bit
+        bsf STATUS,C              ;0/1 - set Carry if signal is 1
+        rrf TxByte,f              ;1 cycle
+        btfss GPIO,CLKpin         ;1/2 cycles ;wait for CLK=5V (FALSE) set back again by C64 (might delay due to C64 VIC-caused badlines)
+        goto $-1                  ;2/0 cycles
+        decfsz BitCount,f         ;1/2 cycles - if zero, the whole byte is read, go to next byte
+        goto ChrLoop              ;2/0 cycles - if nonzero, loop and read rest of the byte
+        decfsz TxIndex,f          ;1/2 cycles ;advance in initialization-string
+        goto CompChr              ;2/0 cycles
+        goto PowerOn              ;0/2 cycles ;when last byte (ControlCmd) is reached we skip character-match checking
+CompChr call GetChar              ;7 cycles
+        xorwf TxByte,w            ;1 cycle ;compare char in W to char read from IEC
+        btfss STATUS,Z            ;2/1 cycle
+        goto StandBy              ;0/2 cycles ;if there's any unmatching character, go to StandBy mode, can be started over by C64
+        goto StrLoop              ;2/0 cycles
+                                  
+PowerOn bcf OutTemp,CLKpin        ;1 cycle  ;tell C64 that initialization was successful, this is CLK-pin's default state (0V)
+        bcf OutTemp,LEDpin        ;1 cycle  ;sign to user that HerMIDI is detected and switched on
+SendOK  call Woutput              ;6 cycles ;C64 must wait for this answer min. 30 cycles since last CLK=5V state
+        movlw (250+80) /4-1       ;wait for C64 to detect "I'm ready" answer (CLK=0V) and set DATA to default state for selected mode
+        call Delay4x
+GetCtrl movfw TxByte              ;TxByte here holds the last received byte, the 'ControlCmd' byte from C64 
+GetMode btfsc STATUS,Z            ;If PacketSize=$00 we switch to Direct (bypass MIDI-signal thourgh DATA-line) mode
+        goto DirecTx
+        andlw 0x1f                ;bit4..0 of ControlCmd set max. size of the byte-package to be sent to C64
+        movwf PacketSize
+        btfss TxByte,7            ;check if C64 needs synchron/asynchron byte-transfer mode (0: synchorn, 1: asynchron)
+        goto IniSync
+        goto IniAsyn
+
+PowrOff bsf OutTemp,DATApin     ;pull back DATA=FALSE(5V) 
+        bsf OutTemp,CLKpin      ;pull back CLK=FALSE(5V)
+        call Woutput
+        btfss GPIO,ATNpin       ;wait for release of ATN-pin to FALSE (5V)
+        goto $-1
+        goto StandBy  ;(SLEEP ;Enter SLEEP mode instead for low power consumption till ATN signal arrives? - only possible if ATN is on GPIO pin 0/1/3 )
+
+
+;=============================================================================================================
+;PLACEHOLDER: 'retlw xx' databytes for a PRG to load to C64 with LOAD"!",15 by emulating an IEC-compatible disk-drive
+;=============================================================================================================
+end

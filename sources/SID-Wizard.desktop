@@ -1,0 +1,36 @@
+[Desktop Entry]
+Type=Application
+Name=SID-Wizard
+GenericName=Music Editor
+Comment=Tracker-style C64 SID composer
+Exec=x64 /opt/SID-Wizard/SID-Wizard-1.7.prg
+Path=/opt/SID-Wizard
+Icon=/usr/share/icons/SW-icon-32x32.png
+Terminal=false
+Categories=AudioVideo;Audio;AudioVideoEditing;Music;
+MimeType=application/swm;application/swi;application/sws;
+Actions=SID-Wizard;SID-Maker;SID-Wizard-2SID;SID-Maker-2SID;User Manual;Browse Folder;
+
+[Desktop Action SID-Wizard]
+Exec=x64 /opt/SID-Wizard/SID-Wizard-1.8.prg
+Name=SID-Wizard
+
+[Desktop Action SID-Maker]
+Exec=x64 /opt/SID-Wizard/SID-Maker-1.8.prg
+Name=SID-Maker
+
+[Desktop Action SID-Wizard-2SID]
+Exec=x64 /opt/SID-Wizard/SID-Wizard-2SID.prg
+Name=SID-Wizard
+
+[Desktop Action SID-Maker-2SID]
+Exec=x64 /opt/SID-Wizard/SID-Maker-2SID.prg
+Name=SID-Maker
+
+[Desktop Action User Manual]
+Exec=xdg-open /opt/SID-Wizard/SID-Wizard-1.8-UserManual.txt
+Name=SID-Wizard User Manual
+
+[Desktop Action Browse Folder]
+Exec=xdg-open /opt/SID-Wizard/
+Name=SID-Wizard folder

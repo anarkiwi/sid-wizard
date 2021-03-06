@@ -1,0 +1,286 @@
+***************************************************** SID-Wizard ChangeLog ********************************************************
+
+
+SID-Wizard 1.8 additions:
+  -Drean C64 detection and support (asked by Uctumi of Argentina demogroup PVM)
+  -"DEMO" playertype (size & runtime reduction but keep some important aspects)
+  -Note-mode in chord-table shouldn't be the default (who reads manual would find it anyway)
+  -garvalf (chipmusic.org) - startup-menu selections too are saved to configfile
+  *press F1 to bring disk-list (only in saver, not loader, setting in menu -> @swconfig )
+  *help in filehandler: F1 load directory, etc.
+  -space also continues in Startup-menu, just like Return
+  -Vibrato-amplitude in note column in DMC mode can be set by hex keys now
+  -Orderlist Separator NOP (Vincenzo's idea) with optional index number (orderlist-FX $F0..$FD)
+  *Sync control thourgh MIDI: send sync output (asked/realized at chipmusic.org forum by TSC & others, MARiO64 also solved sending sync from C64)
+  -AD-SR order changed to SR-AD in player.asm when non-ghostregister Hard-Restart and soundstart events happen. Probably causes a bit better, more stable sound...
+  -SID-Maker-SWP now allows the player to be relocated to max. address regardless of tune-size
+  -SID-Maxer-SWP has no SFX/slowdown compiled in now, but SID-Maker-SWP-FX has both
+  -SWMconvert: SWS-to-SWM conversion (left and right to 2 mono subtunes - Spider's idea)
+ fixes:
+  -SID-Maker (exporter) now copies all CIA timer values in the framespeed-list for different machine-types (PAL/NTSC/Drean)
+  -SID-Maker: just/verdi caused change CIA to NTSC timing, there was no cursor up, just down in tuning-selector
+  -SID-Maker-SWP player bugged with portamento/slide bigger than cca $F0, bpl changed to bcs after label SLOWDN3
+  -player.asm: 1st waveform pitch was not indexed in FREQTBH by Y but accidentally X by typo (not much audible difference btw.)
+  -SID-Maker-SWP runnable export had display issues with title and version-info
+  -stabilized HerMIDI PowerOn by checking DATA-line (and calling it in lower border-area - idea thrown - seemengly no need for that)
+  -3SID - sid-export 3rd SID model, SID-address got corrected/implemented
+  -3SID editor fast forward... (with rastertime-limits, works in bare)
+  -player.TUNE_HEADER - abandoned $20 as fix address, so trackerinfo always fits before format- and authorinfo, even if jumptable grows
+  -DrvType in tune-header is now set by startupmenu
+  -filter/PW-jump command $0A/$0B - if left-side wait command is longer, slide-repetition-counter isn't working afterwards (Spider) - reset CWEPCNT (& PWEEPCNT)!
+  *IRQ-based MIDI interfaces miss notes/noteoffs (issue in IRQ handling with priority/timing) - Soci corrected the IRQ-handling
+  -HerMIDI turns on first but not afterwards (DATA shouldn't be set in ATNpulse)
+  -Starting playback from MIDI delayed cca 0.5 seconds, now it starts immediately
+  -F3 patternplay now inits funktempo properly (to always start on first tempo, not randomly)
+  -final cartridge 3 - directory read but 'file not found' when trying to load -> solution: exporter should end below cca $F000, Final Cart 3 is maybe using that upper RAM area for loading/saving
+   (The solution is to set KERNAL_LOADSAVE=1 or FINAL_CARTRIDGE_3_FIX=1 in settings.cfg...)
+  -SID-Maker - an 'sta $8000,x' has been removed which served as debugging line but was accidentally left there. Fortunately it seemed not causing issues in 1.7 (not at all for the 1st exporting)
+
+SID-Wizard 1.7 additions:
+  -full 3SID support
+  -disabled insert/paste/typing/etc. in pattern 0
+  *be able to set (& display) sequence-play-markers individually with a key-combination (C=+SPACE)
+  -key-shortcut Ctrl+Insert to insert in all tracks into into orderlist in one step (append orderlist - useful for 3SID with many channels)
+  -SWP format and playwer: SWP is a separate packed music-data file with relative pointers, the special SWP-player adjusts its pointers to SWAP to it at init (SWP memory address should be in X and Y)
+  -slowdown-FX support (pitch shift + tempo change together) - useful for 'bullet-time' effects in games
+  -full 3SID support
+  -help expanded with info: -no slide+vibrato+arp at the same time
+  -help expanded with info to SWP, slowdown, and handling instrument+SFX separately in SWP
+  -adjusted the User Manual to the subsequent feature-changes/additions regurarly (based on the lists below) - mention detune-NOP!
+ fixes:
+  -disk-directory listing omitted a file at each page-turning/boundary (F3 key in file-list) (Spider Jerusalem reported this bug)
+  -if filtered instrument goes to unfiltered, other channels' filtered due to GT-compatibility -> stop filter execution by pointing to $ff in that case (Spider Jerusalem reported this)
+  -Shift+SPACE also retains previously played instruments (like F4-key continuation)
+  -2SID/3SID: incorrect refresh of track-position/numbering after coming back from filer
+  -shift+0 issue on 3rd SID - when e.g. channel4 is muted, channel7 also mutes - playadapter.asm div7chn and similar tables were incorrectly filled
+  -2SID/3SID: orderlist start-positions weren't all reset, just channel1,2,3 - modified menu.inc to reset all
+  -exported 2SID/3SID executable rastertime was 57 - had to check, if $d011 9th bit is 0 and add 57 accordingly, displaying above 100
+
+
+SID-Wizard 1.6 additions:
+  -1SID version cursor-left doesn't wrap around when at track0 note-column
+  -made space for two more instruments with careful memory-arrangement
+  -Window/subwindow-change on cursor movement should position more-or-less correctly in both X and Y coordinates where possible (goes inside valid table/pattern-area)
+  -processing & performing Start/Stop/Continue OMNI MIDI-messages and CC-messages of ResetController/AllSoundOff/AllNotesOff
+  -SWMconvert: SWM-to-SWS conversion
+ fixes:
+  *SYS2061 SafeRestart initializes NMI vector too (for RESTORE-key) 
+  *Spider Jerusalem reported the bug: $C7C5 or other addresses got overwritten -> corrected to '#SID_AMOUNT-1' in 'midisubs.inc' row19 (and row157)
+  -blinking of disk-drive suppressed when config-file is not found, after leaving startup-menu (reading drive status channel)
+  -player-rasterbar has the correct thickness, turning black now, before jamming-handler takes place
+  -Rasterbar-flicker if cursor is in instrument-window (lda #0;sta$ffff moved after to ensure time for $d012 detection)
+  (?!didn't appear again: rain8580.swm load bug after other tunes were loaded (if loaded first, the bug doesn't appear))
+  -added -s attribute to gcc/g++ in Makefile to strip down SWMconvert/sng2swm binaries (eliminating debug/linker-symbols)
+  *Loading/saving instrument and saving tune doesn't reset the orderlist-position and patterns (separate 'retoedi' and 'initedi' ways in menu.inc)
+  *if other tracks are zero or shorter than the currently edited, don't play them after $FE/$FF endsignal (Spider Jerusalem's suggestion) - added 'dec SEQPOS,x' for INITER's $FE/$FF branch
+  *exported (2SID) exe with Bare-player freezed -> cause: writing 'datzptr+0' and 'datzptr+1' was exchanged in exporter.asm  'endPset'
+  -re-enabled 4x fast-forward (by mistake PAL/NTSC was not checked in ffwd handler for lowest rasterbar in irq.inc)
+  *support MIDI 'running status' compression in GetEvent routines of HerMIDI-C64.asm & MIDI-C64.asm (MIDI command-bytes (statusbytes) may be sent only once when the same message occurs again)
+  -SID-Maker: Ian Coog notified that mono SIDs should have bit6-7 set to 0 at location $77 in SID-header - correction made in exporter.asm
+
+
+SID-Wizard 1.5 additions:
+  -User-configurable keyboard layout and predefined SDI/GMC/(JCH),etc. sets (now only configurable in source-code before compilation)
+  -SDI layout, take some essential key-shortcuts from SDI: F5-TOGGLE patt/seq, Shift+Home-GoTunestart, C=+A-decr.Advance,
+   in Instrument-window: Shift+S/Q-mainsettings, Shift+W-waveformtable, Shift+P/E-pulsetable, Shift+C/R-Filter(cutoff)table
+  -made it easier to access chords: C=+K goes to chord-table, pressing enter on chord-number in pattern to select chord to edit
+  -splash screen was put into 3rd VIC-bank to allow more place for the compressed SID-Wizard executable 
+  -player-type (mid/light/..) is indicated in the top-logo, (show current player-type in upper border!)
+  -in pattern area Shift +/- selects pattern instead of instrument... (da Blondie's idea)
+  -jsr SCINIT eliminated from menu.inc, so no flash when invoking file-dialog
+  -new tunes were added to the disk, some old tunes were removed
+  -added more (keys, FX-numbers) to instant help (only if MIDI is supported by compilation and so menu is taller)
+  -allow page up/down and 'home' fast navigation and cycling from bottom to top in the (now taller) menu
+  -"Undo" function for pattern-operations... Control+Z  (CBM+Z)  - priorized on Chabee's request
+  *done for instruments: handle with care (skip over) if more patterns/subtunes/instruments are present in a loaded tune than supported in current version
+  *2SID version (by switching/scrolling SID1 and SID2 channels fast but only one editable at a time or scrollable through 6 tracks..., switching is similar solution to DMC stereo version)
+   also 2SID version of exporter, and user can set SID2 address afterwards in executable export
+  *save configuration to a .cfg file, load upon startup if possible
+  -display loaded tune's author-info, also when menu is invoked
+  -display loaded tune's player-type (& Machine-type?) info, also when menu is invoked
+  -solo/unsolo channel with Shift+0
+  -SID-Wizard.desktop file and /usr/local/SID-Wizard folder with example swm&swi for fast-calling and using it from Linux Menu
+  *SFX support (allow a distinct note/pattern to be played on e.g. 3rd track from outside)
+  -A-note=432Hz Verdi-tuning / non-equal-tempered (just-intoned/pythagorian/Well) frequency tables to be selectable in startup-menu
+  -JANKO piano-keyboard layout selectable in menu beside normal SID-Wizard layout
+  -revised charset & menu-decoration, modified 'H' note-character to 'B' for people abroad
+  -new instruments to instrument folder/disk
+  -save 'undo' phase for orderlist & instrument changes too (can use the same buffer as pattern-undo)
+  *note-mode for chords, base-note is given first outside chord-table, then chord-table is editable with note-keys
+  *support older/other MIDI devices as well: Sequential, Passport/Syntech, Datel/Siel/JMS, Namesoft, Maplin  (Namesoft-code started by Frank Buss alias 'Gartenzwerg')
+  -pitch-bending, MIDI note-velocity sensing if instrument has SUSTAIN value of 8
+  -pitch/vibrato is only performed on cursor's SID-channel in monophonic mode -> jamming on playback tracks is possible
+  *be able to go into orderlist/pattern/chord/tempoprogram tables with cursor/tab keys too (Spider's suggestion)
+  -implemented watchdog-timer to avoid freeze in VICE when MIDI-keyboard gets plugged off and endless interrupts happen...
+  -reduced tempotable to $80, that would be enough, we got some more place...
+  *skipping subtunes & patterns above max. subtune-amount, (L04,L15 Ligths On tunes failed to load correctly in 1.5 (orderlist was fucked up))
+  *finalize/improve/stabilize HerMIDI PIC-side & C64-side codes
+  -'absolute note-view' & typing in arpeggio-table and chord-table (like in 1raster-tracker)
+  -loadable/selectable/calculated frequency-table in startup-menu (some people likes certain freq.tables, like DMC, or some pure (non-equaltempered) tuning to specific musical-keys)
+  *'bare' player (no subtune-support, etc...)
+  -SID-initialization loop doesn't disturb $d418, click/pop is eliminated or at least less noticable this way...
+  *player now has an automatically generated relocation-table - Soci made 64tass rev361 capable of achieving this in the preprocessor :)
+  -identation of authorinfo to the middle in .exe export (like 1raster-tracker's)
+  -4x fast-forward function for .exe export
+  -SWMconvert: funktempos averaged to get better estimation for them in XM/MID exports (e.g.:'Funtempo' demotune)
+  -SWMconvert converts any .P00 files to .prg, not only SWM files, and also creates a file with the real name contained in P00 header
+  -SWMconvert doesn't take maxptnamount and maxinstamount into account, using theoretical maximum $7f for patterns and $3f for instruments instead, because SW has a safety-check anyway
+  -Makefile: 2SID and HerMIDI includes/targets are now contained
+  *changing to a simplified manual in txt format, because Abiword 2.9/3.0 can't open/export previous Abiword 2.8 document (freezes)
+  -put native C64 help on the disk (in case no PC is near to read the PDF and it's not printed out)
+  *include SDI-layout and HerMIDI & 2SID in the manual
+ fixes:
+  -SDI and DMC layout now doesn't clash with Shift+K and + for chord-selection
+  -RESTORE key now cannot freeze unpacking and startup-menu (NMI vector set early enough)
+  -shift+C without preceeding c=+C in pattern1 fucked up buffer and pasting - solution: copyptn+1 is 0 ('selfmod') in insdelcopy.inc
+  -SWMconvert now converts 'Tevagyazakitalegjobban.swm' 2nd and 3rd track correctly. Solved: setting 'RowDelta' is now inside the i-loop, chn1 tempo-change doesn't affect other tracks.
+  -SWMconvert authorinfo is filled/padded with $20 SPACE-characters if XM title was shorter and ended with closing zero
+  -SWMconvert didn't like too big WF-arp. table, this caused problem in XM-export of e.g.: quickscore.swm  ('long int' for SampleLength,etc. variables, even when writing file)
+  -SWMconvert 'FE' loop address corrected in XM exports (valid position had to be divided by 3)
+  -SWMconvert MIDI-import bug of multi-track MIDI-files - solution: MidiEvent should be initialized in ProcessMIDItrack function...
+  -SWMconvert problem with exported midi: Lenore, Ocult friend, starting with gate-off: Solved by initializing PrevChannel=0 before converting a track
+  -don't store undo-info for repeated keys
+  -SWMconvert portamento/slide commands with value 00 now repeat the previous value when used with note
+  -SWMconvert when slide ends, SWM gets a zero-slide command to close it
+  -SWMconvert - portamento with value above $F0 now gets converted as $3F legato SWM-command if possible
+  -SWMconvert - zero vibrato-frequency handled -> a default '4' value is added if zero (in XM it uses the previous vibrato-frequency value)
+  *SFX: stabilized, set back instrument correctly when SFX ends, use HR for SFX-sounds
+
+
+SID-Wizard 1.4 additions:
+  *F2 play (from marker) checks the orderlist for preceeding orderlist-effects (transpose,tempo,vol,etc.) - Adam's suggestion
+  -added recent tunes as new examples
+  -by default don't set edit-mode but jam-mode
+  -author info is now seen in row 26 (orderlist-numbering row) after tune is loaded until any key is pressed...
+  -rastertime and player-size is indicated in startup-menu for different player-types
+  -C= and +/- to increase/decrease octave
+  *take care of resetting filter-shift at startup
+  -some effects slightly rearranged (e.g. wf-table pointer), new effects added which are in GT: simple cutoff-frequency setting, simple filter-control (switch&reso) setting
+  -filter-switch setting in selectable, if KT value in range $80..$8F
+  -exporter (SID-Maker) now stores tracker/aouthor info into VARIABLES area, which is overwritten by initer - around 60 bytes freed up this way
+  -extended relocation-range, value can be specified now in settings.cfg (default: min-$0200, max-$ff00)
+  *make relocation-address inc/dec faster - hacked 'repeatex' call in 'exporter.asm' 
+  *for single-speed SIDs use normal SID-filetype without CIA starter code
+  *'exe.prg' export should be able to switch subtunes - +/- keys can select between the given amount (only for multi-subtune files), SPACE restarts the subtune
+  *display tune-data / time / rastertime-usage in EXE export... - displays current and max. rastertime usage in decimal
+  *automatically detected but selectable player-type (normal/light/medium/extra) and machine-type (PAL/NTSC) in exporter-settings
+  -darker 'exe' export colour scheme (reduces SID-noise and looks better) - idea based on Adam's tweaked exe-export for 'Rain'
+  -Makefile: how to copy (with c1541.exe) more than 1 example (a complete folder content, be it 'examples' folder) to the d64 and the binary folder. - solved with bash 'for' loop
+  -Makefile: conversion of all example files using the freshly compiled SWMconvert and sng2swm - solved with 'for' loops in the makefile
+  -Makefile should try to generate the .exe win. binaries if Wine is present and gcc.exe, g++.exe are in the Path
+  -Hungarian translation of the User Manual
+ fixes:
+  *inst.table jump-commands and gate-off pointers sometimes displayed incorrectly - solution: 'jsr commonsubs.reftpos' reactivated before table-display
+  -XM C40 volume setting command is now interpreted as "5F", not "50" - used ternary operators for 0x40 cases
+  -filename was fucked up in saved .P00 - solution: onlyname has to be initialized to handle if there's no folder/path with the filename
+  -if no instrument, export freezes - handled 'no instrument' case in 'depackins' subroutine (packdepack.inc)
+  *saving tune leaves the player-marks in place - only loading/clearing tune resets it now
+  -pressing F1 on instant help deleted the menu behind -> took off unnecessary pattern-display at 'inireq!=0' in editor.asm
+  *fixed: vibrato-amplitude change FX after portamento is now precisely pitched (should wait till vibrato-counter returns to 'middle' but it will increase player-code a bit)
+
+
+SID-Wizard 1.0...1.2 additions:
+  *remember cursor-positions in instrument-tables (robozz suggested it at CSDB) - using indexed memory area to store X & Y table-coordinates (but still reset on inst.selection)
+  *chord fast call with return in instrument chord-data - Hermit's own tip
+  *shouldn't delete instrument copy-buffer when deleting all instruments? (keep it just like keeping pattern-buffer, but init on startup!) 
+  *edit/jam mode might be better distinguishable and jamming might disable value-typing (robozz told it at CSDB) - flash-speeds now configurable
+  -car-return now works in effect-column to ease typing effects contituously
+  *be able to switch off rasterbars (some people find it annoying, especially 'extra' version with more varying rastertime) - ' C= + B '  keycombination
+  *muting the channel might be better to mute it's filter too to reduce click-noises on 6581-but still audible when not muted of course
+  *auto-append-instrument (when typing note) - asked by Nata in e-mail and by BrandonWalsh at CSDB - Shift+I toggles, instr.column colour goes the same as notes
+  *optimize unneeded instrument-selections upon compressing/saving the workfile (PW/Filter-reset-OFF instruments are exceptions)! - Only optimizes in auto-instrument-type mode
+  *switch to toggle 'default-follow-play' mode (advised by Stainless at CSDB) - key-combination: C= + back-arrow
+  *follow-play on/off keypress - Shift+back-arrow
+  *negate value with a keypress - asked by Da Blondie, idea taken from DMC (* key) - solved with '=' key - only active in instrument/chord-tables
+  *use else than A or 1 to delete note in place (robozz suggested it at CSDB) - now C=+Del deletes note or ins&fx depending on cursor-position 
+  *orderlist partial copy-paste function (similar way as partial pattern-copy) (and block/region/subtune saving?)
+  *Configurable colour scheme useful as mood-setter (like in DMC) - now possible as screen-colouring is generated by code - setting in menu, saved to workfile
+  *fast-forward playing - with left-arrow key - 4x speed (configurable in settings.cfg) 
+  -built-in instant help - instant help called from the menu
+  -selectable (in menu) DMC/GMC/FC kind of note-keys - saved to workfile - middle row of keyboard is C-major scale, octave can be selected/set with keys 1..8 (in note column without CBM key) 
+  *bring settings into menu 'instead of / beside' key-shortcuts, arrange menu to be more logical
+  -new logo - drawn by Leon, alignments by Hermit
+  -rearranged Makefile and compile.bat to produce less mess (only one d64, version-numbers in filenames where fits)
+  -save the type of tracker (light/extra/etc.) the workfile was made with (just an information, there won't be restriction because of that)
+  *support note-octave setting in DMC keyboard mode
+  -rearranged settings.inc into a more logical structure
+  *be able to configure 1st-frame waveform (instrument-data $0f) - convert zeroes to default $09 value till SWM2 standard
+   *use ARPSCNT,x instead of waveform to determine in multispeed if 1st frame... (because 1st waveform can be any value now, and multispeed would lag in tables, and waveform is init to 0 anyway)
+  *Solve ADSR-Waveform timing difference to exported. - restructured IRQ rasterbars - single-speed player-call is not at bottom under sprites, which took 400 cycles from CPU, added 8+ rasterlines 
+  -NTSC-compatibility (maybe 3-frame HR timer not needed) - NTSC detected automatically at program-startup (SID-Maker too should be able to select PAL/NTSC freq.table)
+  -move some more settings to the menu beside keyboard-shortcuts (track-binding, auto-advance, step-highlight, etc.) - now framespeed can be set and seen (beside number of rasterbars) in menu
+  -measure rastertime of single-speed bar - display it in the upper border
+  *give a key-combination (C=+E) to put the last unused pattern (and edit it)...
+  *'startupmenu.inc' selectable player version in the beginning of only one executable for SID-Wizard (light/mid/etc. with description & code) in music area
+  *$FF detune-NOP!!! add the info to the Manual
+  -'filt-external' on/off effect ($1F) is added to 'extra' player version (maybe this can decrease SID-noise in some cases) - initialized at tune-start!
+  -put some more ghost-registers, at least for HR and Waveform to get more precise sounds (increases rastertime a bit...) - in extra version all registers are ghosted
+  -now writing 0 instead of 8 into SID-registers (maybe setting waveform $08 afterwards). Sometimes subtunes were switched/restarted without waiting a bit. (but now bigger $d418 click?)
+  *1st waveform should be fully configurable by user (byte $0F of instrument-data) - in SW1.x 0 is converted to $09 to be compatible with existing tunes (but 0 will mean 0 in SWM2 module format)
+  -possible to use zeropage-variables/ghost-registers for player, relocator won't relocate zeropage absolute-addressing and X indexed commands (settings.cfg)
+  *subtune-jumping can now be handled independently on tracks (parametrizable SETSEQA)... no subtune-tempo set btw., stays at the current if not set in Seq/ptn - but really fast subtune-jump!
+  -if possible, optimize size/framespeed further, and enchance preciseness (especially 'mid' version, investigate register-changes on cpu-cycle basis, discuss at CSDB forum.)
+  -idle-graphic (ghost-pixel) masks sprite-characters in orderlist to better distinguish value boundaries (but the old chars remained)
+  -blinking instead of inverting playback-positions in orderlist (btw. the old can be set back in settings.cfg)
+ fixes:
+  **FF 'jumping-to-itself' case should  be avoided and checked in editor because it would freeze the app.
+  **instrument-0-pointer outside player - avoid instrument 0 and properly dismiss it in the player or exporter (otherwise HVSC won't accept the export)
+  **SOMETHING HAPPENED TO THE RELOCATOR since SVN development (I assume it happened around rev16) - a 'sec' was missing
+  *HR-improvement - maybe HR is not that good (ghost-registers' behaviour might be checked in cycle-scale)
+  *export-difference in funktempo - possibly all issues has the same source
+  *Note-column auto-portamento silences release-phase of ADSR if no 3F and hard-restart is switched on (note-off treated as new note?)
+  -Vibrato shouldn't be disabled by porta/legato (Nata advised this) -solved for SW-extra: when PORTEND reached, it resets vibrato, and 
+  -detune should work after portamento/legato too -solution: detune is handled separately via DETUNER,x added to frequency-ghost
+  -DETUNE effect should work at the same row as note - solved by NOP value in detune-table ($FF)
+  *F1/F2 song-playing big-FX not to work when there's no instrument selected. no issue with F3 pattern-play - solution: jmp LEGATOO if instrument is 0
+  -if rastertime of player increases upper border is displayed twice -> oscilloscope-routine went to 2nd bar if multispeed, some others went to last bar
+  *properly reset played instrument on a track when continuing playback with F4 - F1 play sometimes doesn't reset correctly if some instruments selected? 
+  *jamming instrument sometimes only sounds on second press - solved with ACTNOT,x=GATEOFFX & jsr STRTINS in 'pause' routine
+  -dovetailing now releases sounds when advances between tracks
+  -gate-ON effect now works (forgot to set GATE-bit of WRGHOST,x so worked only with WFtable-loop)
+  -multispeed instruments (drums) lose fatness compared to single-speed... (reported by Nata) - made Multi-plays wait till 1st-frame waveform $09 expires 
+  *sometimes full tempotable is saved into the .SWM, not causing any issue...hard to reproduce -> I built safety-test into chord/tempo-program packer.
+  -sometimes F1 playing failed - set 'fspdctr+1' on inits and disable player/jamming calls when 'inirequ+1 != 0' 
+  -made simple cursor-down faster not waiting for refresh, but leave godownp/upinptn for routines that require refresh-waiting
+  -sosperec editor example at speed 3 or 4 sounds crap in SW (issue detected by Nata) - WFARP-table is now continuous even if HR happens on a frame 
+  -subtune not selectable in SID-export - stupid me - I included lda #0 before 'jmp inisub' at CIAINIT routine!
+  -pattern transpose is possible when not in pattern-window! - put 'ora actwind' to checker of 'transptn' (in insdelcopy.inc)
+  *subtune-jump orderlist-command doesn't work in medium/light versions - OF COURSE, that's why they're not full versions (now jups to pos.0) - subtune-jump is an extra!
+  *some click-noises on C=128 with 6581 SID (even with muted channels) - it's filter-on/off and filter-band - 6581 SID 'bug'! (FX: 'filt-external' bit on/off)
+  -warn before overwriting existing file!!! ( SAVE Kernal routine doesn't set Carry when file exists ?! ) - Soci used 'jsr READST' and corrected error-jumps
+  -$d017 and $d01c registers were not initialized - I've zeroed them after 'start' label
+  -when no disk a black screen lags when trying to return to editor and even reset+'sys2061' doesn't solve it, (exporter simply exits) 
+  -small pattern-FX to change ADSR (like 2x) sounds differently than big-FX (like 05) - ghost-registers for ADSR (in extra version) may solve this...
+  -sound-starts were non-exact sometimes (Nata sent tests) -> solution: KEEP ENOUGH DISTANCE (around 10 commands but not too much) BETWEEN ADSR AND GATE-BIT WRITING!!!
+  -mute/solo and C=+P/F is not mentioned in the manual  (robozz told it at CSDB), filter-shift BigFX info should be corrected, add feature-matrix (light/med/etc.)
+  -filt-ex isn't initialized in 'initer' ($1F big-effect is not reset) - now initialized to 0 if function is used (in extra version)
+  -check and extend relocation address further ($0200...max.allowed by tune) - use tlr's code-correction at CSDB
+  *export-type & relocation-setting was jumped on real C64 - due to bouncing noise in real keyboard's buttons - solution: added some delay-loops for 'keyrele' subroutine
+  *$FF-to-itself looping should be avoided in player.asm too for the editor!  (after a while it hangs with empty $FF sequences) - added Y checking into player (just for editor)
+  -instruments should be selected/reset after loading (especially where PW/filter-table reset is switched off) - solution: added 'ResetJamIns' to 'inisubb' after 'jsr initer'
+  *file-dialog characters aren't seen on old (real) C64 - difference in old kernel (Zyron pointed to it at CSDB forums) - solution: colourize by loop after 'SCINIT'
+  -reset instrument-table coordinates after pasting the instrument from buffer with 'C=+V' or cutting the instrument with 'C=+X'!
+  -return goes to beginning of row in instrument-window (was lost for a while after table-positions were remembered)
+  -non-note effects also made invisible instrument 0 in auto-instrument-typing mode - put the testing before pattern-modification routine-call
+  *optimize/rearrange code to free up some more memory for upcoming features - generating colours by code,data under I/O gets freed up - 'insdelcopy.inc' with careful bank-selection 
+  -renamed 'retplay' to 'retsubr', renamed 'AVOIDZEROPAGE_ON' to better 'RETAINZEROPAGE_ON' in player.asm and settings.cfg
+  *instrument-data initialization puts '$A9' value after last $FF table-delimiter - in packdepack.inc right pisition is: (endummyh-dummyheader)-1
+  *now a new note doesn't reset the filter-shift (BigFX $0F), should always be set manually (why the f**k did I think a new note on any channel should reset it?)
+  -fast-forward now also increases timer-speed to still follow where we're on the music timeline
+   *subtune-jump doesn't init tempo correctly - rewrote subtune-setter (SEQSUB,SETSEQ) - btw. no detection of tempo but at least sets the tempo well
+  *very last usable pattern not saved and not loaded to pattern-window on startup - 'maxptnamount+1' used where needed (before bcc)
+  *when pattern is full (size is $f9/$fa above $f8) - a insert command bugs inside pattern if no fx at last row (decreases size, but length too) - 'maxptnlen + 2' in 'insertpt'
+  -when keys are pressed together, sometimes it seems not waiting for keyrepeat/synch-signal delays - solved: 'ptrdysi' is tested in the very beginning of 'repeatex' procedure
+  -changed 'Shift+B' key-combination to 'C=+B' (track-binding on/off) because it could be pressed acidentally on real C64...and that could confuse someone, and track-binding is a must
+  -dismissed most of the global names, used more descriptive addressings into namespaces
+  *copy-paste bugs when Instr.column or Small-FX or Big-Fx-value is $FF in memory! (reported by Spider) - don't rely on $FF checking in 'copytobuf' sobroutine - use 'ptnsize,y' instead
+  *more precise SID-maker CIA-timer table (also 0 should be half-speed) - Ian Coog notified: CIA-starter 'banksel' init not needed...
+  -if 1st waveform > $10 the table insert/delete screws it up! - solution: deleted the '+1' in inst.table insert/delete functions after 'tblamoun'
+  -SWMconvert shouldn't show 'segmentation fault' when input file not found - solution: no 'fclose(InputFile)' needed if there was no input-file
+  -converted/exported XM vibratos sometimes tend to be too much... -solution: made conversion tables (arrays) for both amplitude and vibrato
+  -XM-to-SWM vibrato pattern-FX conversion doesn't happen always - solution: Had to init PrevVib at the beginning of pattern and at new valid note
+  -XM-export: wavetable self-jump not handled well ($FE $D0) - had to check if jump-value is bigger than $C0 which means end of wavetable
+  -XM-export: arp-speed values should be treated correctly (max. $3F, bit6 and bit7 should be masked out)
+
+
+================================================================================================================================================================

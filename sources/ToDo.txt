@@ -1,0 +1,132 @@
+******************************************************************** SID-Wizard ToDo/ideas *********************************************************************
+
+SID-Wizard (editor):
+  (-SWS (2SID) and SWT (3SID) and TEDzakker support (back'n'forth))
+  * give names to patterns?
+  * value up/down (which key would be the best?  + and - are occupied as well as Shift +/- and CBM +/-)
+  - cursor-sprite disturbs rasterline-overlapped player routine, and so ADSR
+  * Make demo/bare/light/medium smaller (instrument 3rd column stripping where applicable?, (pattern 3rd column stripping?))
+  * Different tables for 2 SID-types? (cOzmo's idea)  Or automatic filter-cutoff translation?
+    (or different instrument-pointers for different SID-models...)
+  + Override this behaviour of C=+P/F that instrument-setting shouldn't restart program? (cOzmo's idea)
+   (When drum/etc. interrupts, the pw-sweep should continue -> multiplex 2 PWM channels...)
+  + j3b@nym.hush.com says pressing a key should play note(s) in current pattern-row even in instr.ed.
+  - standalone synth ('SWstage')
+  - SWSconvert, SWTconvert, swm2sng?
+  - continuous SFX support?
+  - File-transfer through MIDI?
+  - Lyrics/speech engine or at least built-in/disk instruments containing words :)
+  - Finalize GM set
+  - slides + arps at the same time (in extra player?)
+  - Vincenzo: import/convert SIDizer .siz instruments,  sample-playback beside normal SID voices
+  - native C128 version of SID-Wizard? (80 columns of text area, 2MHz)
+  -a switch in instrument-data to override transposing (useful for melodic drums) - idea from Spider (taken from AMP tracker)
+  -player marks could be saved with the file (?) (maybe later in SWM2)
+  -instrument/SFX should be usable separately in games (with SWP-player, allow saving instruments separately as 'SIP', and set by calling a jumptable entry )
+  -use one block free area after PTN0 for something (e.g. copy/undo-buffer)?
+  -MIDI-sync support?
+  -handle active-sensing $FE MIDI-message (automatically detect if it's present and only activate note-reset when disappears if it is supported by the MIDI-keyboard
+  -SID-live: A synthesizer-application for live-performance, using SID-Wizard instruments, sets can be made & loaded/saved
+  -MIDI layered monophonic mode (in SID-live probably, instruments could be selected as layers, all 3 channels receive the same note-input)
+  -try to support deletion of previous config-file in all platforms/tools, if exists (VICE, MMC64, TC64, ULTIMATE)
+  -left/right and up/down keys should work simultaneously, making navigation faster...
+  -display selections in pattern and orderlist (greying out?)
+  -disable screen when depacking artefacts appear on the splash-logo (use irq / controllable decrunch routine)
+  *implement shrink/expand pattern-function (should scale the content and patternsize too, but only if possible - fits & doesn't waste notes)
+  -metronome (useful if starting composing with melody) (with C=+M) - should play a short whitenoise (stronger on downbeats) or a drum-instrument on highlighted pattern-steps (shift+H/J)
+  (-follow-play would better position in sequence and subtune too?)
+  *allow shifted characters (e.g. brackets) in file-dialog and instrument-naming
+  -(bpm meter (Shokey's idea))
+  -file-browser: DOS-command typing support (with shift+SPACE in filer) for file-deletion, etc.,   (maybe filename-sorting if possible (with key *))
+  (-fast key-combination (C= + L) for load/save dialog (depending on the cursor-position if in pattern-orderlist / instrument window))
+  (-a bigger help could also be put into startup-menu and selectable. at least 'press F8 in the editor to bring menu' note should be seen there)
+  (-standalone binary for noobs with a built-in C64 (VICE) emulator and menu to select between SID-Wizard/SID-Maker/SWMconvert-GUI)
+  (-make it possible to change folder with VICE's 'seamless folder integration' feature (like SIDPLAY64 does for example) )
+  (-maybe better not to read disk directory automatically when opening save-filedialog (slow for long directory on real 1541 drive) )
+  (-orderlist might follow playback in follow-play mode) - wouldn't be good if it's edited meanwhile...so only in follow-play should be like that
+  (-progress bar for the compressor and loader/saver?)
+  (-instrument's default chord might be loaded/saved together with the instrument? - but it would cause redundant chords (or should check if chord exists) )
+  (-SYS2061 didn't work with MMC64 replay after MMC64 main menu appeared (but worked when cartridge was set to default) - maybe CIA / RAM under ROM touched)
+  (-MMC64/IDE64/64HDD,Netdrive etc. compatibility extension (to use dreamload or switch directory, etc.) )
+  (-selectable simple multispeed (like GT, 'playsub' called in each rasters) - HR-timer and other timers should have bigger range for that, maybe later in SWM2)
+  (-decimal display where possible and fast enough - thrown idea: maybe makes sense for pattern-numbering only but it's only 2 digits (other values are referenced hexadecimally)
+  (-Mouse controller hardware/software extensions)
+  (-bug in VICE up to v2.4: In VICE emulator using NameSoft-interface (NMI based) misses bytes and still freezes if MIDI plugged in (watchdog doesn't work fine when a lot of NMI occurns) )
+
+SID-Maker (exporter):
+  *be able to select disk-drive in SID-Maker too (not just the one SM was loaded from)
+  -to fix?: exported light-version's filter isn't reset the same as in the editor if the same filtered instrument is on more than 1 channel...
+  -could be good if cancel/esc could return to importer screen anytime (even at export-setter..but be careful with half-set values)
+  -Unused playercode-wiping optimization (Like in Goattracker does with post-compilation of its player) - (Use turbo macro-assembler? Cut unused FX's code?)
+  (-a 2 colour splash screen with transparent areas composed of sprites could be made for SID-Maker too)
+  (-maybe pattern0 should also be present to be safe (e.g. if there are empty sequences accidentally) )
+
+player.asm:
+ ( ADSR comes many microseconds AFTER $09 first-frame waveform-setting! )
+ ( Maybe best write-order: $D405, $D404, $d406 )
+  -Not chords but arp.table caller $7E/$7F should determine if a chord loops or returns to arp-table after it ends
+  *Optimize the player-code size-wise and speed-wise too (it should still be optimizeable at instruction/algorithm level - lot of repetitive lsr/asl, etc.)
+  *Ex/Cx/etc. effect should have precedence over instr.data and stay there - solution: set table-pointer to an $FF endsignal (e.g. right before pulse-table), and set the register (ANT1 asked)
+  *to fix: waveform is overwritten by speed-value after $FE loop in wf-table
+  -remember chords, just like instruments?
+  -SWM2 related:*remember $3F legato value (until changed) such as selected instruments (might cause a switch to SWM2 module format)
+   ------------ *legato-FX should be possible in note-column too (performed by the same engine as note-column portamento but with max. speed) - would be a switch to SWM2
+                -$F0..$FD instead of 00..0F in waveform-table to be able to recall waveform 0/1/9/etc.? (Nata gave the idea)  (might cause a switch to SWM2 module format)
+                -should keyboard-track value $00 be NOP? (might cause a switch to SWM2 module format)
+                -a small-FX for tracktempo-changes could reduce complicated rhythms' sizes
+                (-fine (11bit) filter-cutoff setting - idea thrown out because the last column is needed for keyboard-track value - (or maybe setting this in SWM2 if 00 is in left column))
+  -arp.speed values above $C0 may include multispeed slide/vibrato too?
+  -a filtersweep-patternFX would be convenient to have (maybe in extra version)
+  -volume fade-in/out effect (also ability to be called from outside by main program)
+  -when only instrument-selection (without note) in a pattern, the instrument could be pre-selected without messing up currently played instr. (robozz & Conrad)
+  -maybe support for one-shot (instead of looping) tempo-programs could be useful too
+  (-legato-setting for instrument - just pitch-change (or be able to legato and slide at the same time)
+  (-'Early ADSR-register' vs. 'near-to-gateON' setting for special ADSR values and oldschool 1st waveform? (automatically based on ADSR or select by hand?)  )
+  (-filter-reset should happen at instrument-selection even if there's no note at the same row? -thrown out idea - why would it be useful?)
+
+SWMconvert:
+  -to fix: the longest sequence (not the shortest) should be the music-length reference, the others should be padded/repeated - looped sequence (in Choronzon) makes the conversion loop...
+  -MIDI-export should handle different track-tempos in all respects (e.g. in sihdack.swm.mid the fast Shogoon solo), e.g. 'Ninfa' pattern-FX 10 (main tempo) change in a part...
+  *optimize patterns which are less crowded (set slower speed and use shorter note-lengths in patterns, like 'duration' does in old sequencers)
+  -in XM-export different track-tempos could be handled by stretching/shrinking the pattern-data
+  -possibility to give in commandline as argument which 3 tracks/channels to be converted when converting from MIDI/XM to SWM
+  -a 'merge tunes' function would be nice. Two (or more?) tunes could be added into one tune as subtunes...
+  -try to detect and convert XM/MID chords to SWM chords and detect transposes in MID/XM...
+  -make an user-friendly GUI with batch-processing multiple tunes at once (working on top of the commandline-part)
+  (-convert sid files to swm which were made with SID-Maker? might not be a good idea if people don't like their tunes/instruments ripped - encryption should be applicable)
+
+sng2swm:
+  -half-implemented: convert wf/pl/fl table-jump pattern-effects (wherever possible) - if in table to other instrument, try to expand the instrument's table, or detect and use chords
+  -check vibratos. they tend to be too much sometimes, (down-slide maybe as well in 'freezer.sng')
+  -should support older GT format too (GTS4), and later stereo SID (when SW will support 2SID)
+  (-take care of maximal subtune/instr./pattern amounts and orderlist/pattern/inst.table-length of SWM format)
+  (-Convert Goattracker-INS to SWI format? maybe exported GT/SW SID-files to SWM?)
+
+HerMIDI: more in HerMIDI's README.txt
+  -'burn' firmware/receiver into the PIC microcontroller and load from HerMIDI itself through IEC-bus
+
+User Manual:
+  *started already: make video-tutorial (eng & hun) 
+  (-documentation for SWM format (more reader-friendly than SWM-spec.src) )
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+minor issues to fix?
+--------------------
+  - vibrato is nonzero in keyjamming sometimes? (maybe MIDI code randomizes it)
+ (? HerMIDI sometimes loses connection when Turbo Chameleon internal drive simulation is used? (Spider reported this) )
+ (? JiffyDOS - loading a tune when other is playing -> program crashes in file-dialog after load? (during depacking?) - c0zmo reported it; but it worked fine for me)
+ (? Once a weird cursor behaviour happened during 2SID composing, cursor stucked at edge of instr.table, reset+SYS2061 or vice-snapsot helps. (could not reproduce the error yet, maybe nonexistent now))
+
+
+============================================================================================================
+RC testing procedure:
+  -test all: playertypes, tunings, keysets, MIDI-devices/channels/controllers, machine-types, emulators/real
+       export-types (SID,PRG,SEQ), SID-models, SWM versions, drive-numbers/types
+       playmodes/follow, tune-/editor-settings
+       random instruments, ptn/seq-effects, chords, framespeeds, reloc-addresses
+  -test in: SW, SM, SW2SID, SM2SID, SM-SFX, UserManual
+  -check XM&MID imports/exports of sng2swm(.exe) & SWMconvert(.exe) 
+
+
+==================================================================================================================================================================

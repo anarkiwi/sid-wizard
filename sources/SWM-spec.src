@@ -1,0 +1,137 @@
+;//===========SID-Wizard Module Specification Description File====================
+;// used by both 64tass and gcc source-files and compilation processes
+;// $Id: SWM-spec.src 382 2014-06-23 17:53:01Z hermitsoft $
+;//maximum amount of SWM tune-elements (patterns, instruments, etc.)
+maxsubtuneamount=8-1 ;//max. $1F! - amount of subtunes ;counted from 0, so e.g 20 means 21 subtunes (0..$14) 
+maxptnamount=100 ;//maximum number of patterns ;will depend on how much pattern-memory must be stolen for code
+maxinstamount=36+1 ;//maximum number of instruments
+seqlength=126 ;//$7e ;max. $7e - max. storage lenth of a sequence in orderlist
+seqbound=128 ;//seqlength+2 ;max.$80 - sequence-boundary size - leave a little space at end of sequence for possible jumpaddress and $00
+maxptnlen=250-1 ;//max $f9 (249) ;max size of pattern (in bytes) before any insertion is possible - max $f9 ($f8 effective rows + 4 byte with bigFX)
+PTNBOUND=256 ;//maxptnlen+7 (max 256) ;LIKELY TO BE $100, but not more. Less doesn't utilize memory well...
+maxinstsize=128 ;//$80 ;//maximum memory available for one specific instrument
+instnamelength=8 ;//DON'T MODIFY!!! (will be incompatible) - maximum length of instruments' name - cropped at final tune-packing
+MAXCHORDAMOUNT=64 ;//$40 ;//max. $40! - MAXIMUM NUMBER OF CHORDS FOR EMPTYZAK (INCLUDING DUMMYES AT BEGINNING AND END)
+maxchordlength=32 ;//$20 ;//maximum length of a particular chord
+ChordTableLen=256 ;//$100
+MAXTEMPOPRAMOUNT=64 ;//$40 ;max. $40! - MAXIMUM NUMBER OF TEMPOPROGRAMS FOR EMPTYZAK (INCLUDING DUMMYES AT BEGINNING AND END)
+maxtempolength=32 ;//$20 ;//maximum length of a particular tempo-program
+TempoTableLen=128 ;//$80
+
+
+DEFAULTPTNLEN=32 ;//$20 ;//FOR EMPTYZAK MACROS - used in editor/converter to define default length of yet unused patterns
+
+SUBTUNE_MAX=31 ;//$1F theoretical
+PATT_MAX=127 ;//$7F theoretical, used by SWMconvert
+INSTR_MAX=62 ;//$3E theoretical, used by SWMconvert
+
+;//=================== Structure of the SWM module =============================
+
+;//HEADER - fixed size and positions described above
+;//-------------------------------------------------------
+tuneheadersize=64 ;//$40 ;//don't modify (to keep compatibillity throughout versions)
+;//fix value positions in SWM module file (the commented are present in 'editor.inc'
+;//00..03: 'SWM1' identifier
+FSPEEDPOS = 4 ;//position of frame-speed (1..8)
+;//05: pattern-highlighting step-amount
+SWM_HILI_POS = 5 ;//used by converter 
+;//06: auto-advance-amount
+SWM_AUTO_POS = 6 ;//now it's obsolete, don't use this anymore in SWM1!
+;//07: ON/OFF configuration bits (track-binding on/off, rasterbar-display on/off, default-followplay on/off, instrument auto-typing on/off, etc.)
+SWM_CBIT_POS = 7 ;//now it's obsolete, don't use this anymore in SWM1!
+;//08..0A: mute/solo switches
+SWM_MUTE_POS = 8 ;//used by converter
+;//0B: default pattern-length (for unspecified patterns
+SWM_DEFP_POS = 11 ;//$B used by converter
+SEQAMOPOS = 12 ;//$C  ;//position of Amount of sequences before empty-end (calculated by packer)
+PTAMOUPOS = 13 ;//$D  ;//position of Amount of patterns before empty-end - empty but lengthy patterns count too!!!
+INSTAMPOS = 14 ;//$E  ;//position of Amount of non-empty instruments before empty-end
+CHRDLEPOS = 15 ;//$F  ;//position of Length of packed chordtable
+TMPLENPOS = 16 ;//$10 ;//position of Length of packed tempoprogram-table
+COLORTHEMEPOS = 17 ;//$11 ;//now it's obsolete, don't use this anymore in SWM1! ;//position of colour-theme number
+KEYBOARDTYPE_POS=18 ;//$12 ;//now it's obsolete, don't use this anymore in SWM1! ;//position of keyboard-type number
+DRIVERTYPE_POS=19   ;//$13 ;//position of player/driver-musicroutine type info (light/medium/full/extra/bare/demo), just an information, no restriction caused
+TUNINGTYPE_POS=20   ;//$14 ;//position of tuning-type of frequency-table (0:normal 440Hz, 1:432Hz Verdi-tuning, 2-Just-intonation for key of C)
+;//some bytes left for later expansions (e.g.: 2SID version mute/solo bytes)
+AUTHORPOS = 24 ;//(tuneheadersize-40) ;//$18
+
+
+;//=========================================================================================
+;//MUSIC DATA itself:
+;//-------------------
+;//Sequences (that had pattern inside) - all expanded with its 1-byte size-info
+;//    like e.g.:  1,1,1,fe,(4), 2,2,2,ff,01,(5), 3,4,5,6,7,ff,02,(7), ...
+
+;//Patterns (that were referenced in sequences) - $ff endsignal changed to size-info, then expanded with length-info
+;//....like e.g.:  9,2,0,bd,1,9,2,(7),(6),  $7d,$22,2,2,0,(5),(5)  .....
+
+;//Instruments (that had something in their tables) - filtertable $ff signal changed to size of instrument without its name, and name is appended
+;//....like e.g.:  fix 16 bytes, then tables: 41,0,0,41,2,0,$ff, 88,00,00,$ff, $9F,03,01,($1e), 8char-NAME
+;//more precisely:
+;//instbase .BYTE %00011010 ;0 CONTROL REGISTER (HR TIMER,HRTYPE ,VIBRATO-TYPE,TIED PW/CTF)
+;//         .BYTE $0F,$F0  ;1 HR-ADSR
+;//         .BYTE $00,$F0  ;3 ADSR ON NOTESTART (GATE-ON)
+SWI_AD_POS=3  ;//used for converter (Attack/Decay byte)
+SWI_SR_POS=4  ;//used for converter (Sustain/Release byte) and SUSTAIN-inspector for MIDI-velocity in playadapter.inc
+;//         .BYTE $00      ;5 VIBRATO (CALCULATED) FREQ+AMP (amplitude:high nibble)
+SWI_INSVIBRATO_POS=5 ;//used for converter
+;//         .BYTE $00      ;6 VIBRATO DELAY OR AMPLITUDE-INCREMENT SPEED
+SWI_VIBDELAY_POS=6 ;//used for converter
+;//         .BYTE $00      ;7 ARPEGGIO AND CHORD-SPEED (0=1X)
+SWI_ARP_SPEED_POS=7 ;//used for converter
+;//         .BYTE $01      ;8 DEFAULT CHORD FOR INSTRUMENT
+SWI_DEFCHORD_POS=8 ;//used for converter (and now SW too)
+;//         .BYTE $00      ;9 OCTAVE SHIFT (2's complement) - it's transpose essentially but in 12 steps by editor
+SWI_OCTAVE_POS=9 ;//used for converter
+;//         .BYTE <(pulsprog - instbase) ;PWTBL1-INST1 ;A PW-TABLE POINTER RELATIVE TO INSTRUMENT-ADDRESS
+SWI_PULSETBPT_POS=10 ;//$A used for converter
+;//         .BYTE <(filtprog - instbase) ;FLTBL1-INST1 ;B FILTER-TABLE POINTER RELATIVE TO INSTRUMENT-ADDRESS
+;//         .BYTE $00      ;C GATEOFF POINTER FOR WFARP-TABLE RELATIVE TO WF-TABLE POSITION
+;//         .BYTE $00      ;D GATEOFF POINTER FOR PW-TABLE RELATIVE TO PW-TABLE POSITION
+;//         .BYTE $00      ;E GATEOFF POINTER FOR FILTER-TABLE RELATIVE TO FILTER-TABLE POS.
+;//         .BYTE $00      ;F 1ST FRAME WAVEFORM
+;//         .BYTE $ff  ;WF-PROGAM ;hardwired position at $10 (relative to instrument-base)
+;//pulsprog .BYTE $Ff  ;PW-PROGRAM        
+;//filtprog .BYTE $Ff ;FILTER-PROGRAM
+WFTABLEPOS=16 ;//$10 ;//WF-ARP TABLE BASE-POSITION RELATIVE TO INSTRUMENT-BASEPOSITION
+
+;//Chordtable- chords after each other, separated with $7e/$7f - the chordtable-size is given in CHRDLEPOS in the header. if 0, nothing is here
+;//....like e.g.:  0,3,7,7e, 0,4,7,A,$7f, ...
+
+;//Tempotable- tempo-programs separated by bytes with bit7=ON. tempotable-size is given in TMPLENPOS in header. if 0, nothing stored
+;//....like e.g.:  08,07,06,85, 20,20,10,90, ...
+
+;//Subtune-funktempos - left/rigth values in pair, based on number of subtunes (sequences/3) - one is always stored even if no sequence
+;//....like e.g.:  88,84, 08,84, 20,90, ... 
+;//-------------------------------------------------------------------------
+
+
+;//.....
+;//PATTERN-EFFECT values =======================================================
+;//note-column effect-values
+;//NOT TO MODIFY THESE, HARDWIRED VALUES, POSSIBLY UNCHANGEABLE AND OCCURING MANY TIMES IN THE WHOLE CODE!
+SWM_NOTE_MAX=95 ;//$5F ;//maximum note-value
+VIBRATOFX=96 ;//$60 ;//BASE OF VIBRATO-EFFECT
+PACKEDMIN=112 ;//$70 ;//minimum value representing 2 packed NOPs
+PACKEDMAX=119 ;//$77 ;//maximum value representing 9 packed NOPs
+PORTAMFX=120 ;//$78 ;//AUTO-PORTAMENTO NOTE-EFFECT VALUE
+DEFAULTPORTA=110 ;//AUTO-PORTAMENTO NOTE-FX DEFAULT SPEED
+SYNCONFX=121 ;//$79 ;//SYN-ON NOTE-EFFECT VALUE
+SYNCOFFX=122 ;//$7A ;//SYNC-OFF NOTE EFFECT VALUE
+RINGONFX=123 ;//$7B ;//RING ON NOTE EFFECT VALUE
+RINGOFFX=124 ;//$7C ;//RING-OFF NOTE EFFECT VALUE
+GATEONFX=125 ;//$7D ;//GATE-ON (NOTESTART) NOTE EFFECT VALUE
+GATEOFFX=126 ;//$7E ;//GATE-OFF(NOTE-MUTE) NOTE EFFECT VALUE
+
+;//instrument/smallfx-column special effect-values
+SWM_VOLUME_SMALLFX=80 ;//$50 - used to check in converter, if volume-column of XM should be used
+SWM_MAIN_VOLUME_SMALLFX=160 ;//$A0 - used for converter
+SWM_LEGATO_INSFX=63 ;//$3F - used to check in converter, if 3FF (max.portamento) fx should be used
+SWM_VIBRATO_BIGFX=8 ;//used in converter to sustain NOTE-column-vibrato
+SWM_DETUNE_FX=13 ;//$0D - used in converter
+SWM_NOTEDELAY_FX=30 ;//$1e - used in converter
+;//further effects are described in the user manual (not including here to avoid information redundancy)
+
+
+;//======================================================================================================
+

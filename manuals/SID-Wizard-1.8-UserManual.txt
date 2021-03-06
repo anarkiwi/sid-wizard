@@ -1,0 +1,676 @@
+       **************************       
+       SID-Wizard 1.8 User Manual       
+       **************************       
+
+This is a shorter revised version of the
+SID-Wizard User Manual now in TXT format
+so all quirks and complexities coming 
+with PDF are excluded now, and it can be
+read on real C64 as well. Press cursor
+up/down to scroll up/down, and press /
+(slash) or Shift+/ to page up/down, and
+press Home to return to the top.
+
+
+======================================
+I. Introduction of SID-Wizard and SID
+======================================
+
+SID-Wizard is a music-tracker applica-
+tion for the Commodore 64 computer's
+audio-chip called SID. It has many ad-
+vanced features not found in other trac-
+kers, hovewer I took many ideas from the
+best C64 music editors like Goattracker,
+SDI, X-SID, SID-Factory, JCH Editor,etc.
+
+Main features of SID-Wizard:
+-36 Instruments (30 in 2SID, 26 in 3SID)
+-8 subtunes (only 2 in 2SID, 1 in 3SID)
+-100 250byte patterns (105 in 2SID/3SID)
+-Each instrument has own distinct tables
+-Each instrument has own Hard-Restart
+-Calculated vibrato (4 types) & slide
+-Up to 8x framespeed (400Hz SID-control)
+-ChordTable with direct Note-entry mode
+-Keyboard-tracking (note-dependent filt)
+-Support for different tempos on tracks
+-3 simultaneous pattern-effects in track
+-Gate-off entries in instrument-tables
+-Scalable player (from 'bare' to extra)
+-Music (SWM) compatible through versions
+-Export formats like .SID and Executable
+-Goattracker-like concept and keys
+-Oscilloscope & pulsew./cutoff displays
+-Selectable pre-set colour-themes
+-DMC/SDI/Janko key-layout approaches too
+-NTSC and Drean machine-type support
+-MIDI/XM file-conversion via SWMconvert
+-Goattracker SNG importer 'sng2swm.exe'
+-Saving editor-settings to a config-file
+-One-step "Undo" for patt./orderl./ins.
+-Sound-FX support (SFX, Check doc's end)
+-Collection of 324 example instruments
+-Tunings: Verdi-tuning, Just-intonation
+-MIDI-in (poly/mono,velo-sense),devices:
+ HerMIDI,Sequential,Passport/Syntech,JMS
+ Datel/Siel/CLAB,NameSoft,Maplin,MoogSP.
+-MIDI-sync output (start/stop/clock)
+-2SID ('.sws') & 3SID ('.swt') versions
+-Independent Orderlist-marks (C=+SPACE)
+-Separator 'NOP' in Orderlist with ID
+-Insert entire orderlist column (C=+DEL)
+-SWP - relocatable musicdata and player
+-Tape-slowdown effect support in player
+
+
+If you're interested in sound-sythesis
+and the SID-chip you can read a bit more
+in SID-Wizard 1.4 User Manual. But let's
+see the registers of SID in a nutshell:
+
+ 00-01 07-08 0E-0F :Pitch low&high bytes
+                    (low byte;high byte)
+ 02-03 09-0A 10-11 :Pulsewidth registers
+                    (low byte;hi-nybble)
+  $04   $0B   $12  :Waveform+control reg
+                   (test,ring,sync,gate)
+ 05-06 0C-0D 13-14 :ADSR envelope reg.
+                    (Att,Decay;Sust,Rel)
+      $15-$16 :Filter cutoff frequency
+               (low 3 bits; high 8 bits)
+        $17   :Filter Resonance & Switch
+               (Reso.nybble,Ch3,Ch2,Ch1)
+        $18   :Filter Band / Volume reg.
+               (Band nybble, Vol.nybble)
+
+
+========================
+II. Usage of SID-Wizard
+========================
+
+1.Startup-menu:
+---------------
+ You can select between these 
+ player-routine types at startup:
+
+ Normal: It probably has everything you
+         will need: Calculated vibratos,
+         Detune,Chord,Transpose, instru-
+         ment octave,WF-ARP speed,Pulse/
+         Filt.reset OFF, keyboard-track,
+         11bit filter, tempo-programs,
+         vibrato types, HR-types, frame1
+         setting, note-off tableindex, 
+         subtune-jump, zeropage-restore
+        
+ Medium: Smaller player-size but lacks: 
+         vibrato-type,hard-restart type,
+         frame1 setting,PW keybrd-track,
+         note-off index, subtune-jump FX
+         and zeropage save/restore 
+        
+ Light: Even smaller & consumes less 
+        rastertime, but lacks also:
+        Calculated vibrato & slide, De-
+        tune, Chord-table, Transpose FX,
+        Instrument-octave, WF-arp.speed,
+        PW/Filt.reset OFF, keyboard-trk,
+        11bit filter, tempo-programs
+        
+ Extra: Based on 'Normal', adds extras:
+        (takes more memory & rastertime)
+        program-tables never skipped,
+        FiltSwitch-Reso.FX, Ghost regis-
+        ters, fast tempo (0..2), vibrato
+        is not lost after pitch-slide,
+        note/track Delay pattern-FX
+        
+ Bare: Very restricted, significantly 
+       smaller size, less than "Light".
+       Lacks: subtune-support,multispeed
+       support, external volume-setting,
+       filter-shift FX, orderlist-FX,
+       portamento in note-column, WF-ar-
+       peggio NOP $80, vibrato-rate FX,
+       filter/detune/WF small effects
+
+ Demo: Includes features that are most
+       likely needed for demos/intros. 
+       Lacks:subtune-support,filtershift
+       portamento in note-column, vibra-
+       to frequency-FX, SmallFX for: 
+       filter,detune,waveform/ring/sync.
+       No extras like octave,chords,
+       calculated vibrato & vib.types,
+       gateoff-program,keyboard-track,
+       No setting for HardRest./frame1.
+
+ *If none of these pre-set values fit 
+  your needs you can refine them in file
+  /sources/settings.cfg and recompile 
+  SID-Wizard with your own settings.
+ *2SID version of SID-Wizard uses ghost-
+  registers in all types of players.
+  
+ For PAL machines you can select an al-
+ ternative pitch-tuning system in Start-
+ up menu: Verdi tuning is equal-tempered
+ but uses A4=432Hz as base-note, while
+ Just-intonation even has note-intervals
+ based on integer ratios to produce pure
+ intervals in key of C. (not other keys)
+
+ Drean machine tuning is auto-selected.
+
+2.User Interface (and navigation keys)
+--------------------------------------
+ You have to use key-combinations to do
+ tasks in SID-Wizard. Numbers are given 
+ in hexadecimal 1..F format everywhere. 
+ CRSR-keys can now go through ins.panel.
+
+ The top-border part displays the logo
+ with SW version-number and player-type,
+ Octave, Playback-time, Rastertime, Auto
+ advance amount, Pulsewidth- and Filter-
+ cutoff bars, and finally Channel3 wave.
+ 
+ Pattern-editor (call with F5 key):
+  The largest part of the screen where 
+  you can put notes & effects for the 3 
+  tracks of SID. A patternrow looks like
+  
+  Column1   Column2     Column3 Column4
+  Note/Fx Instrument/Fx  Effect Fx-Value
+  
+  The notes can be typed in the selected
+  octave by 2 rows in normal SW-layout:
+
+  Upper octave:   2 3   5 6 7   9 0
+  (SDI's layout) Q W E R T Y U I O P @ *
+
+  Lower octave:     S D   G H J   L
+                   Z X C V B N M , .
+  
+  DMC-layout:    W E   T Y U   O P
+                A S D F G H J K L :
+
+  JANKO-layout: Chromatic/non-diatonic, 
+   notes found on F,4,K,8 keys as well.
+
+ Orderlist (call with F6 = Shift+F5):
+  In the bottom-border you can organize
+  the sequence how the patterns are to 
+  be played after each other on tracks.
+  Some effects can also be given above
+  $80, see values later in section III.
+  First track's playback-start mark is
+  seen in position-numbers' colouring,
+  while individual track play-marks can
+  be seen as small underlines. 
+ 
+ Instrument-panel (call with F7 key):
+  On the right-side of the screen the
+  instruments can be edited. You can se-
+  lect instrument to edit with +/- keys.
+  Each instrument has a number and you
+  can give them a name as well. See the
+  content of the tables in section III.
+ 
+ At the rightmost side of the screen are
+ chord-table (call with C=+F5 or C=+K) 
+ and the tempo-program table (C=+F7/F8)
+
+3.Menu: File operations, configuration
+--------------------------------------
+ Menu and file-operations can be called
+ with F8 key (Shift+F7). Press Esc/STOP
+ to exit the Menu or file-dialog. You
+ can save/load worktunes with SWM exten-
+ sion, while SWI stands for instruments.
+ (You can check the author-information 
+ and player-type abbreviation N/M/L/E/B
+ of the loaded tune in orderlist's posi-
+ tion-row right after loading or by cal-
+ ling the menu with F8 key.)
+  Press RETURN on the menupoints to set 
+ or adjust parameters. One exception is
+ default pattern-length which can be set
+ with +/- and sets the unused patterns' 
+ lengths when you kill/load/save a tune.
+
+  To activate a MIDI-device first select
+ its type with RETURN, then select the 
+ MIDI-channel you want to receive from.
+ (Press Shift+RETURN to disable MIDI.)
+  If a MIDI-device is set successfully
+ you can see ':' before its name, else
+ a '!' notifies you about the issues.
+  Attention: Most MIDI-devices which use
+ $DE00..$DFFF will cause a clash/freeze 
+ if you have a cartridge attached on Ex-
+ pansion port. I don't know a workaround
+ except using HerMIDI which doesn't use
+ the Expansion-port kept for cartridges.
+  MIDI beat-clock output is generated on
+ devices that have MIDI-output, so now
+ you can synchronize other sequencers as
+ well as start/stop their playback.
+
+ Base-addresses of SID2 and SID3 can be
+ set to all possible values with +/- but
+ the most commonly used addresses come 
+ first. The setting gets performed when 
+ you exit from menu or restart tune.(F1)
+ (Clash with cartridges can also happen 
+  if you try to set $DE00..$DFE0 here.)
+ 
+ From version 1.5 SID-Wizard no longer
+ saves editor-specific settings into the
+ workfile: you can save your settings
+ with 'SAVE CONFIG' menupoint into a 
+ file called '@SWCONFIG.PRG'. Then it's
+ loaded at next startup automatically,
+ if succeeds it is seen in startup-menu.
+ Otherwise you'll see a '?' next to this
+ menupoint. (If even saving the config 
+ was unsuccessful you'll see a '!' here)
+
+4.Keyboard-layout of SID-Wizard
+-------------------------------
+ If you use VICE emulator some useful 
+ equivalents: CONTROL=Tab, RUNSTOP=Esc,
+ C= (CBM)=Control, <-(bkArrow)=Tilde/End
+ Pound=Insert, UpArrow=PageDn (in Linux)
+ 
+ General keys (some were told before):
+     F1          Play from the beginning
+  F2 (Shift+F1)  Play from play-mark(s)
+     F3          Play selected patterns
+  F4 or RUNSTOP  Stop/Continue (toggle)
+  C= + F1..F4    Same, but Follow-play
+  <- (BackArrow) FastForward 6x playback
+  Shift + <-     Toggle follow-playback
+     C= + <-     Toggle auto-Follow
+     C= + , / .  Select(inc/dec) Subtune
+  < > (Sh+ ,/.)  Inc./Dec. subtune-tempo
+  [ ] (Sh+ :/;)  Inc./Dec. 2nd funktempo
+     C= + T      Toggle SubtuneFunkTempo
+  / or Up-Arrow  Page Down (4/8 steps)
+  Sh+/ ,RESTORE  Page Up (4/8 steps)
+  Shift + F / G  Inc./Dec. framespeed
+  Shift + I      Toggle auto-Instrument
+ 
+ Pattern-editor related keys (F5):
+  CONTROL (Tab)  Step Track (Shift:back)
+  C= + CONTROL   Fast switch SID 1..3
+  Shift + SPACE  Play patt. from cursor
+  Shift+ 1..9/0  Mute-UnMute/Solo-Unsolo
+  C=+1..8 C= +/- Select / inc.dec.Octave
+  RETURN (+Sh.)  Put Note-ON / Note-OFF
+                 Go to instr. / chord
+  C= + RETURN    Select played patterns
+  A / 1 / C=+DEL Empty row in column
+     DEL         Delete / Dec. patt.len.
+  Sh+DEL / Pound Insert / Inc. patt.len.
+  Shift+C= + DEL Delete whole PatternRow
+  C= + Z/X/C/V   Undo/CutCopy/Copy/Paste
+  Shift + C      Set end of Copy-marking
+  Shift + Q / W  Transpose from cursor
+     C= + Q / W  Transpose octave up/dn.
+     Shift + V   Vibrato in Note-column
+     Shift + P   Portamento in Note-col.
+  Shift/C= + R   RingMod.ON/OFF in NoteC
+  Shift/C= + S   Sync.ON/OFF in Note-col
+  Shift + +/-    Select pattern on track
+  Sh+D / C= + D  DoveTail/MIDI-Polyphony
+  Shift + A / Z  Inc./Dec. auto-adv.step
+  Shift + H / J  Inc./Dec.highlight-step
+     C= + B      Toggle track-binding
+ 
+ Orderlist-related keys (F6 / F5):
+  RETURN (+Sh.)  Go to pattern(s) in pos
+  Shift+SPACE    Set all play-marks (F2)
+  C= + SPACE     Set playmark on a track
+  Shift+C=+SPACE Set marks to played pos
+  C= + Z/C/V     Undo/Copy/Paste @cursor
+  Shift + C      Set end of Copy-marking
+  C= + E         Find 1st Empty pattern
+  C= + DEL / Ins Insert an entire column
+ 
+ Instrument-related keys (F7):
+  + / - (&Shift) Select instrument
+  CONTROL (Tab)  Go Instrument-subtables
+  Shift + N      Name the instrument
+  RETURN         Toggle param./ go Chord
+  Shift+SPACE    Set Note-OFF table-pos.
+  C= + Z/X/C/V   Undo/Cut/Copy/Paste Ins
+  C= + P / F     Toggle PW/Filter reset
+     =           Negate value in table
+  Shift + S      Go to main Inst.setting
+  Shift + W      Go to WF-ARP table
+  Shift + P      Go to PulseWidth table
+ 
+ Chord-table related keys (C=+F5):
+  Shift + K / L  Select Chord anywhere
+  + / -          Sel.Chord in ChordTable
+  RETURN         Return to patt./instr.
+    =            Negate value in table
+  C= + N         Note-mode / Number-mode
+ 
+ Tempo-table related keys (C=+F7):
+  Shift + T / Y  Select Tempo-program
+  + / -          Sel.Tempo in TempoTable
+ 
+ Menu keys (F8):
+  RETURN (+Sh.)  Adjust/reset settings
+  + / -          Set default patt.length
+                  or SID2 base-address 
+ File selector keys:
+  F1             Re-read disk-directory
+  F3 / Up-arrow  Page-down in directory
+  CONTROL (Tab)  Filename/info/selector
+  RETURN         Approve / Perform task
+  F7/STOP (Esc)  Quit file-dialog
+
+ (Since SW-1.8 save dialogs don't read
+  the disk-directory automatically, so
+  press F1 to bring it. If you want the
+  old behavior,use SAV.AUT.DIR setting.)
+
+5.SDI key-layout's differences/addons:
+--------------------------------------
+ SH L     Load music (bring up MENU too)
+ SH S     Save Music (bring up MENU too)
+  F1      Play from orderlist mark(s)
+  F2      Set play-mark in orderlist
+  F3      Stop/Continue playback
+  Z       Play pattern from current line
+ Return   Play pattern from top
+  F4      Edit/Synth mode (toggle)
+ F7/F8    Select octave (incr./decr.)
+ STOP, /  Toggle instrum./pattern-editor
+ SH F     Filter program table
+ SH T     Tempo program table
+ CBM +/-  Next/Previous song (subtune)
+ CBM 1..3 Track on/off  (mute/unmute)
+ S/K , L  Tab jump left/right (tracks)
+ , / .    Jump up/down 8/4 lines
+ Space    Delete down (in pattern)
+ G, SH G  Gate on/off (--/++ in pattern)
+ > / <    Transpose in pattern / Chord+-
+ M, CBM M Copy, Paste (at cursor-posit.)
+ SH M     Set end of copy-mark/selection
+ CBM F    Clear pattern (From cursorpos)
+ SH Home  To start of song (orderlist)
+  H       Hunt next unused in Orderlist
+  N       Name sound/instrument
+  ?       Set speed calls (framesp.1..8)
+
+
+=================================
+III. Hexadecimal value reference
+=================================
+
+1.Instrument-parameters
+-----------------------
+ Main instrument-settings:
+  ADSR - If Sustain=8, MIDI-velocity=ON
+  ADHR - ADSR value for hard-restart
+  Frame1 waveform (turn on with RETURN)
+  HardRestart timer (0..2 frames before)
+  HardRestart-type (normal/staccato)
+  Vibrato amplitude,rate, delay/increase
+  Vibrato-type (incremental/delayed u/d)
+  Waveform-Arp. table execution speed 
+   (>$40:PW-multispeed, >$80:Filter too)
+  Default Chord's No. for the instrument
+  Octave-shift (set '+/-' with RETURN)
+  PW/Filt-reset (inits on ins.selection)
+ 
+ Waveform-Arpeggio-Detune table:
+  WF-column: $00..$0F repeat row x times
+             $10..$FD set waveform/ctrl.
+             $FE      Jump (>$40:itself)
+  Arp-column:   $00      No pitch-shift
+  (with Wform)  $01..$5F Pitch-shift up
+                $7F      Jump to chord
+                $80      NOP (prev.val.)
+                $81..$DF Absolute pitch
+                $FF..$E0 PitchShift down
+  *Arp. overrides/cancels slide/vibrato!
+  Detune-column: $00..$FE Detune upwards
+                   $FF    NOP (prev.val)
+ PulseWidth-table:
+  $8x..$Fx xx  Set Pulsewidth xxx
+  $00..$7F xx  Add xx to PW 00..7F times
+     $FE  xx   Jump to table-position xx
+  *3rd column is keyboard-tracking curve
+  ($00:off, $00->downwards:less,$01->up-
+   wards:more  dependence on note-pitch)
+ 
+ Filter-program table:
+  Filters are switched on automatically
+  for channels that use filtered instru-
+  ments. The leftmost channel has the
+  highest priority for filter-control if
+  more tracks try to use filter. Values:
+  $8r..$Fr xx  Set resonance and cutoff
+               (9:lowpass,A:band,C:hi)
+  $00..$7F xx  Add xx to Cutoff .. times
+     $FE  xx   Jump to table-position xx
+  *3rd column: $00..$7F,$ff..$90:kbTrack
+               $8x FilterSwitch-override
+  *If you just insert an empty row in 
+   1st row of the filtertable,instrument
+   is filtered but won't control filter.
+
+2.Pattern-Effects
+-----------------
+ Note-column effects: They appear like
+  tiny graph. symbols after being typed
+  with key-combinations (Shift+R/S/P/V)
+  Vibrato's amplitude can be set to 1..F
+ 
+ Instrument-column effects:
+  $01..$3E  Select Instrument for track
+    $3F     Legato/tied (set pitch only)
+  $40..$4F  Set Waveform (small Fx)
+  $50..$5F  Set Sustain-level (note-vol)
+  $60..$6F  Set note's Release-time
+  $70..$7F  Set Chord(overrides default)
+ 
+ Effect-column SMALL effects:
+  $20..$2F  Set Attack-time of note
+  $30..$3F  Set Decay-time of note
+  $4,5,6,7x The same as above (instr.FX)
+  $80..$8F  Vibrato Amplitude setting
+  $90..$9F  Vibrato Rate setting
+  $A0..$AF  Set Main Volume ($d418 nybL)
+  $B0..$BF  Filter-band nybble
+  $C0..$CF  Chord-speed setting
+  $D0..$DF  Detune current note
+  $E0..$EF  Control-nyb.(test/ring/sync)
+  $F0..$FF  Filter-resonance setting
+ 
+ Effect-column BIG effects:
+  $01  Pitch-slide Up
+  $02  Pitch Slide Down
+  $03  Tone-portamento (auto-portamento)
+  $04  Waveform-Control register setting
+  $05  ATTACK/DECAY register setting
+  $06  SUSTAIN/RELEASE register setting
+  $07  Select Chord (overrides default)
+  $08  Set Vibrato Amplitude & Rate
+  $09  Go to WF-ARP table-position
+  $0A  Go to PulseWidth table-position
+  $0B  Go to Filter table-position
+  $0C  Set Chord-speed (or arp.speed)
+  $0D  Detune current note upwards
+  $0E  Set PulseWidth
+  $0F  Set Filter Cutoff-freq. hi-byte
+  $10  Set Main single tempo
+  $11  Set Main FunkTempo
+  $12  Launch Main Tempo-program
+  $13  Set Track's single tempo
+  $14  Set Track's individual FunkTempo
+  $15  Launch Tempo-program for track
+  $16  Select Vibrato-type (0/10/20/30)
+  $1C  Shift Cutoff hi-byte (permanent)
+  $1D  Delay track by $00..$ff frames
+  $1E  Delay note by max=tempo-3 frames
+  $1F  Set FiltSw/Reso register ($d417)
+
+3.Orderlist values
+------------------
+ $01..$7F  Pattern-numbers
+ $8F..$80  Transpose key down
+ $90..$9F  Transpose key up ($90:orig.)
+ $A0..$AF  Set Main Volume ($0..$F)
+ $B0..$EF  Set single track-tempo
+ $F0..$FD  Separtor NOP with section ID
+  $FE (-E) End of tune, stop playback
+  $FF (-F) Jump to position given by the
+ following number,above $80:Jump subtune
+ *Orderlist must not begin with $FE/$FF!
+ (Separator is seen as '--' to '-D', it
+  does nothing but eases visualization.)
+
+4.Chord-table values
+--------------------
+ $00..$7D  Rel. pitch up (by halfnotes)
+ $FF..$80  Rel. pitch-shift downwards
+   $7E     Return from chord to Arp-tbl.
+   $7F     Loop the chord infinitely
+   
+ ChordTable now can be edited in 2 ways:
+ the 'Note-mode' is selectable: You can 
+ set the base/root note of a chord out-
+ side of the chord-table, then the notes
+ of the chord IN the chordtable. Editing
+ mode (Space) should be selected to type
+ (More convenient method than the number
+  based.Playback also sets the basenote)
+
+5.Tempo-table values
+--------------------
+ $00..$7F  Tempo for one pattern-row
+
+
+========================================
+IV. SID-Maker,converters,player-use,MIDI
+========================================
+
+SID-Maker is an important addon for
+SID-Wizard, it can create various for-
+mats from the saved SWM tune: Normal,
+Raw, Executable and SID. (If you used a
+':' in the author-info field it will be-
+have as a separator between author-name 
+and tune-title in the SID export.)
+ Each format has different settings, you
+can select a different player-type for
+all if you want, and relocation-address.
+SID-export has one more setting, if the
+SID-type to be set for old/new. (Player-
+type and SIDtype defaults autodetected.)
+ There are additional SID2/SID3 address
+settings in 2SID/3SID versions,it works
+as in the editor: most common addresses
+come first. All export-formats need it.
+
+SWMconvert.exe is a non-C64 addon, you
+can convert from/to XM/MID formats with
+a degree of precision. It's used to con-
+vert between .P00/.prg or .S00/.sid for-
+mat in case you save from VICE-emulator.
+(Also for .SWM to/from .SWS conversion.)
+
+sng2swm can convert Goattracker's .sng
+workfiles to SID-Wizard's .swm format.
+You can find some examples on the disk.
+
+The exported tune (normal/raw/sid) can
+be included in your programs in the usu-
+al way, LoadAddress of the tune is the
+initialization subroutine, subtune must
+be set in accumulator before calling it.
+LoadAddress+3 is the playback-routine 
+to be called in every frame. 
+LoadAddress+6 is the multispeed-call if 
+you have multispeed tune. 
+And LoadAddress+9 is the external volu-
+me setting. (Put volume into accu before
+you call this short routine.)
+ SFX (Sound-FX) can be triggered on 
+channel 3 from your program by calling
+LoadAddress+12, if you exported the tune
+with the special SID-Maker-SFX. All FXes
+are essentially instruments, they over-
+ride channel3 notes during execution.
+You have to set the CPU-registers first:
+X=Note, Y=Instrument, A=Length (frames)
+( Check '/sources/SFX-example' folder. )
+ SWP relocatable musicdata and player
+can be exported by SID-Maker-SWP. To 
+init an SWP tune, set its load-address
+lo- and hi-bytes in X and Y, and subtune
+in A, then call the special SWP player's
+init- and play-routines as usual.
+ Tape-slowdown simulation FX and SFX are
+assembled into SID-Maker-SWP-FX. To set 
+slowdown (in halftone-steps), put slow-
+down value 0..24 into Accu., then call
+LoadAddress+15 and the tune slows down.
+
+You can see the estimated rastertime du-
+ring composing and the final measure in
+the executable export. The memory foot-
+prints of the different player-types are
+displayed in the Startup-menu of editor.
+
+Supported MIDI-commands:Stop,Start,Reset
+SoundOff,ProgramChange,Brightness,Volume
+Note,PitchWheel,ModWheel,Aftertouch,(in
+monophonic-mode only on cursor channel)
+
+=================
+V. Closing Words
+=================
+
+Don't be surprised if you see some short
+screen-flashing in the top & bottom bor-
+ders when you use MIDI-devices. That's 
+caused by the IRQ that MIDI-cartridges 
+generate in arbitrary times and so they
+disturb raster-interrupt of SID-Wizard.
+
+In case you'd have an unfortunate crash
+due to external issues (drive,etc.) you 
+can restart SID-Wizard safely after a 
+warm reset by 'SYS 2061' command.
+
+I hope You'll enjoy using SID-Wizard...
+
+Thanks to people for their contribution:
+Witchmaster for the ebook and testing
+Akaobi for Japanese Manual and support
+Necropolo,Chabee,Vincenzo for test,tunes
+Spider,Toggle,Adam,Triton for tunes,test
+cOzmo and Uctumi for their new examples
+Gaetano Chiummo for 2SID & 3SID examples
+Unreal who decorated the original box
+Leon who drew SW-1.2 & 1.4 splash-logos
+Soci who helped and beautified the codes
+Ant1 for an online tutorial for Newbies
+T.L.R for some tests,reports,ideas
+Conrad who layed down base of sng2swm
+Gartenzwerg for help with Namesoft-MIDI
+Ian Coog for timing & SID-format hints
+
+****************************************
+*              Mihaly Horvath = Hermit *
+*                      Hungary 2018 AD *
+*                    hermit.sidrip.com *
+****************************************
