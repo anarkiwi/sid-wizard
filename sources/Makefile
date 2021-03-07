@@ -131,7 +131,7 @@ $(BINARYDIR)/$(SM-SWP-FX-EXEC): $(SM-SOURCE) $(SM-SOURCES)
 
 $(BINARYDIR)/$(UM-PACK): $(BINARYDIR)/$(UM-EXEC)
 	$(PACKER) sfx sys -q -o $@ $<
-$(BINARYDIR)/$(UM-EXEC): $(UM-SOURCE) $(UM-SOURCES) $
+$(BINARYDIR)/$(UM-EXEC): $(UM-SOURCE) $(UM-SOURCES)
 	$(AS) $(AFLAGS) -o $@ $<
 
 #C64 2SID-variant executables
