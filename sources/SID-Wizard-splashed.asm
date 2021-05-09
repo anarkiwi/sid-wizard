@@ -241,8 +241,10 @@ CMEM    sta BitmapCol,y
         sta $D011       ;set bitmap mode
         lda #((Bitmap & $3800) >> 10) | ((BitmapCol & $3c00) >> 6)
         sta $D018       ;set bitmap and video-ram pointers
-        lda #(BitmapCol >> 14) ^ 3
-        sta $DD00       ;set VIC-bank
+        lda $dd00
+        and #%11111100
+        ora #(BitmapCol >> 14) ^ 3
+        sta $dd00 ;set VIC-bank
 ;        lda #$FF
 ;        sta $d015       ;switch on sprites
 

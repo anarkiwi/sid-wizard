@@ -1063,7 +1063,8 @@ reredir sei             ;init ROM $ VICbank and read disk directory to the scree
         .fi
         lda #$36        ;enable KERNAL ROM (only)
         sta banksel
-        lda #3
+        lda $dd00
+        ora #%00000011
         sta $dd00
         lda #$17        ;small character set
         sta $d018

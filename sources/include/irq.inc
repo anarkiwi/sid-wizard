@@ -201,7 +201,8 @@ row25ca lda COLRPOS+$3c0 ;set back colors of 25th row (tick colouring) - instead
         .if ( GHOSTPIXEL_ON && PTNBOUND==256 && maxptnlen<250 && maxsubtuneamount<18 )
         sty GHOSTPIXPOS
         .fi
-        lda #(MIDI_support!=0 && HerMIDI_support!=0)? 3+MIDIC64.HerMIDI.DATAout : 3 ;hack for HerMIDI not to screw up operation
+        lda $dd00
+        ora #%00000011
         sta $dd00       ;lower border sprites are in other VIC-bank
         jsr commonsubs.xwaitr1 ;wait around 1 rasterline (in commonsubs.inc), returns X=0
         lda #$15        ;video-ram switching before lower border sprites come
@@ -277,8 +278,9 @@ mplychk lda fastfwd+1   ;fast-forward
         bne +
         ;lda #0         ;X is 0 here after loop
         stx $d027 ;sta $d027
-+       ldx #(MIDI_support!=0 && HerMIDI_support!=0)? 0+MIDIC64.HerMIDI.DATAout : 0
-        stx $dd00 ;sta $dd00
++       lda $dd00
+        and %11111100
+        sta $dd00
         lda #$84
         sta $d018
         ldy PALNTSC     ;shift on NTSC machine to be better seen...
@@ -289,8 +291,14 @@ mplychk lda fastfwd+1   ;fast-forward
         dey
         bpl -
 
-.if (MIDI_support!=0 && HerMIDI_support!=0 && HerMIDI_TX_MODE==MIDIC64.HerMIDI.SynchMode)
+.if (MIDI_support!=0)
+.if (MIDIC64.Vessel_support!=0)
+        jsr MIDIC64.GetData
+.else
+.if (HerMIDI_support!=0 && HerMIDI_TX_MODE==MIDIC64.HerMIDI.SynchMode)
         jsr midisubs.HerMIDI_Synchron_GetData
+.fi
+.fi
 .fi
 
 
