@@ -6,6 +6,8 @@ This is a port of SID Wizard 1.8.7, for the Vessel MIDI interface (https://githu
 Within SID Wizard, select MIDI device VESSEL. Currently, the C64 can only receive MIDI
 (future versions will increase MIDI performance and enable MIDI transmission from the C64).
 
+For releases, see https://github.com/anarkiwi/sid-wizard/releases.
+
 
 ;===============================================================================
 ;--- SID-WIZARD --- A native C64 music editor (tracker) tool
