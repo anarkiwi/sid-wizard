@@ -21,7 +21,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ../application/SID-Wizard-1.8.prg
+        asset_path: application/SID-Wizard-1.8.prg
         asset_name: vessel-sid-wizard.prg
         asset_content_type: application/octet-stream
     - name: upload PAL D64 disk1
@@ -30,6 +30,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ../application/SID-Wizard-1.8-disk1.d64
+        asset_path: application/SID-Wizard-1.8-disk1.d64
         asset_name: vessel-sid-wizard-disk1.d64
         asset_content_type: application/octet-stream
