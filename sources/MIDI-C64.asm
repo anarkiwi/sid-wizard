@@ -20,7 +20,7 @@ MIDIC64_INC_EVENTS=1 ;whether 'EVENT' & 'GetEvent' routine is needed
 MIDIC64_INC_NAMES=0 ;include names of devices?
 MIDIbuffer_size=32 ;should be bigger than HerMIDI.MaxBuffSize (it uses)
 MIDIC64_Watchdog_ini=200 ;0:no watchdog, 1..$ff: init value of watchdog
-HerMIDI_support=1 ;enables support for HerMIDI Serial/IEC-port device
+HerMIDI_support=0 ;enables support for HerMIDI Serial/IEC-port device
 .if (HerMIDI_support!=0)
 HerMIDI_TX_MODE = MIDIC64.HerMIDI.AsyncMode
 HerMIDI_PacketSize=MIDIC64.HerMIDI.MaxBuffSize
@@ -59,21 +59,25 @@ ClearToSend = bit3 ;0:MIDI-device ready to receive, 1:MIDI-dev not ready
 DataCdetect = bit2 ;0:no byte, 1:databyte interrupt,read Status to clear
 TxDataRempty= bit1 ;Set to 1 when TX-register is ready for writing.
 RxDataRfull = bit0 ;Set to 1 when RX-register is ready for reading.
-MIDI_Legacy_list = [Sequential, Passport, DatelJMS, NameSoft, NameSoftIRQ, Maplin, MoogSP]
+MIDI_Legacy_list = [Vessel]
 .else
 MIDI_Legacy_list = []
 .fi
-Sequenti_support=1*MIDI_Legacy_support
-Passport_support=1*MIDI_Legacy_support
-DatelJMS_support=1*MIDI_Legacy_support
-NameSoft_support=1*MIDI_Legacy_support
-NameSoftIRQ_support=1*MIDI_Legacy_support
-Maplin_support = 1*MIDI_Legacy_support
-MoogSP_support = 1*MIDI_Legacy_support
+Vessel_support=1*MIDI_Legacy_support
+Passport_support = 0
+DatelJMS_support = 0
+NameSoft_support = 0
+NameSoftIRQ_support = 0
+Maplin_support = 0
+MoogSP_support = 0
 ;MSSIAH_support=0 ;no tech. info, probably in 'Legacy' group as well
 ;MIDI-device identifiers:
 HerMIDI_ID=1 ;number/ID of HerMIDI device
+.if (HerMIDI_support!=0)
 Legacy_min=2 ;number/ID of 1st device in Legacy-category
+.else
+Legacy_min=1
+.fi
 Legacy_max=Legacy_min+len(MIDI_Legacy_list)-1;Legacy-cat.max.ID
 IRQmode=$40
 NMImode=$80
@@ -101,7 +105,11 @@ EventBuffer .proc
 .if (MIDIC64_INC_NAMES!=0)
 DeviceAmount=size(DevName)/8-1
 .enc screen
+.if (HerMIDI_support!=0)
 DevName .text "  NONE  ","HERMIDI ",MIDI_Legacy_list.DevName
+.else
+DevName .text "  NONE  ",MIDI_Legacy_list.DevName
+.fi
 .enc none
 .else
 DeviceAmount=Legacy_max
@@ -161,6 +169,55 @@ OpenLgc ;open standard/legacy MIDI-devices
 SetAddr txa ;MIDI-device-number in X
         asl ;*2
         tay
+        .if (Vessel_support!=0)
+        ; Set PA2 to 1 to signal OUTPUT
+        lda $dd00
+        ora #%00000100
+        sta $dd00
+        ; Set Port B to output
+        lda #$ff
+        sta $dd03
+
+        ; Reset
+        lda #$fd
+        sta $dd01
+        lda #$00
+        sta $dd01
+
+        ;Send command 0x5, enable all channels
+        lda #$fd
+        sta $dd01
+        lda #$05
+        sta $dd01
+        lda #$ff
+        sta $dd01
+        lda #$ff
+        sta $dd01
+
+        ;Send command 0x7, enable all commands on all channels
+        lda #$70
+vEnCh   ldx #$fd
+        stx $dd01
+        ldx #$07
+        stx $dd01
+        sta $dd01
+        adc #$01
+        cmp #$80
+        bne vEnCh
+
+        ;Send command 0x6, enable all real time messages.
+        lda #$fd
+        sta $dd01
+        lda #$06
+        sta $dd01
+        lda #$ff
+        sta $dd01
+        lda #$ff
+        sta $dd01
+
+        lda #0
+        sta Status
+        .else
         lda (ControlAdd-Legacy_min*2)+0,y 
         sta rdCtrl+1
         sta wrCtrl+1
@@ -183,26 +240,31 @@ SetAddr txa ;MIDI-device-number in X
         sta PutData.TxByte+1
         lda (TxAddress-Legacy_min*2)+1,y 
         sta PutData.TxByte+2
-Reset   lda #MIDIreset
-        jsr wrCtrl
-        lda InitDevVal-Legacy_min,x ;set MIDI-device, disable NMI/IRQ
-        jsr wrCtrl
-        jsr SetMIDIintA
+        .fi
 clrBuff lda #0 ;clear MIDIbuffer
         .if (MIDIC64_INC_EVENTS!=0)
         sta GetEvent.rdIndex+1
         .fi
         sta GetData.WrIndex+1
+        .if (Vessel_support==0)
+Reset   lda #MIDIreset
+        jsr wrCtrl
+        lda InitDevVal-Legacy_min,x ;set MIDI-device, disable NMI/IRQ
+        jsr wrCtrl
+        jsr SetMIDIintA
 chkStat jsr rdStat
         and #ClearToSend ;check if init successful
         sta Status
         bne retLega ;if unsuccessful, don't enable NMI/IRQ
 startRx lda IenableVal-Legacy_min,x ; enable NMI/IRQ from MIDI interface
         jsr wrCtrl
+        .if (MoogSP_support!=0)
         cpx #MoogSP_ID
         bne retLega
         lda #MoogSP.Control_Enable
         sta MoogSP.Control_Latch1
+        .fi
+        .fi
 retLega rts
 .fi
 chOther ;no other devices yet...
@@ -229,13 +291,45 @@ GetData .proc ;reads databytes and puts them into MIDI-databuffer
 chLegac cpx #Legacy_max+1
         bcs chOther ;could go to other upper categories later
         .if (MIDI_Legacy_support!=0)
-retLega rts ;nothing to do,IRQ/NMI based MIDI-devices use InterruptGetByte/etc
+         .if (Vessel_support!=0)
+         ;Reset PA2 to signal INPUT mode
+         lda $dd00
+         and #%11111011 ;Set bit2 to 0
+         sta $dd00
+         ;Set Port B to input
+         lda #$00
+         sta $dd03
+
+         ;Read the available number of bytes. Max number of bytes in one go is 255 (not 256)
+         ldy $dd01 ;Read bytecount from Port B
+         beq VesselEmpty
+         sty $d020
+RxByte   lda $dd01 ;Read MIDI byte from Port B
+WrIndex  ldx #selfmod
+         sta MIDIbuffer,x
+         inx
+         cpx #MIDIbuffer_size
+         bcc +
+         ldx #0        ; this makes it behave as a ring-buffer
++        stx WrIndex+1
+         dey
+         bne RxByte
+VesselEmpty
+         ; Set PA2 to 1 to signal OUTPUT
+         lda $dd00
+         ora #%00000100
+         sta $dd00
+         ; Set Port B to output
+         lda #$ff
+         sta $dd03
+         .fi
         .fi
 chOther ;no other devices yet...
 retData rts
 
 .if (MIDI_Legacy_support!=0)
 InterruptGetByte
+        jmp IntEnd3
         pha
         lda banksel
         pha
@@ -251,14 +345,14 @@ chInput and #RxDataRfull ;test if note at input. If not, probably pulled off
         beq retData   ;if no input cable maybe pulled off, prevent freeze?
 stInput txa
         pha
-RxByte  lda selfmodA  ; get MIDI byte and store in MIDIbuffer0
-WrIndex ldx #selfmod
-        sta MIDIbuffer,x
-        inx
-        cpx #MIDIbuffer_size
-        bcc +
-        ldx #0        ; this makes it behave as a ring-buffer
-+       stx WrIndex+1
+;RxByte  lda selfmodA  ; get MIDI byte and store in MIDIbuffer0
+;WrIndex ldx #selfmod
+;        sta MIDIbuffer,x
+;        inx
+;        cpx #MIDIbuffer_size
+;        bcc +
+;        ldx #0        ; this makes it behave as a ring-buffer
+;+       stx WrIndex+1
  .if (MIDIC64_Watchdog_ini!=0)
         dec watchdog
         bne IntEnd
@@ -273,6 +367,7 @@ IntEnd  pla         ; restore previous bank selection and end IRQ
 IntEnd2 pla
         sta banksel
         pla
+IntEnd3
 .fi
         .pend
 RTIcode rti ;check if not defined yet externally
@@ -304,10 +399,12 @@ chLegac cpx #Legacy_max+1
 .if (MIDI_Legacy_support!=0)
 CloseLg lda #MIDIreset ;InitDevVal-Legacy_min,x ;disable NMI/IRQ
         jsr wrCtrl
+        .if (MoogSP_support!=0)
         cpx #MoogSP_ID
         bne SetIntA
         lda #MoogSP.Control_Disable
         sta MoogSP.Control_Latch1
+        .fi
 SetIntA lda IntrptType-Legacy_min,x
         bmi +
         lda #<IRQ
@@ -452,19 +549,19 @@ HerMIDI .binclude "HerMIDI/HerMIDI-C64.asm" ;contains HerMIDI-device's routines
 .fi ;end of HerMIDI_support checking
 
 
-;========================= Sequential object ===========================
-.if (Sequenti_support!=0)
-Sequential .block
-DevName = "SEQUENTL"
-MIDIcontrol = $de00 ;write-only
-MIDIstatus  = $de02 ;read-only
-MIDI_Tx   = $de01   ;write-only
-MIDI_Rx   = $de03   ;read-only
+;========================= Vessel object ===========================
+.if (Vessel_support!=0)
+Vessel .block
+DevName = " VESSEL "
+MIDIcontrol = $de00 ; not used
+MIDIstatus  = $de02 ; not used
+MIDI_Tx   = $dd01   ;write-only
+MIDI_Rx   = $dd01   ;read-only
 MIDIspeed= 1 
 CounterDiv = (MIDIspeed==1) ? 0*bit1+1*bit0 : 1*bit1+0*bit0;div by 16/64
-MIDIenable = WordSelect+CounterDiv ;IRQ is disabled with this value
+MIDIenable = WordSelect+CounterDiv ;NMI is disabled with this value
 IRQenable  = RxIntEnable+WordSelect+CounterDiv
-IntType = IRQmode
+IntType = NMImode
 .bend
 .fi
 
