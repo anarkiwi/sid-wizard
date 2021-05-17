@@ -55,10 +55,15 @@ retcMID rts
 sendSt  lda #MIDI.StartSqPlay ;playback-start command to other MIDI-controlled sequencer
 sendMID jsr chkMIDI
         beq retcMID
-putMIDI ;ldx MIDIdev ;chkMIDI should always precede (sets X)  
-        cpx #1     ;HerMIDI?
-        beq retcMID
+putMIDI ; ldx MIDIdev ;chkMIDI should always precede (sets X)
+        cpx #1     ; Vessel?
+        bne retcMID ; no, return
+.if (MIDIC64.Vessel_support!=0)
+        sta $dd01
+        jmp retcMID
+.else
         jmp MIDIC64.PutData ;send out MIDI beat-clock (the beat of 1st SID-channel, others don't matter)
+.fi
 
 
 ;-------------------------------------------------------------------------------
@@ -71,8 +76,8 @@ useMIDI .proc
         lda player.SPDCNT+0
         cmp #2     ;note-start? (after hard-restart)
         bne +
-        ; lda #MIDI.TimingClock  ;send out MIDI beat-clock (the beat of 1st SID-channel, others don't matter)
-        ; jsr sendMID
+        lda #MIDI.TimingClock  ;send out MIDI beat-clock (the beat of 1st SID-channel, others don't matter)
+        jsr sendMID
 +       lda Config.confbits
         and #8 ;poly-mode?
         asl ;0/16
@@ -84,7 +89,7 @@ useMIDI .proc
         beq +     ;if we're in instrument window, test note on 3rd channel to display it on scope
         lda subwpos1+0  ;current track
 +       sta jamchan+1
-        .if (HerMIDI_support!=0 && Vessel_support == 0 && HerMIDI_TX_MODE==MIDIC64.HerMIDI.AsyncMode)
+        .if (HerMIDI_support!=0 && MIDIC64.Vessel_support==0 && HerMIDI_TX_MODE==MIDIC64.HerMIDI.AsyncMode)
         jsr MIDIC64.GetData ;get MIDI-events into C64's buffer (only HerMIDI uses this yet)
         .fi
 ;process the events
