@@ -3,8 +3,7 @@
 
 This is a port of SID Wizard 1.8.7, for the Vessel MIDI interface (https://github.com/anarkiwi/vessel).
 
-Within SID Wizard, select MIDI device VESSEL. Currently, the C64 can only receive MIDI
-(future versions will increase MIDI performance and enable MIDI transmission from the C64).
+Within SID Wizard, select MIDI device VESSEL.  Future versions will increase MIDI performance.
 
 For releases, see https://github.com/anarkiwi/sid-wizard/releases.
 
