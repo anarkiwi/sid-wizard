@@ -256,10 +256,10 @@ MUSICDATA                ;musicdata-pointers reset relative to this address acco
 ;...ptnsize - real size of pattern in memory - JUST FOR EDITOR
 ;=====================music data to save starts here - in the same order as saved file==============================
         *= TUNEHEADER   ;some basic tune-specific settings workfile/tune/subtune related settings (framespeed, etc.)
-.enc screen
+.enc 'screen'
 filetyp .text "SWM"      ;3 BYTE FILETYPE-DESCRIPTION - abbreviation of 'SID-WIZARD MODULE'
 version .text SWMversion ; VERSION 1 of the module format
-.enc none
+.enc 'none'
 framesp .byte 1         ;framespeed of the music (1 singlespeed.. to 8 multispeed)
  .if (SID_AMOUNT==1)
 stptick .byte $04       ;tick amount for step-highlighting

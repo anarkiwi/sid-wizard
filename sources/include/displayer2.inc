@@ -1079,7 +1079,7 @@ ColorThemes .section data  ;order is based on 'ColorSet' above
 ColorThemesEnd
         .send data
 ThemeNames .section DataUnderIO
-         .enc screen
+         .enc 'screen'
           .text "DEFAULT "
           .text "BRIGHTER"
           .text "GREENISH"
@@ -1089,7 +1089,7 @@ ThemeNames .section DataUnderIO
           .text "BROWNISH"
           .text "RED&GREY"
           .text "AMISH :)"
-         .enc none
+         .enc 'none'
 ThemeNamesEnd
         .send DataUnderIO
 

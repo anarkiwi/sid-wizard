@@ -104,13 +104,13 @@ EventBuffer .proc
 
 .if (MIDIC64_INC_NAMES!=0)
 DeviceAmount=size(DevName)/8-1
-.enc screen
+.enc 'screen'
 .if (HerMIDI_support!=0)
 DevName .text "  NONE  ","HERMIDI ",MIDI_Legacy_list.DevName
 .else
 DevName .text "  NONE  ",MIDI_Legacy_list.DevName
 .fi
-.enc none
+.enc 'none'
 .else
 DeviceAmount=Legacy_max
 .fi

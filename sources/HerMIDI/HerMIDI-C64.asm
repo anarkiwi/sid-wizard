@@ -63,10 +63,10 @@ PacketSize .byte MaxBuffSize ;can be changed at every init.
 
 IniString:
 ControlCmd .byte SynchMode+MaxBuffSize  ;Command, sent last
-.enc inistring 
+.enc 'inistring'
 .cdef "az",$61, "AZ",$41, "09",$30, "  ",$20, "!!",$21, "..",$2e
 DeviceID   .text "C64 needs HerMIDI interface 1.0!" ;string to switch on
-.enc none
+.enc 'none'
 IniString_end ;(String bytes may depend on used assembler & directives!)
 
 ;variables used only inside, can be anywhere:
