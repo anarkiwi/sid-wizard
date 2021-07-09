@@ -448,7 +448,7 @@ SplashBitmapEnd
 ;modify Starter to point to splash displayer
         *= $0801
         .word ss,2014
-        .null $9e,^SPLASHER;Sys SPLASHER
+        .null $9e, format("%d", SPLASHER) ;Sys SPLASHER
 ss      .word 0
 ;===============================================================================
 ; vim: sw=4 ts=4 syntax=asm:

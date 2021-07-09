@@ -942,7 +942,7 @@ helprow .text "F3/F4 PLAYPATT/STOP"
         .text "FX8,$10:VIBRA,TEMPO"
 .fi
         .text "-------------------"
-        .text " ",^Year," HERMIT SOFT. "
+        .text " ", format("%d", Year)," HERMIT SOFT. "
         .enc none
 helptxend
 helpYsize = (helptxend-helptxt)/(helprow-helptxt) ;help-text vertical size

@@ -83,7 +83,7 @@ seqbuffer .fill 128     ;around 128 byte buffer where
 ;================================= BASIC area start ===========================
         *= $0801
         .word ss,Year
-        .null $9e,^start ;Sys 2064
+        .null $9e, format("%d", start) ;Sys 2064
 ss        .word 0
 
         *= $080d        ;SYS 2061 to safe-restart the editor, without initializing patterns/instruments
