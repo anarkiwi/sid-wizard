@@ -101,7 +101,7 @@ endplmi ;end of 'plmiret2' macro
 ;================================= BASIC area start ===============================================================
         *= $0801
         .word ss,Year
-        .null $9e,^start;Sys 2064
+        .null $9e,format("%d", start) ;Sys 2064
 ss      .word 0
 
 ;================================= Code part 1 ================================
@@ -487,7 +487,7 @@ editorow=24 ;row of editor-info
 EXEstarter              ;executable-SID startercode
         .logical $0801  ;set logical compilation address
 BASICbe .word ss2,Year
-        .null $9e,^start2 ;Sys 2064
+        .null $9e, format("%d", start2) ;Sys 2064
 ss2     .word 0
         .byte 0,0,0     ;to align to $0810
 ;address 2064 ($0810) - INITIALIZATION AT PROGRAM START - set IRQ handlers, screen, and main VIC registers

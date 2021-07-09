@@ -12,7 +12,7 @@ repspd2=$02 ;continuous keyrepeat delay (repetition speed) in frames (x20ms)
 
         *= $0801
         .word ss,1
-        .null $9e,^start ;SYS command
+        .null $9e, format("%d", start)  ;SYS command
 ss      .word 0
 
 start   sei
