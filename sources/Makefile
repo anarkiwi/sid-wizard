@@ -94,7 +94,11 @@ upload: $(BINARYDIR)/$(APPNAME1)-$(APPVERSION).prg
 
 wizard: $(BINARYDIR)/$(SW-SPLASH)
 wizardlabels: $(SW-SOURCE) $(SW-SOURCES)
-	$(AS) $(AFLAGS) -l WIZARDLABELS.txt --dump-labels -D SID_AMOUNT=1 -D SWversion="'$(APPVERSION)'" -o tmp.out $<
+	$(AS) $(AFLAGS) -l WIZARDLABELS.txt --vice-labels -D SID_AMOUNT=1 -D SWversion="'$(APPVERSION)'" -o tmp.out $<
+	$(RM) tmp.out
+
+wizarddump: $(SW-SOURCE) $(SW-SOURCES)
+	$(AS) $(AFLAGS) -L WIZARD.asm -D SID_AMOUNT=1 -D SWversion="'$(APPVERSION)'" -o tmp.out $<
 	$(RM) tmp.out
 
 #C64 executables
@@ -274,7 +278,6 @@ SID-Wizard-splashed: SID-Wizard-splashed.prg
 SID-Wizard-splashed.prg: $(SWS-SOURCE) $(SWS-SOURCES)
 	$(AS) $(AFLAGS) -D SID_AMOUNT=1 -o $@ $<
 
-
 clean:
 	$(RM) $(BINARYDIR)/$(SW-SPLASH) $(BINARYDIR)/$(SW-SPLASH-KERNAL) $(BINARYDIR)/$(SW-2SID-SPLASH) $(BINARYDIR)/$(SW-3SID-SPLASH)
 	$(RM) $(BINARYDIR)/$(SW-PACK) $(BINARYDIR)/$(SW-EXEC) $(BINARYDIR)/$(SM-PACK) $(BINARYDIR)/$(SM-PACK-KERNAL) $(BINARYDIR)/$(UM-PACK) $(BINARYDIR)/$(SM-EXEC) $(BINARYDIR)/$(UM-EXEC)
@@ -290,7 +293,7 @@ clean:
 	$(RM) $(EXASWMDIR)/sng-imports/*.swm $(EXASWMDIR)/sng-imports/todisk/*.swm
 	$(RM) editor.prg exporter.prg SID-Wizard-splashed.prg
 	$(RM) WIZARDLABELS.txt
-
+	$(RM) WIZARD.asm
 
 install: 
 	$(CP) $(BINARYDIR)/$(SWM-CONVERTER) $(APPDIR)/
