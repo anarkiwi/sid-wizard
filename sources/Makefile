@@ -93,6 +93,10 @@ upload: $(BINARYDIR)/$(APPNAME1)-$(APPVERSION).prg
 	ncftpput -p "" -Cv c64 $(BINARYDIR)/$(APPNAME1)-$(APPVERSION).prg /Temp/$(APPNAME1)-$(APPVERSION).prg
 
 wizard: $(BINARYDIR)/$(SW-SPLASH)
+wizardlabels: $(SW-SOURCE) $(SW-SOURCES)
+	$(AS) $(AFLAGS) -l WIZARDLABELS.txt --dump-labels -D SID_AMOUNT=1 -D SWversion="'$(APPVERSION)'" -o tmp.out $<
+	$(RM) tmp.out
+
 #C64 executables
 $(BINARYDIR)/$(SW-SPLASH): $(SWS-SOURCE) $(BINARYDIR)/$(SW-PACK) $(SWS-SOURCES)
 	$(AS) $(AFLAGS) -D SID_AMOUNT=1 -o $@ $<
@@ -285,6 +289,7 @@ clean:
 	$(RM) $(EXASWMDIR)/mid-imports/*.swm.prg $(EXASWMDIR)/mid-imports/*.swm.P00 $(EXASWMDIR)/mid-imports/*.swm
 	$(RM) $(EXASWMDIR)/sng-imports/*.swm $(EXASWMDIR)/sng-imports/todisk/*.swm
 	$(RM) editor.prg exporter.prg SID-Wizard-splashed.prg
+	$(RM) WIZARDLABELS.txt
 
 
 install: 
