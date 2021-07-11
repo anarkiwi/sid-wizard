@@ -18,6 +18,7 @@ It should work like:
      - repeat
      
    - each time a MIDI SYNC message is processed, also keyboard is checked
+     (track muting should work via SHIFT 1..3)
    
    - F4 or <- to exit VESSELSYNC mode
    
