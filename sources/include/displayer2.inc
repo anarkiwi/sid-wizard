@@ -1068,27 +1068,21 @@ ColorSetEnd
 ;-------------------------predefined editor color-schemes-----------------------
 ColorThemes .section data  ;order is based on 'ColorSet' above
         .byte 12,  15, 3,12,  11,12,15,  13,15,12,15, 3,15,11, 14,15
-        .byte 15,   1,15,12,  11,15, 1,  13, 1,15,15,12, 3,11, 14,13
+        .byte  5,  13, 3, 5,   5,13, 1,   3, 7, 5,13, 3,13, 7, 13, 3
         .byte 14,   1, 3, 14, 11,12,15,  13,15,12,15,   4  ,15,11, 14,15       
         .byte  3,  15, 3, 5,  11,12,15,   3,13, 3,13,15,13,13,  3, 1
         .byte 14,  15,14, 6,   6,14,13,  14,15,14, 3,15,13,15, 14, 3
         .byte  4,  10,14, 4,   4,10, 7,  10,12, 4,15,10, 7,10,  4, 7
-        .byte  8,  10, 8, 9,   9, 8, 7,   8,10, 8,10,10, 7, 7,  8, 7
-        .byte  2,  15,10, 2,  11,12,15,  10,15, 2,10,15, 1,10,  2,10
-        .byte 15,  15,12,15,  11,15, 1,  12,15,15,15,15,15,11, 12, 1
 ColorThemesEnd
         .send data
 ThemeNames .section DataUnderIO
          .enc 'screen'
           .text "DEFAULT "
-          .text "BRIGHTER"
+          .text "GREENISH"
           .text "VESSEL  "
           .text "TURKISH "
           .text " BLUISH "
           .text " PURPLE "
-          .text "BROWNISH"
-          .text "RED&GREY"
-          .text "AMISH :)"
          .enc 'none'
 ThemeNamesEnd
         .send DataUnderIO
