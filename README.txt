@@ -10,18 +10,19 @@ It should work like:
 
    - starting playback via F1 or F3: will start in VESSELSYNC mode:
    
-   - waits for incoming MIDI SYNC message 
+   - wait for incoming MIDI SYNC message 
      (24ppqn, when SW tune tempo == 6: 1 row = 1/16th note)
    
-     - calls player routine
+     - call player routine
+
+     - check keyboard (SHIFT 1..3 channel mute/unmute should work)
+
+     - if keyboard F4 or <- : exit VESSELSYNC mode 
    
      - repeat
-     
-   - each time a MIDI SYNC message is processed, also keyboard is checked
-     (track muting / UNmuting should work via SHIFT 1..3)
    
-   - F4 or <- to exit VESSELSYNC mode 
-     (keyboard must be checked -> MIDI SYNC must be still sent)
+   - F4 or <- to exit VESSELSYNC mode:
+     keyboard must be checked -> MIDI SYNC must be still sent
    
 
 ;===============================================================================
