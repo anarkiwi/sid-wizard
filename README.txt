@@ -2,7 +2,7 @@
 ;--- M64 update: ---
 
 This should be a first poc for external MIDI sync in. 
-It should work like: 
+It should work like:
 
  - when no MIDI device is selected, no changes
  
