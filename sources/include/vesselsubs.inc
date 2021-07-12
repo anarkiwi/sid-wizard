@@ -1,4 +1,3 @@
-;ident:8,24
 ; vesselsubs.inc 2021 m64
 
 VESSELMODE .byte 0      ; 1 = vessel sync playing mode 
