@@ -30,6 +30,8 @@ do_vessel
         ; VESSEL MIDI READ HERE
         ;
         jsr MIDIC64.GetData.vesselReadMIDI
+        cpy #MIDI.StopSeqPlay
+        beq midistop
         cpy #MIDI.TimingClock
         bne do_vessel
 
@@ -42,7 +44,7 @@ do_vessel
 +       lda VESSELMODE
         beq goback
 
-; stop
+midistop
         lda #0
         sta VESSELMODE
 
