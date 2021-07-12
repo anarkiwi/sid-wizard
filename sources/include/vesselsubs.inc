@@ -55,6 +55,10 @@ midistop
         lda #1
         sta vesseldisp+1
 
+        ; in case of MIDI stop
+        lda #0
+        sta playadapter.playmod
+
         ; re-enable raster irq
         lda $d01a
         ora #$1
