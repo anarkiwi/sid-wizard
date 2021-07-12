@@ -104,13 +104,13 @@ EventBuffer .proc
 
 .if (MIDIC64_INC_NAMES!=0)
 DeviceAmount=size(DevName)/8-1
-.enc screen
+.enc 'screen'
 .if (HerMIDI_support!=0)
 DevName .text "  NONE  ","HERMIDI ",MIDI_Legacy_list.DevName
 .else
 DevName .text "  NONE  ",MIDI_Legacy_list.DevName
 .fi
-.enc none
+.enc 'none'
 .else
 DeviceAmount=Legacy_max
 .fi
@@ -304,6 +304,19 @@ chLegac cpx #Legacy_max+1
          ldy $dd01 ;Read bytecount from Port B
          beq VesselEmpty
          sty $d020
+         jmp RxByte
+vesselReadMIDI ; read without changing border color
+         ;Reset PA2 to signal INPUT mode
+         lda $dd00
+         and #%11111011 ;Set bit2 to 0
+         sta $dd00
+         ;Set Port B to input
+         lda #$00
+         sta $dd03
+
+         ;Read the available number of bytes. Max number of bytes in one go is 255 (not 256)
+         ldy $dd01 ;Read bytecount from Port B
+         beq VesselEmpty
 RxByte   lda $dd01 ;Read MIDI byte from Port B
 WrIndex  ldx #selfmod
          sta MIDIbuffer,x
@@ -315,6 +328,7 @@ WrIndex  ldx #selfmod
          dey
          bne RxByte
 VesselEmpty
+         tay
          ; Set PA2 to 1 to signal OUTPUT
          lda $dd00
          ora #%00000100

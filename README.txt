@@ -1,4 +1,31 @@
 ;===============================================================================
+;--- M64 update: ---
+
+This should be a first poc for external MIDI sync in. 
+It should work like: 
+
+ - when no MIDI device is selected, no changes
+ 
+ - when MIDI device VESSEL is selected playback changes:
+
+   - starting playback via F1 or F3: will start in VESSELSYNC mode:
+   
+   - wait for incoming MIDI SYNC message 
+     (24ppqn, when SW tune tempo == 6: 1 row = 1/16th note)
+   
+     - call player routine
+
+     - check keyboard (SHIFT 1..3 channel mute/unmute should work)
+
+     - if keyboard F4 or <- : exit VESSELSYNC mode 
+   
+     - repeat
+   
+   - F4 or <- to exit VESSELSYNC mode:
+     keyboard must be checked -> MIDI SYNC must be still sent
+   
+
+;===============================================================================
 ;--- SID-WIZARD for VESSEL ---
 
 This is a port of SID Wizard 1.8.7, for the Vessel MIDI interface (https://github.com/anarkiwi/vessel).

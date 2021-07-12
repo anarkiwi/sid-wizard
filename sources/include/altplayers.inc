@@ -122,7 +122,7 @@ SID3Aadd .word PlrList.SID3ADDtable
         .if COMPILEDAPP==1
 descrAddr .word PlrList.description
 FeatIadd .word PlrList.FeatInstance1
-        .enc screen
+        .enc 'screen'
 .if (SID_AMOUNT==1)
 rastimes .text"$1C ","$1B ","$17 ","$23 ","$17 ","$19 "
 plysizes .text"$A57","$99A","$7FA","$AEF","$71A","$89B" ;.text ^(player.playercode_end-player.playercode), ^(mediumPlayer.playercode_end-mediumPlayer.playercode), text ^(lightPlayer.playercode_end-lightPlayer.playercode), ^(extraPlayer.playercode_end-extraPlayer.playercode)
@@ -133,7 +133,7 @@ plysizes .text"$D33","$C4D","$A2D","$D7F","$904","$B04" ;.text ^(player.playerco
 rastimes .text"$58 ","$54 ","$4D ","$62 ","$4C ","$53 "
 plysizes .text"$F5A","$E55","$BAC","$FA9","$A95","$D17" ;.text ^(player.playercode_end-player.playercode), ^(mediumPlayer.playercode_end-mediumPlayer.playercode), text ^(lightPlayer.playercode_end-lightPlayer.playercode), ^(extraPlayer.playercode_end-extraPlayer.playercode)
 .fi
-        .enc none
+        .enc 'none'
         .fi
 
         .if COMPILEDAPP==2
@@ -263,10 +263,10 @@ FreqTableJustPalLo
 normalPlayer .block
 
         .if (COMPILEDAPP==1)
-         .enc screen
+         .enc 'screen'
 description .text "The default player which features all   "
           .text "the necessities and almost every extra. "
-         .enc none
+         .enc 'none'
          #FeatInstances ;macro in settings.cfg - binary representation of the features (FeatInstance1 & FeatInstance2 arrays)
 ;the default player source is included in editor.asm directly
         .fi
@@ -354,10 +354,10 @@ WFCTRL_SMALLFX_ON= 1
 .bend
 
         .if (COMPILEDAPP==1)
-         .enc screen
+         .enc 'screen'
 description .text "A moderately reduced player, It has got "
             .text "almost all function but less rastertime."
-         .enc none
+         .enc 'none'
          #FeatInstances ;macro in settings.cfg - binary representation of the features above (FeatInstance1 & FeatInstance2 arrays)
         .fi
 
@@ -445,10 +445,10 @@ WFCTRL_SMALLFX_ON= 1
 .bend
 
         .if (COMPILEDAPP==1)
-         .enc screen
+         .enc 'screen'
 description .text "A reduced player with small rastertime, "
             .text "all extra features are switched off...  "
-         .enc none
+         .enc 'none'
          #FeatInstances ;macro in settings.cfg - binary representation of the features above (FeatInstance1 & FeatInstance2 arrays)
         .fi
 
@@ -536,10 +536,10 @@ WFCTRL_SMALLFX_ON= 1
 .bend
 
         .if (COMPILEDAPP==1)
-         .enc screen
+         .enc 'screen'
 description .text "All extra features are switched on, and "
             .text "no matter what rastertime it takes...   "
-         .enc none
+         .enc 'none'
          #FeatInstances ;macro in settings.cfg - binary representation of the features above (FeatInstance1 & FeatInstance2 arrays)
         .fi
 
@@ -627,10 +627,10 @@ WFCTRL_SMALLFX_ON= 0
 .bend
 
         .if (COMPILEDAPP==1)
-         .enc screen
+         .enc 'screen'
 description .text "Very reduced: No subtunes, orderlist-FX,"
             .text "no multispeed,arptable-nop,some smallfx."
-         .enc none
+         .enc 'none'
          #FeatInstances ;macro in settings.cfg - binary representation of the features above (FeatInstance1 & FeatInstance2 arrays)
         .fi
 
@@ -718,10 +718,10 @@ WFCTRL_SMALLFX_ON= 0
 .bend
 
         .if (COMPILEDAPP==1)
-         .enc screen
+         .enc 'screen'
 description .text "Includes features needed for demo-music,"
             .text "lacks subtune,filtershift,some smallefx."
-         .enc none
+         .enc 'none'
          #FeatInstances ;macro in settings.cfg - binary representation of the features above (FeatInstance1 & FeatInstance2 arrays)
         .fi
 

@@ -169,13 +169,13 @@ display	jsr displaytexts
         rts
 icnt    .byte 0
 
-.enc screen
+.enc 'screen'
 text1   .text"PRESS + TO INCREASE, - TO DECR. SLOWDOWN "
 text1b  .text"(SETS BULLET-TIME SLOWDOWN TARGET TOO.) "
 text2   .text"PRESS AND HOLD SPACE FOR BULLET-TIME FX."
 text3   .text"SLOWDN:0  BULLETTIME TARGETSLOWDOWN: 0  "
 text4 .text  "    PRESS RETURN TO RESTART THE TUNE     "
-.enc none
+.enc 'none'
 hexdisp pha             ;input:accu, output: nybbles in Accu and X-register
         and #$0f
         tay
@@ -189,8 +189,8 @@ div16   lsr
         lda hexchar,y
         rts
 
-        .enc screen
+        .enc 'screen'
 hexchar .text "0123456789ABCDEF"
-        .enc none
+        .enc 'none'
 
 ;-------------------------------------------------------------------------------

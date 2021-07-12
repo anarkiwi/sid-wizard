@@ -24,7 +24,7 @@ SW-SOURCES+=include/menu.inc include/packdepack.inc include/commonsubs.inc
 SW-SOURCES+=graphics/graphics.inc include/displayer2.inc
 SW-SOURCES+=include/keyhandler.inc include/datawriter.inc include/insdelcopy.inc
 SW-SOURCES+=graphics/sw-charset.prg graphics/sw-header.prg
-SW-SOURCES+=include/midisubs.inc MIDI-C64.asm HerMIDI/HerMIDI-C64.asm
+SW-SOURCES+=include/midisubs.inc include/vesselsubs.inc MIDI-C64.asm HerMIDI/HerMIDI-C64.asm
 SM-SOURCES=settings.cfg SWM-spec.src include/player.asm include/packdepack.inc
 SM-SOURCES+=include/keyhandler.inc include/menu.inc include/altplayers.inc
 UM-SOURCES=../manuals/SID-Wizard-$(APPVERSION)-UserManual.txt $(EXASWMDIR)/sid-exports/flashitback.sid
@@ -91,6 +91,15 @@ all: $(BINARYDIR)/$(SW-SPLASH) $(BINARYDIR)/$(SW-SPLASH-KERNAL) $(BINARYDIR)/$(S
 
 upload: $(BINARYDIR)/$(APPNAME1)-$(APPVERSION).prg
 	ncftpput -p "" -Cv c64 $(BINARYDIR)/$(APPNAME1)-$(APPVERSION).prg /Temp/$(APPNAME1)-$(APPVERSION).prg
+
+wizard: $(BINARYDIR)/$(SW-SPLASH)
+wizardlabels: $(SW-SOURCE) $(SW-SOURCES)
+	$(AS) $(AFLAGS) -l WIZARDLABELS.txt --vice-labels -D SID_AMOUNT=1 -D SWversion="'$(APPVERSION)'" -o tmp.out $<
+	$(RM) tmp.out
+
+wizarddump: $(SW-SOURCE) $(SW-SOURCES)
+	$(AS) $(AFLAGS) -L WIZARD.asm -D SID_AMOUNT=1 -D SWversion="'$(APPVERSION)'" -o tmp.out $<
+	$(RM) tmp.out
 
 #C64 executables
 $(BINARYDIR)/$(SW-SPLASH): $(SWS-SOURCE) $(BINARYDIR)/$(SW-PACK) $(SWS-SOURCES)
@@ -269,7 +278,6 @@ SID-Wizard-splashed: SID-Wizard-splashed.prg
 SID-Wizard-splashed.prg: $(SWS-SOURCE) $(SWS-SOURCES)
 	$(AS) $(AFLAGS) -D SID_AMOUNT=1 -o $@ $<
 
-
 clean:
 	$(RM) $(BINARYDIR)/$(SW-SPLASH) $(BINARYDIR)/$(SW-SPLASH-KERNAL) $(BINARYDIR)/$(SW-2SID-SPLASH) $(BINARYDIR)/$(SW-3SID-SPLASH)
 	$(RM) $(BINARYDIR)/$(SW-PACK) $(BINARYDIR)/$(SW-EXEC) $(BINARYDIR)/$(SM-PACK) $(BINARYDIR)/$(SM-PACK-KERNAL) $(BINARYDIR)/$(UM-PACK) $(BINARYDIR)/$(SM-EXEC) $(BINARYDIR)/$(UM-EXEC)
@@ -284,7 +292,8 @@ clean:
 	$(RM) $(EXASWMDIR)/mid-imports/*.swm.prg $(EXASWMDIR)/mid-imports/*.swm.P00 $(EXASWMDIR)/mid-imports/*.swm
 	$(RM) $(EXASWMDIR)/sng-imports/*.swm $(EXASWMDIR)/sng-imports/todisk/*.swm
 	$(RM) editor.prg exporter.prg SID-Wizard-splashed.prg
-
+	$(RM) WIZARDLABELS.txt
+	$(RM) WIZARD.asm
 
 install: 
 	$(CP) $(BINARYDIR)/$(SWM-CONVERTER) $(APPDIR)/

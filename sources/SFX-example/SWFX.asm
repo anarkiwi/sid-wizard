@@ -259,7 +259,7 @@ div16   lsr
         ldx hexchar,y
         rts
 
-.enc screen
+.enc 'screen'
 titletx	.text " SID-Wizard Sound-Effect demonstration: "
 helptxt .text "Press keys 1..9 and 0 to play SFX 1..10."
 usagetx	.text "Usage:Export tune with SID-Maker-SFX.prg"
@@ -275,7 +275,7 @@ insfxtx	.null "Current instr/iFX:"
 instrtx	.null "Current instruments:"
 effectx	.null "Current Effects:"
 hexchar	.text "0123456789ABCDEF"
-.enc none
+.enc 'none'
 
 ;-----------------------------------
 *=PLAYERADDR
