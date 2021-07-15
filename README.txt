@@ -6,7 +6,7 @@ MIDI SYNC message on the C64 via NMI:
 
 - use new menupoint: 'NMI MODE' to toggle feature ON
   border rasterbar changes to white
-  NMI will trigger sync like below 
+  NMI will trigger sync ... 
 
 
 ;===============================================================================
