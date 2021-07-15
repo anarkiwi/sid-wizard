@@ -374,7 +374,9 @@ AutoFollow jsr keyhandler.autoFlw
         jmp mainloop
 
 ;--------------------------------------------
-m64mode jsr keyhandler.f1er.PlayBeg
+m64mode lda #1
+        sta plybcol+1
+        jsr keyhandler.f1er.PlayBeg
         jmp mainloop
 
 ;--------------------------------------------
