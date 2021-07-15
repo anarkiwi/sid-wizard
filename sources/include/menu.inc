@@ -879,7 +879,7 @@ autistx .text "FF *"
 autfltx .text "FF *"
         .text "* HIDE RBARS: O"
 rastbtx .text "N  *"
-        .text "* M64 MODE  : O"
+        .text "* NMI MODE  : O"
         m64btx .text "N  *"
 .if (SID_AMOUNT==1)
         .text "* CHORD-NOTE: O"
