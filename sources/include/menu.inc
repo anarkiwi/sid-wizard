@@ -854,7 +854,6 @@ diOnOf2 ldx #"N" ;"N "  ;on/off text endings
         .enc 'screen'
 menutxt .text "*******************"
 menurow .text "*  - MAIN MENU -  *"
-        .text "* --------------- *"
 firstmp .text "*    SAVE TUNE    *"
         .text "*    LOAD TUNE    *"
         .text "* SAVE INSTRUMENT *"
