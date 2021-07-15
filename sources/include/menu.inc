@@ -11,7 +11,7 @@ menu .block             ;private stuff
 runmenup                ;run selected menupoint (jumped here from main loop)
         lda menupoint
         asl             ;multiply by 2 to get word-jumpaddress for menupoint
-        tay
+        tay             
         lda menujmp,y
         sta mjumper+1
         lda menujmp+1,y
@@ -26,8 +26,8 @@ menujmp .word dummymp,savetun,loadtun,saveins,loadins,seldriv
 .if (SID_AMOUNT<3) 
 	.word AutoDir
 .fi
-        .word SetFspd,SetDefPtLen,initunt,iniinsc
-        .word SwitchTheme,KeyLayout,AutoIns,AutoFollow,RasterBar
+        .word SetFspd,SetDefPtLen,initunt,iniinsc 
+        .word SwitchTheme,KeyLayout,AutoIns,AutoFollow,RasterBar,m64mode
 .if (SID_AMOUNT==1)
         .word ChordNoteMode
 .fi
@@ -373,6 +373,9 @@ AutoIns jsr keyhandler.toggIns
 AutoFollow jsr keyhandler.autoFlw
         jmp mainloop
 
+;--------------------------------------------
+m64mode jsr keyhandler.f1er.PlayBeg
+        jmp mainloop
 
 ;--------------------------------------------
 RasterBar lda #2        ;rasterbar-displaying on/off
@@ -876,6 +879,8 @@ autistx .text "FF *"
 autfltx .text "FF *"
         .text "* HIDE RBARS: O"
 rastbtx .text "N  *"
+        .text "* M64 MODE  : O"
+        m64btx .text "N  *"
 .if (SID_AMOUNT==1)
         .text "* CHORD-NOTE: O"
 notectx .text "N  *"
