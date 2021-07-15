@@ -1,7 +1,7 @@
 ;===============================================================================
 ;--- M64 update: ---
 
-This should be a first poc for external MIDI sync in:
+First poc for external MIDI sync IN:
 
  - when no MIDI device is selected, no changes
  
@@ -11,7 +11,7 @@ This should be a first poc for external MIDI sync in:
      will start playback in VESSEL SYNC mode:
    
    - wait for incoming MIDI SYNC message 
-     (24ppqn, when SW tune tempo == 6: 1 row = 1/16th note)
+     (24ppqn, when SW single speed tune tempo == 6: 1 row = 1/16th note)
    
      - call player routine
 
