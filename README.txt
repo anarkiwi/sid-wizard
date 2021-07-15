@@ -8,7 +8,7 @@ This should be a first poc for external MIDI sync in:
  - when MIDI device VESSEL is selected playback changes:
 
    - starting playback via F1, F3 or MIDI START: 
-     will start playback in VESSELSYNC mode:
+     will start playback in VESSEL SYNC mode:
    
    - wait for incoming MIDI SYNC message 
      (24ppqn, when SW tune tempo == 6: 1 row = 1/16th note)
@@ -17,11 +17,11 @@ This should be a first poc for external MIDI sync in:
 
      - check keyboard (SHIFT 1..3 channel mute/unmute should work)
 
-     - if keyboard F4, <-, or MIDI STOP : exit VESSELSYNC mode 
+     - if keyboard F4, <-, or MIDI STOP : exit VESSEL SYNC mode 
    
      - repeat
    
-   - Note: for keyboard F4 or <- to exit VESSELSYNC mode:
+   - Note: for keyboard F4 or <- to exit VESSEL SYNC mode:
      keyboard must be checked -> MIDI SYNC must be still sent
      should not be necessary, as MIDI STOP exits sync mode now.
    
