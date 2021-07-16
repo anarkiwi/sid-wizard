@@ -15,7 +15,7 @@ by an incoming MIDI SYNC message:
 
 
 ;===============================================================================
-;--- M64 update: ---
+;--- M64 update I: ext MIDI sync IN ---
 
 First poc for external MIDI sync IN:
 
