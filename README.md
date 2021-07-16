@@ -40,7 +40,10 @@ First poc for external MIDI sync IN:
    - Note: for keyboard F4 or <- to exit VESSEL SYNC mode:
      keyboard must be checked -> MIDI SYNC must be still sent
      should not be necessary, as MIDI STOP exits sync mode now.
-   
+```
+![SID Wizard menu NMI mode on](http://m64.rocks/3.png "VESSEL SYNC")
+```   
+
 
 ;===============================================================================
 ;--- SID-WIZARD for VESSEL ---
