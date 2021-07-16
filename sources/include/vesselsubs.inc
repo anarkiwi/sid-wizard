@@ -1,6 +1,8 @@
 ; vesselsubs.inc 2021 m64
 
-VESSELMODE .byte 0      ; 1 = vessel sync playing mode 
+VESSELMODE .byte 0      ; 0 = off
+                        ; 1 = vessel sync playing mode 
+                        ; 2 = vessel NMI sync mode 
 
 ; main loop 
 
@@ -42,6 +44,7 @@ do_vessel
         jmp vessel
 
 +       lda VESSELMODE
+        and #1 ; check specifically for 1
         beq goback
 
 midistop

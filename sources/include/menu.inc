@@ -374,9 +374,27 @@ AutoFollow jsr keyhandler.autoFlw
         jmp mainloop
 
 ;--------------------------------------------
-m64mode lda #1
-        sta plybcol+1
-        jsr keyhandler.f1er.PlayBeg
+m64mode lda VESSELMODE
+        and #2
+        bne nmi_mode_off
+        
+; turn on 
+        ; jsr keyhandler.f1er.PlayBeg
+        inc m64btx
+        ldx #1
+        lda #2
+        jmp nmi_mode_ret
+
+nmi_mode_off
+        dec m64btx
+        ldx #14
+        lda #0
+                
+nmi_mode_ret
+        sta VESSELMODE
+        stx plybcol
+        stx plybcol+1 ; restore border
+
         jmp mainloop
 
 ;--------------------------------------------
@@ -880,8 +898,8 @@ autistx .text "FF *"
 autfltx .text "FF *"
         .text "* HIDE RBARS: O"
 rastbtx .text "N  *"
-        .text "* NMI MODE  : O"
-        m64btx .text "N  *"
+        .text "* NMI MODE  :  "
+        m64btx .text "0  *"
 .if (SID_AMOUNT==1)
         .text "* CHORD-NOTE: O"
 notectx .text "N  *"
