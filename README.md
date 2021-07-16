@@ -1,3 +1,4 @@
+```
 ;===============================================================================
 ;--- M64 update II: NMI SYNC ---
 
@@ -117,3 +118,4 @@ Assemble/compile/install (in Linux):
 
 ; 2018 Hermit Software Hungary  - contact:   by messagebox at hermit.sidrip.com
 ;===============================================================================
+```
