@@ -387,7 +387,7 @@ m64mode lda VESSELMODE
 
 nmi_mode_off
         dec m64btx
-        ldx #14
+        ldx #4
         lda #0
                 
 nmi_mode_ret
