@@ -7,7 +7,11 @@ by an incoming MIDI SYNC message:
 
 - use new menupoint: 'NMI MODE' to toggle feature ON
   border rasterbar changes to white
+```
+![SID Wizard menu NMI mode on](http://m64.rocks/2.png "SID Wizard menu NMI mode ON")
+```
   NMI will trigger sync ... 
+
 
 
 ;===============================================================================
