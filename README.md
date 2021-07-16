@@ -10,7 +10,7 @@ by an incoming MIDI SYNC message:
 ```
 ![SID Wizard menu NMI mode on](http://m64.rocks/2.png "SID Wizard menu NMI mode ON")
 ```
-  NMI will trigger sync ... 
+  NMI will trigger sync (to be updated ...)
 
 
 
