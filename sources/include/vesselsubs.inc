@@ -81,21 +81,19 @@ gotomainloop jmp mainloop
 menu_nmi_mode        
         lda VESSELMODE
         and #2
-        bne nmi_mode_off
-        
-; turn on 
-        ; jsr keyhandler.f1er.PlayBeg
+        bne _nmi_mode_off
+
         inc menu.m64btx
         ldx #1
         lda #2
-        jmp nmi_mode_ret
+        jmp _nmi_mode_ret
 
-nmi_mode_off
+_nmi_mode_off
         dec menu.m64btx
         ldx #4
         lda #0
                 
-nmi_mode_ret
+_nmi_mode_ret
         sta VESSELMODE
         stx plybcol
         stx plybcol+1 ; restore border
