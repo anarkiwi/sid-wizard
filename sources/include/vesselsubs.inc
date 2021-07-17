@@ -77,6 +77,34 @@ goback  jsr display     ;considers menu-display over patterns (based on 'menumod
         jmp menu.runmenup
 gotomainloop jmp mainloop
 
+; NMI code
+menu_nmi_mode        
+        lda VESSELMODE
+        and #2
+        bne nmi_mode_off
+        
+; turn on 
+        ; jsr keyhandler.f1er.PlayBeg
+        inc menu.m64btx
+        ldx #1
+        lda #2
+        jmp nmi_mode_ret
+
+nmi_mode_off
+        dec menu.m64btx
+        ldx #4
+        lda #0
+                
+nmi_mode_ret
+        sta VESSELMODE
+        stx plybcol
+        stx plybcol+1 ; restore border
+
+        jmp mainloop
+
+vessel_setNMI
+        rts
+
 ; display code 
 
 vesseldisp lda #1 ; selfmod 1st chk

@@ -374,28 +374,7 @@ AutoFollow jsr keyhandler.autoFlw
         jmp mainloop
 
 ;--------------------------------------------
-m64mode lda VESSELMODE
-        and #2
-        bne nmi_mode_off
-        
-; turn on 
-        ; jsr keyhandler.f1er.PlayBeg
-        inc m64btx
-        ldx #1
-        lda #2
-        jmp nmi_mode_ret
-
-nmi_mode_off
-        dec m64btx
-        ldx #4
-        lda #0
-                
-nmi_mode_ret
-        sta VESSELMODE
-        stx plybcol
-        stx plybcol+1 ; restore border
-
-        jmp mainloop
+m64mode jmp menu_nmi_mode
 
 ;--------------------------------------------
 RasterBar lda #2        ;rasterbar-displaying on/off
