@@ -2,8 +2,7 @@
 ;===============================================================================
 ;--- M64 update II: NMI SYNC ---
 
-First poc for external MIDI sync IN triggered by VESSEL  on the C64 via NMI
-by an incoming MIDI SYNC message:
+First poc for external MIDI sync IN triggered by VESSEL via NMI
 
 - use new menupoint: 'NMI MODE' to toggle feature ON
   border rasterbar changes to white
@@ -15,9 +14,9 @@ by an incoming MIDI SYNC message:
 
 
 ;===============================================================================
-;--- M64 update: ---
+;--- M64 update I: ext MIDI sync IN ---
 
-First poc for external MIDI sync IN:
+First poc for external MIDI sync IN
 
  - when no MIDI device is selected, no changes
  
