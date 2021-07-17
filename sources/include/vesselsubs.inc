@@ -1,4 +1,5 @@
 ; vesselsubs.inc 2021 m64
+VESSELSTART
 
 VESSELMODE .byte 0      ; 0 = off
                         ; 1 = vessel sync playing mode 
@@ -13,7 +14,7 @@ vessel  lda playadapter.playmod
         beq goback
 
 wait4play lda #1
-        beq do_vessel   ; first run toggle
+        beq vessel_read_midi   ; first run toggle
 
         lda #0
         sta wait4play+1 ; 1st run: wait4play: wait for incoming MIDI sync messages
@@ -27,17 +28,14 @@ wait4play lda #1
 
         jsr vesseldisp
 
-do_vessel  
-        ;
-        ; VESSEL MIDI READ HERE
-        ;
+vessel_read_midi  
         jsr MIDIC64.GetData.vesselReadMIDI
         cpy #MIDI.StopSeqPlay
         beq midistop
         cpy #MIDI.TimingClock
-        bne do_vessel
+        bne vessel_read_midi
 
-        jsr playadapter.playsubb        
+do_sync jsr playadapter.playsubb        
         
         jsr vesseldisp
         jsr keyhandler.keyer
@@ -303,10 +301,10 @@ stap3   sta vidram+40*(5+10)+10+0+1
         lda #4
         sta $d020
         rts
-
+VESSELEND
 .section data
     .enc 'screen'
     vessellogo .text "             <-VESSEL/SYNC=>             "
 .send data
 
-.warn format(" vessel TMP WARNING IGNORE: Vesselsubs end: %x", *)
+.warn format(" vessel TMP WARNING IGNORE: Vesselsubs end: %x (%x remaining)", *, $D000 - *)
