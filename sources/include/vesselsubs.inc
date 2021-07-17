@@ -1,4 +1,6 @@
 ; vesselsubs.inc 2021 m64
+.dsection VESSEL
+.section VESSEL
 VESSELSTART
 
 VESSELMODE .byte 0      ; 0 = off
@@ -302,9 +304,10 @@ stap3   sta vidram+40*(5+10)+10+0+1
         sta $d020
         rts
 VESSELEND
+.send VESSEL
 .section data
     .enc 'screen'
     vessellogo .text "             <-VESSEL/SYNC=>             "
 .send data
 
-.warn format(" vessel TMP WARNING IGNORE: Vesselsubs end: %x (%x remaining)", *, $D000 - *)
+.warn format(" vessel TMP WARNING IGNORE: Vesselsubs end: $%04x ($%04x remaining)", *, $D000 - *)

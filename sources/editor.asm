@@ -367,13 +367,13 @@ defFIba .byte $ff       ;FILTER-PROGRAM
         .include "include/displayer2.inc" ;display cursor and textual content (mainly orderlist)
         .include "include/menu.inc"       ;menu and file-dialog and file-operations
         .include "include/packdepack.inc" ;compresses/decompresses the tune to prepare for loading/saving by wiping out empty area
-        .include "include/vesselsubs.inc"
         .dsection data	;tables/variables being displayed and used ;all data from other sources (between '.section data' and '.send data' comes here
 
 .if (MIDI_support!=0)
 MIDIdev=Config.MIDIdev ;use this external label instead of MIDI-C64.asm's built-in label
         .include "MIDI-C64.asm" ;library with MIDI-devices' usage routines
         .include "include/midisubs.inc" ;contains SW-related MIDI routines
+        .include "include/vesselsubs.inc"
 .fi
 
 ;.if (FINAL_CARTRIDGE_3_FIX!=0)
