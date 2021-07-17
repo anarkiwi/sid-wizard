@@ -77,7 +77,18 @@ goback  jsr display     ;considers menu-display over patterns (based on 'menumod
         jmp menu.runmenup
 gotomainloop jmp mainloop
 
+
 ; NMI code
+
+vessel_NMI_ON 
+        rts
+
+vessel_NMI_OFF
+        rts
+
+VESSELNMI
+
+; menu point NMI MODE handling
 menu_nmi_mode        
         lda VESSELMODE
         and #2
@@ -97,11 +108,8 @@ _nmi_mode_ret
         sta VESSELMODE
         stx plybcol
         stx plybcol+1 ; restore border
-
         jmp mainloop
 
-vessel_setNMI
-        rts
 
 ; display code 
 
@@ -330,10 +338,15 @@ stap3   sta vidram+40*(5+10)+10+0+1
         sta $d020
         rts
 VESSELEND
+
+.fill 93
+
 .send VESSEL
 .section data
     .enc 'screen'
     vessellogo .text "             <-VESSEL/SYNC=>             "
+    VESSEL_NMI_OLD_PTR_FFFE .byte 0,0
+    VESSEL_NMI_OLD_PTR_0318 .byte 0,0
 .send data
 
 .warn format(" vessel TMP WARNING IGNORE: Vesselsubs end: $%04x ($%04x remaining)", *, $D000 - *)
