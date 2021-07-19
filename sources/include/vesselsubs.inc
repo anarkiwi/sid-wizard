@@ -106,6 +106,9 @@ vessel_NMI_ON
         lda #<VESSELNMI
         ldy #>VESSELNMI
         jsr MIDIC64.setNMI  
+
+        ; configure VESSEL for NMI: ON 101
+        
         rts
 
 vessel_NMI_OFF
@@ -116,10 +119,13 @@ vessel_NMI_OFF
         lda $dc0d  
         lda $dd0d  
 
+        ; configure VESSEL for NMI: OFF 000
+
         ; restore NMI
         lda #<NMI
         ldy #>NMI
         jsr MIDIC64.setNMI  
+
         rts
 
         ; NMI PLAY ROUTINE (on NMI)
@@ -143,10 +149,10 @@ VESSELNMI
         
 _exitNMI
         pla
-        tay        ;restore register Y from stack (remember stack is FIFO: First In First Out)
+        tay        
         pla
-        tax        ;restore register X from stack
-        pla        ;restore register A from stack
+        tax        
+        pla        
 
         rti  
 
