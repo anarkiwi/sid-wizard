@@ -464,8 +464,6 @@ VESSELEND
 .section data
     .enc 'screen'
     vessellogo .text "             <-VESSEL/SYNC=>             "
-    VESSEL_NMI_OLD_PTR_FFFA .byte 0,0
-    VESSEL_NMI_OLD_PTR_0318 .byte 0,0
 .send data
 
 .warn format(" vessel TMP WARNING IGNORE: Vesselsubs end: $%04x ($%04x remaining)", *, $D000 - *)
