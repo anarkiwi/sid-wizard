@@ -109,6 +109,7 @@ vessel_NMI_ON
 
         ; configure VESSEL for NMI: ON 101
         
+        
         rts
 
 vessel_NMI_OFF
