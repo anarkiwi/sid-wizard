@@ -51,12 +51,10 @@ do_sync jsr playadapter.playsubb
         jmp vessel
 
 +       lda VESSELMODE
-        and #1          ; check specifically for 1
-        beq goback      ; if we are SYNC PLAYING (but playback OFF):
-                        ; STOP sync playing, and go back
+        beq goback      ; if VESSELMODE 0: goback
 
-        and #2          ; if VESSELMODE was 2: EXIT from NMI SYNC
-        bne midistop    ; if VESSELMODE was 0, but playback on: STOP (ie MIDI STOP, F4)
+        and #2          ; if VESSELMODE 2: EXIT from NMI SYNC
+        beq midistop    ; if VESSELMODE was 1, but playback OFF: STOP (ie MIDI STOP, F4)
         
         ; STOP VESSEL NMI SYNC HERE
         jsr vessel_NMI_OFF
