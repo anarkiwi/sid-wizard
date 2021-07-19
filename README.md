@@ -12,7 +12,7 @@ First poc for external MIDI sync IN triggered by VESSEL via NMI
 
   - VESSEL is configured to trigger NMIs on SYNC (and maybe stop,...)
   
-  - border rasterbar changes to white
+  - border rasterbar changes to white (if no MIDI device yet selected)
 ```
 ![SID Wizard menu NMI mode on](http://m64.rocks/2.png "SID Wizard menu NMI mode ON")
 ```
@@ -25,8 +25,8 @@ First poc for external MIDI sync IN triggered by VESSEL via NMI
   
   - Outside NMI: keyboard is checked, display updated. Last MIDI byte checked for STOP:
   
-  - If last MIDI message STOP or keyboard F4: exit playback: exit VESSEL sync display
-    and go back to editor
+    - If last MIDI message STOP or keyboard F4: exit playback: exit VESSEL sync display
+      and go back to editor
 
 
 ;===============================================================================
