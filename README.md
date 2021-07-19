@@ -4,7 +4,9 @@
 
 First poc for external MIDI sync IN triggered by VESSEL via NMI
 
-- behaviour of update I stays the same (see below)
+- behaviour of update I stays the same (see below):
+  When VESSEL MIDI device is selected: playback start will show VESSEL SYNC
+  screen, and playback is synced to MIDI SYNC messages
 
 - use new menupoint: 'NMI MODE' to toggle feature ON
   border rasterbar changes to white
