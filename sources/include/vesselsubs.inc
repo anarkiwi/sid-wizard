@@ -108,8 +108,23 @@ vessel_NMI_ON
         jsr MIDIC64.setNMI  
 
         ; configure VESSEL for NMI: ON 101
-        
-        
+        ;Set PA2 to 1 to signal OUTPUT
+        lda $dd00
+        ora #%00000100  ;Set bit2 to 1
+        sta $dd00
+
+        ;Set Port B to output
+        lda #$ff
+        sta $dd03
+
+        ;Send command 0x4, enable NMI.
+        lda #$fd
+        sta $dd01
+        lda #$04
+        sta $dd01
+        lda #%00001001
+        sta $dd01
+   
         rts
 
 vessel_NMI_OFF
@@ -121,6 +136,22 @@ vessel_NMI_OFF
         lda $dd0d  
 
         ; configure VESSEL for NMI: OFF 000
+        ;Set PA2 to 1 to signal OUTPUT
+        lda $dd00
+        ora #%00000100  ;Set bit2 to 1
+        sta $dd00
+
+        ;Set Port B to output
+        lda #$ff
+        sta $dd03
+
+        ;Send command 0x4, enable NMI.
+        lda #$fd
+        sta $dd01
+        lda #$04
+        sta $dd01
+        lda #%00000000
+        sta $dd01
 
         ; restore NMI
         lda #<NMI
@@ -204,6 +235,7 @@ vesseldisp lda #1 ; selfmod 1st chk
         beq notfirst 
         lda #0 
         sta vesseldisp+1
+        sta $d020
         sta $d015
         
         ; clrscr

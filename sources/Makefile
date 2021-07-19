@@ -68,8 +68,8 @@ SNG-CONVERTER=sng2swm
 
 CP?=cp -f
 MD=mkdir
-ICON=SID-Wizard-Vessel.png
-MENUENTRY=SID-Wizard-Vessel.desktop
+ICON=SID-Wizard.png
+MENUENTRY=SID-Wizard.desktop
 CC=gcc
 CPPC=g++
 APPDIR=/usr/local/bin
