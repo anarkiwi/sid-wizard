@@ -9,7 +9,10 @@ First poc for external MIDI sync IN triggered by VESSEL via NMI
   screen, and playback is synced to MIDI SYNC messages
 
 - use new menupoint: 'NMI MODE' to toggle feature ON
-  border rasterbar changes to white
+
+  - VESSEL is configured to trigger NMIs on SYNC (and maybe stop,...)
+  
+  - border rasterbar changes to white
 ```
 ![SID Wizard menu NMI mode on](http://m64.rocks/2.png "SID Wizard menu NMI mode ON")
 ```
@@ -17,9 +20,7 @@ First poc for external MIDI sync IN triggered by VESSEL via NMI
   
   - F1/F2/F3 / MIDI START will trigger VESSEL SYNC display on
   
-  - VESSEL is configured to trigger NMIs on SYNC (and maybe stop,...)
-  
-  - ON NMI playback is called, MIDI interface incoming byte is read (sync or stop)
+  - ON NMI: playback is called, MIDI interface incoming byte is read (sync or stop)
     and stored
   
   - Outside NMI: keyboard is checked, display updated. Last MIDI byte checked for STOP:
