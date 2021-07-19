@@ -12,7 +12,7 @@ First poc for external MIDI sync IN triggered by VESSEL via NMI
 
   - VESSEL is configured to trigger NMIs on SYNC (and maybe stop,...)
   
-  - border rasterbar changes to white
+  - border rasterbar changes to white (if no MIDI device yet selected)
 ```
 ![SID Wizard menu NMI mode on](http://m64.rocks/2.png "SID Wizard menu NMI mode ON")
 ```
