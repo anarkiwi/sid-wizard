@@ -85,9 +85,9 @@ midistop
 
 goback  jsr display     ;considers menu-display over patterns (based on 'menumode' variable) 
         lda menu.menupoint ;check selected menupoint (value is 0 if no menupoint was launched)
-        beq gotomainloop    ;if no menu was launched, main loop continues
+        beq +           ;if no menu was launched, main loop continues
         jmp menu.runmenup
-gotomainloop jmp mainloop
++       jmp mainloop
 
 
 ; NMI code
