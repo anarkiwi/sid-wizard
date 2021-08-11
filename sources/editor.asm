@@ -373,7 +373,7 @@ defFIba .byte $ff       ;FILTER-PROGRAM
 MIDIdev=Config.MIDIdev ;use this external label instead of MIDI-C64.asm's built-in label
         .include "MIDI-C64.asm" ;library with MIDI-devices' usage routines
         .include "include/midisubs.inc" ;contains SW-related MIDI routines
-        .include "include/vesselsubs.inc"
+        .include "include/vessel/vesselsubs.inc"
 .fi
 
 ;.if (FINAL_CARTRIDGE_3_FIX!=0)

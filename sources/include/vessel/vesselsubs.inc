@@ -9,11 +9,11 @@ VESSELMODE .byte 0      ; 0 = off
 
 ; main loop 
 
-vessel  lda playadapter.playmod
-        beq +           ; if playmode is 0, tune doesn't play
-
-        lda MIDIdev
+vessel  lda MIDIdev
         beq goback
+        
+        lda playadapter.playmod
+        beq +           ; if playmode is 0, tune doesn't play
 
         lda VESSELMODE
         and #2 ; check if new NMI MODE ON
@@ -190,14 +190,13 @@ NMI_MIDI_BYTE .byte 0
 
 ; NMI PLAY ROUTINE (main loop)
 VESSEL_NMIPLAY
-        jsr keyhandler.keyer ; to handle STOP
-        jsr vesseldisp
-        ldy NMI_MIDI_BYTE
-        cpy #MIDI.StopSeqPlay
-        bne +
-        ; if MIDI STOP: 
-        lda #0
-        sta playadapter.playmod
+
+        ;
+        ; outsourced  =8] 
+        ;
+.include "vesselNMI.inc"
+
+
 +       jmp vessel ; main loop 
 
 
