@@ -2,31 +2,31 @@
 ;===============================================================================
 ;--- M64 update II: NMI SYNC ---
 
-First poc for external MIDI sync IN triggered by VESSEL via NMI
+First poc for external MIDI sync IN triggered by VESSEL via NMI:
+While the synced playing is handled in NMI, we can keep the editor
+and display intact. Ofc NMI will occasionally disturb IRQ. For now
+just a poc, needed display rework (sprites) to follow.
 
-- behaviour of update I stays the same (see below):
-  When VESSEL MIDI device is selected: playback start will show VESSEL SYNC
-  screen, and playback is synced to MIDI SYNC messages
+- behaviour of update I stays the same (see below)
 
 - use new menupoint: 'NMI MODE' to toggle feature ON
 
-  - VESSEL is configured to trigger NMIs on SYNC (and maybe stop,...)
+  - VESSEL is configured to trigger NMIs on START/SYNC/STOP
   
-  - border rasterbar changes to white (if no MIDI device yet selected)
+  - border rasterbar changes to white to indicate the mode
 ```
 ![SID Wizard menu NMI mode on](http://m64.rocks/2.png "SID Wizard menu NMI mode ON")
 ```
   NMI will trigger sync, playback mode changes:
   
-  - F1/F2/F3 / MIDI START will trigger VESSEL SYNC display on
+  - F1/F2/F3 / MIDI START will trigger playback in SYNC
   
-  - ON NMI: playback is called, MIDI interface incoming byte is read (sync or stop)
-    and stored
+    - ON NMI: playback is called, MIDI interface incoming byte is read (sync or stop)
+      and stored
   
-  - Outside NMI: keyboard is checked, display updated. Last MIDI byte checked for STOP:
+    - Outside NMI: keyboard is checked, display updated. Last MIDI byte checked for STOP:
   
-    - If last MIDI message STOP or keyboard F4: exit playback: exit VESSEL sync display
-      and go back to editor
+      - If last MIDI message STOP or keyboard F4: exit playback
 
 
 ;===============================================================================
