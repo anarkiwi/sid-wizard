@@ -3,10 +3,8 @@
 .section VESSEL
 VESSELSTART
 
-VESSELMODE      .byte 0         ; 0 = off
-                                ; 1 = vessel sync playing mode 
-VESSELNMIMODE   .byte 0         ; 0 = off
-                                ; 1 = on
+VESSELMODE      .byte 0         ; 0 = off / 1 = vessel sync playing mode 
+VESSELNMIMODE   .byte 0         ; 0 = off / 1 = on
 
 ; main loop 
 
