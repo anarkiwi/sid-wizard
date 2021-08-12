@@ -3,9 +3,10 @@
 .section VESSEL
 VESSELSTART
 
-VESSELMODE .byte 0      ; 0 = off
-                        ; 1 = vessel sync playing mode 
-                        ; 2 = vessel NMI sync mode 
+VESSELMODE      .byte 0         ; 0 = off
+                                ; 1 = vessel sync playing mode 
+VESSELNMIMODE   .byte 0         ; 0 = off
+                                ; 1 = on
 
 ; main loop 
 
@@ -16,11 +17,10 @@ vessel  lda MIDIdev
         beq +           ; if playmode is 0, tune doesn't play
 
         lda VESSELMODE
-        and #2 ; check if new NMI MODE ON
-        beq wait4play
+        bne wait4play
 
         ; NMI MODE ON, PLAY REQUESTED
-        jmp VESSEL_NMIPLAY
+        ; jmp VESSEL_NMIPLAY
 
 wait4play lda #1
         beq vessel_read_midi   ; first run toggle
@@ -53,11 +53,11 @@ do_sync jsr playadapter.playsubb
 +       lda VESSELMODE
         beq goback      ; if VESSELMODE 0: goback
 
-        and #2          ; if VESSELMODE 2: EXIT from NMI SYNC
-        beq midistop    ; if VESSELMODE was 1, but playback OFF: STOP (ie MIDI STOP, F4)
+        ; and #2          ; if VESSELMODE 2: EXIT from NMI SYNC
+        ; beq midistop    ; if VESSELMODE was 1, but playback OFF: STOP (ie MIDI STOP, F4)
         
         ; STOP VESSEL NMI SYNC HERE
-        jsr vessel_NMI_OFF
+        ; jsr vessel_NMI_OFF
         ; stop all else and go back
 midistop
         lda #0
@@ -128,7 +128,7 @@ vessel_NMI_ON
 vessel_NMI_OFF
         ; disable playback in NMI handler
         lda #0
-        sta VESSELMODE
+        sta VESSELNMIMODE
 
         lda $dc0d  
         lda $dd0d  
@@ -169,9 +169,8 @@ VESSELNMI
         lda #$ff   
         sta $d019  
 
-        lda VESSELMODE
-        and #2 ; check specifically for 2
-        bne _exitNMI
+        lda VESSELNMIMODE
+        beq _exitNMI
 
         jsr playadapter.playsubb        
         jsr MIDIC64.GetData.vesselReadMIDI
@@ -194,28 +193,29 @@ VESSEL_NMIPLAY
         ;
         ; outsourced  =8] 
         ;
-.include "vesselNMI.inc"
+        .include "vesselNMI.inc"
 
-
+        jsr display
 +       jmp vessel ; main loop 
 
 
 ; menu point NMI MODE handling
 menu_nmi_mode        
-        lda VESSELMODE
-        and #2
+        lda VESSELNMIMODE
         bne _nmi_mode_off
 
 ; menu turn nmi mode on
         jsr vessel_NMI_ON
-        inc menu.m64btx
+        
         ldx #1
-        lda #2
+        stx menu.m64btx
+        lda #1
         jmp _nmi_mode_ret
 
 _nmi_mode_off
         jsr vessel_NMI_OFF
-        dec menu.m64btx
+        lda #0
+        sta menu.m64btx
         ldx #4
         lda #0
                 
