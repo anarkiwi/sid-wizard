@@ -1,35 +1,30 @@
-this is still work in progress ...
+this is still work in progress ... 
 branch "add-external MIDI sync" is usable (but w/o hardrestart correction)
 
 ```
 ;===============================================================================
+;--- M64 update III: renaming to sid-wizard-vessel ---
+
+ - the new NMI mode and hardrestart correction feature require some sort of ui
+   extension to configure them.
+   -> a new submenu can be opened in the menu (F8) : "VESSEL CONFIG"
+   
+ - ... ... ...
+
+
+;===============================================================================
 ;--- M64 update II: NMI SYNC ---
 
-First poc for external MIDI sync IN triggered by VESSEL via NMI:
-While the synced playing is handled in NMI, we can keep the editor
-and display intact. Ofc NMI will occasionally disturb IRQ. For now
-just a poc, needed display rework (sprites) to follow.
+this poc allready changed due to restructuring of code for proper ui / menu-
+extension
 
-- behaviour of update I stays the same (see below)
+ - playback can be triggered on NMI: use new menupoint "NMI MODE" to turn feature on
+ ... (full description removed / misleading due to changes in design)
 
-- use new menupoint: 'NMI MODE' to toggle feature ON
-
-  - VESSEL is configured to trigger NMIs on START/SYNC/STOP
-  
-  - border rasterbar changes to white to indicate the mode
 ```
 ![SID Wizard menu NMI mode on](http://m64.rocks/2.png "SID Wizard menu NMI mode ON")
 ```
-  NMI will trigger sync, playback mode changes:
-  
-  - F1/F2/F3 / MIDI START will trigger playback in SYNC
-  
-    - ON NMI: playback is called, MIDI interface incoming byte is read (sync or stop)
-      and stored
-  
-    - Outside NMI: keyboard is checked, display updated. Last MIDI byte checked for STOP:
-  
-      - If last MIDI message STOP or keyboard F4: exit playback
+ 
 
 
 ;===============================================================================
