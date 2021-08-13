@@ -25,8 +25,6 @@ extension
 ![SID Wizard menu NMI mode on](http://m64.rocks/2.png "SID Wizard menu NMI mode ON")
 ```
  
-
-
 ;===============================================================================
 ;--- M64 update I: ext MIDI sync IN ---
 
