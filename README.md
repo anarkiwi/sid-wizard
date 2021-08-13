@@ -1,3 +1,6 @@
+this is still work in progress ...
+branch "add-external MIDI sync" is usable (but w/o hardrestart correction)
+
 ```
 ;===============================================================================
 ;--- M64 update II: NMI SYNC ---
