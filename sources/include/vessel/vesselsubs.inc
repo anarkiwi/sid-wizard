@@ -3,30 +3,39 @@
 .section VESSEL
 VESSELSTART
 
+VSTATE_OFF .var             0
+VSTATE_VESSELMODE_ON .var   1
+VSTATE_NMI_ON .var          2
+
 VESSELMODE      .byte 0         ; 0 = off / 1 = vessel sync playing mode 
-VESSELNMIMODE   .byte 0         ; 0 = off / 1 = on
 
 ; main loop 
 
-vessel  lda MIDIdev
+vessel  lda MIDIdev     ; by checking this, no further need to check VESSELMODE
         beq goback
         
         lda playadapter.playmod
         beq +           ; if playmode is 0, tune doesn't play
 
+        ; we are playing / or play requested
         lda VESSELMODE
-        bne wait4play
+        bne +
+        ; if it was not set yet, autoset it here (until submenu is coded)
+        lda #VSTATE_VESSELMODE_ON
+        sta VESSELMODE
+        jmp wait4play
 
-        ; NMI MODE ON, PLAY REQUESTED
-        ; jmp VESSEL_NMIPLAY
++       cmp #VSTATE_NMI_ON
+        bne +
+        jmp VESSEL_NMIPLAY
++       cmp #VSTATE_VESSELMODE_ON
+        bne goback
 
 wait4play lda #1
         beq vessel_read_midi   ; first run toggle
 
         lda #0
         sta wait4play+1 ; 1st run: wait4play: wait for incoming MIDI sync messages
-        lda #1
-        sta VESSELMODE  ; turn on vessel sync playing mode
 
         ; disable raster irq    
         lda $d01a
@@ -49,13 +58,17 @@ do_sync jsr playadapter.playsubb
         jmp vessel
 
 +       lda VESSELMODE
-        beq goback      ; if VESSELMODE 0: goback
+        beq goback      ; if VESSELMODE 0: nothing to do, goback
 
-        ; and #2          ; if VESSELMODE 2: EXIT from NMI SYNC
-        ; beq midistop    ; if VESSELMODE was 1, but playback OFF: STOP (ie MIDI STOP, F4)
+        cmp #VSTATE_VESSELMODE_ON
+        beq midistop    ; if VESSELMODE was 1, but playback OFF: STOP (ie MIDI STOP, F4)
         
+
+        cmp #VSTATE_NMI_ON
+        bne midistop
         ; STOP VESSEL NMI SYNC HERE
-        ; jsr vessel_NMI_OFF
+        jsr vessel_NMI_OFF
+
         ; stop all else and go back
 midistop
         lda #0
@@ -126,7 +139,7 @@ vessel_NMI_ON
 vessel_NMI_OFF
         ; disable playback in NMI handler
         lda #0
-        sta VESSELNMIMODE
+        sta VESSELMODE
 
         lda $dc0d  
         lda $dd0d  
@@ -167,7 +180,7 @@ VESSELNMI
         lda #$ff   
         sta $d019  
 
-        lda VESSELNMIMODE
+        lda VESSELMODE
         beq _exitNMI
 
         jsr playadapter.playsubb        
@@ -199,29 +212,32 @@ VESSEL_NMIPLAY
 
 ; menu point NMI MODE handling
 menu_nmi_mode        
-        lda VESSELNMIMODE
-        bne _nmi_mode_off
+        lda MIDIdev                     ; no MIDI no NMI     
+        beq +
+        lda VESSELMODE
+        cmp #VSTATE_VESSELMODE_ON       ; if VESSELMODE_ON goback
+        beq +
+        cmp #VSTATE_NMI_ON
+        beq _nmi_mode_off
 
 ; menu turn nmi mode on
         jsr vessel_NMI_ON
         
         ldx #1
         stx menu.m64btx
-        lda #1
         jmp _nmi_mode_ret
 
 _nmi_mode_off
         jsr vessel_NMI_OFF
         lda #0
         sta menu.m64btx
+        sta VESSELMODE
         ldx #4
-        lda #0
                 
 _nmi_mode_ret
-        sta VESSELMODE
         stx plybcol
         stx plybcol+1 ; restore border
-        jmp mainloop
++       jmp mainloop
 
 
 ; display code 
