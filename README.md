@@ -9,6 +9,10 @@ branch "add-external MIDI sync" is usable (but w/o hardrestart correction)
    extension to configure them.
    -> a new submenu can be opened in the menu (F8) : "VESSEL CONFIG"
    
+ - as the new changes aren't anymore pure tests, and the code develops into a 
+   pretty different sw-version already - this branch was renamed to 
+   "sid-wizard-vessel" - the probably final name
+   
  - ... ... ...
 
 
