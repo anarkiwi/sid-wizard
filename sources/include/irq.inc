@@ -39,7 +39,9 @@ rastsig and #$FF ;selfmod ;and don't allow nested raster-interrupts
 ;----------------------- SELECT SINGLE/MULTI RASTERBAR -------------------------
 fspdctr lda #selfmod    ;multispeed frame-position timer
         beq rast1st
+        
         jsr singmul
+ 
         jmp dendply
 
 ;----------------------- SINGLE-SPEED PLAYBACK-PART HANDLING -------------------
@@ -53,7 +55,9 @@ playchk ldy playadapter.playmod
         jsr commonsubs.barcolo
         tya ;lda playmod
         beq +           ;if playmode is 0, tune doesn't play
+        
         jsr playadapter.playsubb ;runtime:$10..$28 rasterlines; call singlespeed part of the player routine ($1003),measure rastertime
+        
         lda framesp
         cmp #(SID_AMOUNT==1)? 6 : (SID_AMOUNT==2)? 3 : 2 ;need gap before next multispeed-call
         bcs singlnd

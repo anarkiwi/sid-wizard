@@ -374,7 +374,7 @@ AutoFollow jsr keyhandler.autoFlw
         jmp mainloop
 
 ;--------------------------------------------
-m64mode jmp menu_nmi_mode
+m64mode jmp run_menupoint_syncmode
 
 ;--------------------------------------------
 RasterBar lda #2        ;rasterbar-displaying on/off
@@ -877,7 +877,7 @@ autistx .text "FF *"
 autfltx .text "FF *"
         .text "* HIDE RBARS: O"
 rastbtx .text "N  *"
-        .text "* NMI MODE  :  "
+        .text "* SYNC MODE :  "
         m64btx .text "0  *"
 .if (SID_AMOUNT==1)
         .text "* CHORD-NOTE: O"

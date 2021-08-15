@@ -229,11 +229,14 @@ inisubb .proc           ;player-adapter version of initer ($1000) of player rout
         .pend
 
 playsubb .proc          ;player-adapter version of player ($1003) parto of driver/player routine
+        
         lda #$A0 ;LDY
         jsr player.wCHDMOD
         lda $d012
         sta storast+1
+
         jsr player.playsub
+
         lda $d012
         ldy #0          ;show real rastertime-bar of player
         sty $d020
