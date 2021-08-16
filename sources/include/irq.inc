@@ -36,6 +36,13 @@ rastsig and #$FF ;selfmod ;and don't allow nested raster-interrupts
 +
 .fi
 
+        lda VESSELMODE
+        cmp #2
+        bne fspdctr
+
+        ; VESSELNMI IS ON
+        jmp rast1st
+
 ;----------------------- SELECT SINGLE/MULTI RASTERBAR -------------------------
 fspdctr lda #selfmod    ;multispeed frame-position timer
         beq rast1st
@@ -55,7 +62,7 @@ playchk ldy playadapter.playmod
         jsr commonsubs.barcolo
         tya ;lda playmod
         beq +           ;if playmode is 0, tune doesn't play
-        
+
         jsr playadapter.playsubb ;runtime:$10..$28 rasterlines; call singlespeed part of the player routine ($1003),measure rastertime
         
         lda framesp

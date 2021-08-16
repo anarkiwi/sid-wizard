@@ -17,15 +17,11 @@ vessel  lda MIDIdev     ; by for MIDI dev present, no further need to check VESS
         lda playadapter.playmod
         beq goback              ; if playmode is 0, tune doesn't play
 
+        lda VESSELMODE
         cmp #VMODE_EXT_MIDI_SYNC
         beq wait4play           ; ext sync will play 
 
-        lda VESSELMODE
-        beq goback              ; raster IRQ will play
-
-        cmp #VMODE_NMI_SYNC     
-        bne wait4play
-        jmp goback      ; NMI will play
+        jmp goback      ; NMI or IRQ will play
 
 wait4play lda #1
         beq vessel_read_midi   ; first run toggle
@@ -52,18 +48,6 @@ do_sync jsr playadapter.playsubb
         jsr vesseldisp
         jsr keyhandler.keyer
         jmp vessel
-
-+       lda VESSELMODE
-        beq goback      ; if VESSELMODE 0: nothing to do, goback
-
-        cmp #VMODE_EXT_MIDI_SYNC
-        beq midistop    ; if VESSELMODE was 1, but playback OFF: STOP (ie MIDI STOP, F4)
-        
-
-        cmp #VMODE_NMI_SYNC
-        bne midistop
-        ; STOP VESSEL NMI SYNC HERE
-        jsr vessel_NMI_OFF
 
         ; stop all else and go back
 midistop lda #1
