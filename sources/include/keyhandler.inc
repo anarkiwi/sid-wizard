@@ -1956,6 +1956,7 @@ f1er .proc              ;F1 key handler (reset and play whole tune from beginnin
         jmp spacer.shifSpc
 +
 .if (MIDI_support!=0)
+        ; M64 NOTE: MAKE THIS CONFIGURABLE
         jsr midisubs.sendSt ;start-command to other MIDI-controlled sequencer
 .fi
 PlayBeg ldx #0 ;reset tune and play from beginning

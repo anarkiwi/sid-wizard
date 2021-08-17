@@ -107,8 +107,8 @@ appiniter               ;(this section was contained by initer.inc before)
 
 ;---------------------- display-refresher main loop (outside IRQ) ------------------
 mainloop
-inirequ lda #1                          ;selfmod variable ; if not 0, signs tune initialization request for main routine
-beq goto_vessel                         ;check init request from IRQ
+        inirequ lda #1                          ;selfmod variable ; if not 0, signs tune initialization request for main routine
+        beq goto_vessel                         ;check init request from IRQ
 initune jsr playadapter.inisubb         ;player-adapter version of initer ($1000) of player routine
         lda #0
         sta inirequ+1      
