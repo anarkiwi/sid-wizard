@@ -98,7 +98,7 @@ vesseldisp lda #1 ; selfmod 1st chk
         sta $0400,y
         sta $0500,y
         sta $0600,y
-        sta $0700,y
+        sta $0700,y 
         lda #0
         sta $d800,y
         sta $d900,y
@@ -106,7 +106,7 @@ vesseldisp lda #1 ; selfmod 1st chk
         sta $db00,y
         iny
         bne -
-
+    
         ; colors for numbers
         lda #$0b ; SEQPOS
         sta $d800+40*(3)+5+0
