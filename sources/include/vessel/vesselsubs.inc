@@ -91,7 +91,7 @@ vesseldisp lda #1 ; selfmod 1st chk
         sta vesseldisp+1
         sta $d020
         sta $d015
-        
+         
         ; clrscr
         ldy #0
 -       lda #$20        
