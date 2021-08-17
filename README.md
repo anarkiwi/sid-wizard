@@ -1,33 +1,8 @@
-this is still work in progress ... 
+```
+this is work in progress ...
 branch "add-external MIDI sync" is usable (but w/o hardrestart correction)
 
-```
-;===============================================================================
-;--- M64 update III: renaming to sid-wizard-vessel ---
 
- - the new NMI mode and hardrestart correction feature require some sort of ui
-   extension to configure them.
-   -> a new submenu can be opened in the menu (F8) : "VESSEL CONFIG"
-   
- - as the new changes aren't anymore pure tests, and the code develops into a 
-   pretty different sw-version already - this branch was renamed to 
-   "sid-wizard-vessel" - the probably final name
-   
- - ... ... ...
-
-
-;===============================================================================
-;--- M64 update II: NMI SYNC ---
-
-this poc allready changed due to restructuring of code for proper ui / menu-
-extension
-
- - playback can be triggered on NMI: use new menupoint "NMI MODE" to turn feature on
- ... (full description removed / misleading due to changes in design)
-
-```
-![SID Wizard menu NMI mode on](http://m64.rocks/2.png "SID Wizard menu NMI mode ON")
-```
 ;===============================================================================
 ;--- M64 update I: ext MIDI sync IN ---
 
