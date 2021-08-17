@@ -1,4 +1,4 @@
-; vesselsubs.inc 2021 m64
+; vesselsubs.inc 2021 m64 
 .dsection VESSEL
 .section VESSEL
 VESSELSTART
@@ -101,7 +101,7 @@ vesseldisp lda #1 ; selfmod 1st chk
         sta $0700,y 
         lda #0
         sta $d800,y
-        sta $d900,y 
+        sta $d900,y
         sta $da00,y
         sta $db00,y
         iny
