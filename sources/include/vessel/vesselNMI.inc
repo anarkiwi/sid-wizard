@@ -129,7 +129,7 @@ VESSEL_NMIPLAY
         lda #0
         sta playadapter.playmod
 
-+       jmp vessel ; main loop 
++       jmp mainloop ; main loop 
 
 
 
