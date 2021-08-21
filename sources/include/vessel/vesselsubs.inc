@@ -26,7 +26,7 @@ vessel  lda MIDIdev     ; by for MIDI dev present, no further need to check VESS
         bne goback
         jmp VESSEL_NMIPLAY
 
-        jmp goback      ; NMI or IRQ will play
+        ; jmp goback      ; NMI or IRQ will play
 
 wait4play lda #1
         beq vessel_read_midi   ; first run toggle
