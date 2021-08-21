@@ -125,9 +125,15 @@ VESSEL_NMIPLAY
         cmp #MIDI.StopSeqPlay
         bne +
 
-        ; MIDI STOP: stop nmi mode, set VESSELMODE to 0 
+        ; MIDI STOP: stop playback, leave NMI ON
         lda #0
         sta playadapter.playmod
+        lda #1
+        sta wait4play+1
+
+        ; re init vessel disp
+        lda #1
+        sta vesseldisp+1
 
 +       jmp mainloop ; main loop 
 
@@ -173,7 +179,6 @@ run_menupoint_syncmode
 +       ; menu turn nmi mode on
         jsr vessel_NMI_ON
         ldx #1
-        stx playadapter.playmod
         lda #2
         jmp _menup_sync_mode_ret
 
