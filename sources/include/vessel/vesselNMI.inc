@@ -120,7 +120,7 @@ NMI_MIDI_BYTE .byte 0
 
 ; NMI PLAY ROUTINE (main loop)
 VESSEL_NMIPLAY
-        jsr display
+        ; jsr display
         lda NMI_MIDI_BYTE
         cmp #MIDI.StopSeqPlay
         bne +

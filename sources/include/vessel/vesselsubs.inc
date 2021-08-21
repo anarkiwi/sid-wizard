@@ -22,6 +22,7 @@ vessel  lda MIDIdev     ; by for MIDI dev present, no further need to check VESS
         beq wait4play           ; ext sync will play 
 
         ; block, if NMI disable/enables IRQ:
+        cmp #VMODE_NMI_SYNC
         bne goback
         jmp VESSEL_NMIPLAY
 
