@@ -98,7 +98,7 @@ VESSELNMI
         
         inc $d020
 
-        ; jsr playadapter.playsubb
+        jsr playadapter.playsubb
 
         ; {
         ;   jsr playadapter.playsubb
@@ -147,6 +147,12 @@ VESSEL_NMIPLAY
         sta vesseldisp+1
 
         jsr vessel_NMI_OFF
+
+        ldx #4
+        stx plybcol
+        stx plybcol+1 ; restore border
+        lda #0
+        sta menu.m64btx
 
         sei
         lda #$35
@@ -227,14 +233,16 @@ run_menupoint_syncmode
         ; do F1 first
 
 _VNMI_PlayBeg 
-        ; ldx #0 ;reset tune and play from beginning
-        ; stx IRQ.fspdctr+1 ;start with 1st raster of course
-        ; stx playadapter.maxrasti ;reset rastertime-measuring
-        ; ldx #1
-        ; stx playadapter.followp+1 ;if commodore key is pressed together, follow-playing switches ON, else OFF
-        ; lda #1
-        ; sta playadapter.playmod
-        ; jsr playadapter.ptploff ;switch off pattern-playing in player-code (playadapter.inc)
+        ldx #0 ;reset tune and play from beginning
+        stx IRQ.fspdctr+1 ;start with 1st raster of course
+        stx playadapter.maxrasti ;reset rastertime-measuring
+        ldx #1
+        stx playadapter.followp+1 ;if commodore key is pressed together, follow-playing switches ON, else OFF
+        lda #1
+        sta playadapter.playmod
+        jsr playadapter.ptploff ;switch off pattern-playing in player-code (playadapter.inc)
+        lda #2
+        sta menu.m64btx
 
         jsr vessel_NMI_ON
         lda #$35
