@@ -28,8 +28,9 @@ MODE 2: NMI sync:
  - NMI gets pointed to to MIDI sync
  - until MIDI START nothing happens (main loop "animates" 2nd row character)
  - each MIDI sync message triggers a NMI by VESSEL via /flag on CIA2. 
- - in NMI code playback is called, and follow flow is displayed, 3rd row character
-   is "animated".
+ - in NMI code playback is called, and follow flow is calculated, outside of
+   NMI the patterns are displayed, 3rd row character is "animated".
+   
  - NMI SYNC can only be EXITED via MIDI STOP message ! 
  
 branch "add-external MIDI sync" is usable (but w/o hardrestart correction)
