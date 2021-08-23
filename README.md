@@ -18,6 +18,8 @@ incremented on each SYNC.
 A little change in behaviour (for now, this shall change): after stopping
 playback in modes 1 or 2, the mode is set back to 0.
 
+In NMI SYNC playback also the keyboard works, you can mute/solo channels
+
 MODE 2: NMI sync:
 
  - when choosing this mode, immediately waits for MIDI start message
