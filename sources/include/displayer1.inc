@@ -89,7 +89,7 @@ selinst lda #1          ;self-written variable, number of selected instrument
         sty vidram+31
         tax
         lda commonsubs.hexchar,x
-        sta vidram+30
+        sta vidram+29
 
         jsr commonsubs.setinsptr ;load selected instrumet's basepointer to zeropage pointers
         jsr commonsubs.reftpos ;refresh table-base positions in jmtbase to add them in displayer/datawriter

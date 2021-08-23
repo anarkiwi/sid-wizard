@@ -11,22 +11,37 @@ VESSELMODE      .byte 0         ; 0 = off / 1 = vessel sync playing mode
 
 ; main loop 
 
-vessel  lda MIDIdev     ; by for MIDI dev present, no further need to check VESSELMODE
-        beq goback
-        
-        lda playadapter.playmod
-        beq goback              ; if playmode is 0, tune doesn't play
+vessel  lda MIDIdev     ; by checking for MIDI dev present, no further need to check VESSELMODE
+        bne +
+        jmp goback
 
-        lda VESSELMODE
++       lda NMI_MIDI_STOP
+        beq + ; continue, if no STOP
+        jmp VESSEL_NMISTOP
+        
++       lda playadapter.playmod
+        beq goback
+
+; PLAYING HERE        
++       lda VESSELMODE
         cmp #VMODE_EXT_MIDI_SYNC
         beq wait4play           ; ext sync will play 
 
-        ; block, if NMI disable/enables IRQ:
         cmp #VMODE_NMI_SYNC
         bne goback
-        jmp VESSEL_NMIPLAY
 
-        ; jmp goback      ; NMI or IRQ will play
+        jsr keyhandler.keyer  
+        
+        lda #1
+        sta display.syncscr+1
+        jsr display  
+
+        jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
+
+        inc vidram+29+40
+        lda VESSELMODE
+        sta vidram+29
+        jmp vessel      ; NMI or IRQ will play
 
 wait4play lda #1
         beq vessel_read_midi   ; first run toggle
@@ -52,7 +67,7 @@ do_sync jsr playadapter.playsubb
         
         jsr vesseldisp
         jsr keyhandler.keyer
-        jmp mainloop
+        jmp vessel
 
         ; stop all else and go back
 midistop lda #1
@@ -76,8 +91,9 @@ midistop lda #1
         jmp menu.retoedi 
 
 goback  jsr display     ;considers menu-display over patterns (based on 'menumode' variable) 
+        inc vidram+29+40
         lda VESSELMODE
-        sta vidram
+        sta vidram+29
         lda menu.menupoint ;check selected menupoint (value is 0 if no menupoint was launched)
         beq +           ;if no menu was launched, main loop continues
         jmp menu.runmenup

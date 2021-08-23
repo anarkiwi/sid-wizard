@@ -308,7 +308,7 @@ mutesolo .fill CHN_AMOUNT,$FF
 ;======================== RUNTIME CONFIGURATION ========================
 Config .block ;is saved to disk (in this order) if possible, and loaded at startup if possible
 ChnOff=$11 ;"OFF" MIDI-channel
-confbits .byte %00001001 ;ON/OFF configurations, each bit corresponds to a particular SID-Wizard ON/OFF-setting
+confbits .byte %00011001 ;ON/OFF configurations, each bit corresponds to a particular SID-Wizard ON/OFF-setting
  ;bit0 (1) - bind tracks ON/OFF (ON=1) - move track together wherever possible, or not at all
  ;bit1 (2) - rasterbar-display ON/OFF ('ON=0' to keep compatibility with previous SWM files) (some people get annoyed by player-rasterbars)
  ;bit2 (4) - followplay as default?  ('ON=1' to keep compatibility) - toggle follow-play for simple F1 play

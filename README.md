@@ -1,7 +1,36 @@
 ```
-this is work in progress ...
-branch "add-external MIDI sync" is usable (but w/o hardrestart correction)
+;===============================================================================
+;--- M64 update II: ext NMI SYNC ---
 
+The first proof of concept is working! In the menu you can select "SYNC MODE".
+(You need to choose/activate MIDI interface VESSEL first)
+MODE 0: normal mode (default)
+MODE 1: external MIDI sync in (by polling)
+MODE 2: NMI sync: external MIDI sync in via NMI
+
+Mode 0 and 1 are from the prev proof of concept, and work the same.
+
+I added a new "display section" - on the patterns very top row, on the right
+end - just before the instrument table. First row displays the SYNC MODE,
+2nd row is incremented each main loop. When in NMI playback, a 3rd row is
+incremented on each SYNC.
+
+A little change in behaviour (for now, this shall change): after stopping
+playback in modes 1 or 2, the mode is set back to 0.
+
+MODE 2: NMI sync:
+
+ - when choosing this mode, immediately waits for MIDI start message
+   (border turns white)
+ - the NMI mode is enabled on VESSEL, with status message filter feature enabled
+ - NMI gets pointed to to MIDI sync
+ - until MIDI START nothing happens (main loop "animates" 2nd row character)
+ - each MIDI sync message triggers a NMI by VESSEL via /flag on CIA2. 
+ - in NMI code playback is called, and follow flow is displayed, 3rd row character
+   is "animated".
+ - NMI SYNC can only be EXITED via MIDI STOP message ! 
+ 
+branch "add-external MIDI sync" is usable (but w/o hardrestart correction)
 
 ;===============================================================================
 ;--- M64 update I: ext MIDI sync IN ---
