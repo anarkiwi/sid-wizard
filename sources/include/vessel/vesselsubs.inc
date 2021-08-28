@@ -35,10 +35,11 @@ vessel  lda MIDIdev     ; by checking for MIDI dev present, no further need to c
         lda #1
         sta display.syncscr+1
         jsr display  
-
-        jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
+        
+        ; jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
 
         jsr vessel_statusdisp
+
         jmp vessel      ; NMI or IRQ will play
 
 wait4play lda #1
