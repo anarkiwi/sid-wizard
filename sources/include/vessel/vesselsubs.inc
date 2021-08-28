@@ -38,9 +38,7 @@ vessel  lda MIDIdev     ; by checking for MIDI dev present, no further need to c
 
         jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
 
-        inc vidram+29+40
-        lda VESSELMODE
-        sta vidram+29
+        jsr vessel_statusdisp
         jmp vessel      ; NMI or IRQ will play
 
 wait4play lda #1
@@ -91,9 +89,7 @@ midistop lda #1
         jmp menu.retoedi 
 
 goback  jsr display     ;considers menu-display over patterns (based on 'menumode' variable) 
-        inc vidram+29+40
-        lda VESSELMODE
-        sta vidram+29
+        jsr vessel_statusdisp
         lda menu.menupoint ;check selected menupoint (value is 0 if no menupoint was launched)
         beq +           ;if no menu was launched, main loop continues
         jmp menu.runmenup
@@ -326,6 +322,14 @@ stap3   sta vidram+40*(5+10)+10+0+1
         lda #4
         sta $d020
         rts
+
+; used as overlay in main loop
+vessel_statusdisp
+        inc vidram+29+40
+        lda VESSELMODE
+        sta vidram+29
+        rts
+
 VESSELEND
 
 .include "vesselnmi.inc"

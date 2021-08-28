@@ -109,7 +109,7 @@ _exitNMI
         tay
         pla
         tax
-        pla             ;written at IRQ entry, stored value of $01 ROM/RAM bank switcher
+        pla             ;written at NMI entry, stored value of $01 ROM/RAM bank switcher
         sta banksel
         pla   
 
@@ -260,6 +260,8 @@ _VNMI_PlayBeg
         jsr playadapter.inisubb
 
         jsr menu.menuback
+
+
 
         jmp vessel
 
