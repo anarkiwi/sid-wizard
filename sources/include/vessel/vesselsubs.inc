@@ -326,9 +326,11 @@ stap3   sta vidram+40*(5+10)+10+0+1
 
 ; used as overlay in main loop
 vessel_statusdisp
-        inc vidram+29+40
         lda VESSELMODE
         sta vidram+29
+        lda playadapter.playmod
+        sta vidram+29+40
+        inc vidram+29+40+40
         rts
 
 VESSELEND
