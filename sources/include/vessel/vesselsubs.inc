@@ -20,25 +20,33 @@ vessel  lda MIDIdev     ; by checking for MIDI dev present, no further need to c
         jmp VESSEL_NMISTOP
         
 +       lda playadapter.playmod
-        beq goback
+        bne _playing
+
+_not_playing
+        lda VESSELMODE
+        cmp #VMODE_NMI_SYNC
+        bne goback
+        jmp _vnmi_play
 
 ; PLAYING HERE        
-+       lda VESSELMODE
+_playing lda VESSELMODE
         cmp #VMODE_EXT_MIDI_SYNC
         beq wait4play           ; ext sync will play 
 
         cmp #VMODE_NMI_SYNC
         bne goback
-
-        jsr keyhandler.keyer  
         
+_vnmi_play        
+        jsr keyhandler.keyer
         lda #1
         sta display.syncscr+1
         jsr display  
-        
-        ; jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
+        jsr playadapter.jamplay
+        jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
+        jsr display2
 
         jsr vessel_statusdisp
+        inc vidram+29+40+40+40+40
 
         jmp vessel      ; NMI or IRQ will play
 
@@ -330,7 +338,7 @@ vessel_statusdisp
         sta vidram+29
         lda playadapter.playmod
         sta vidram+29+40
-        inc vidram+29+40+40
+        inc vidram+29+40+40+40
         rts
 
 VESSELEND

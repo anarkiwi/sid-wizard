@@ -83,20 +83,19 @@ VESSELNMI
         pha
         tya
         pha
+
         lda #$35    
         sta banksel
 
         bit $dd0d
-
-        inc $d020
         
-        inc vidram+29+40+40+40+40
+        inc vidram+29+40+40+40+40+80
 
         jsr NMIReadMIDI
         cpy #MIDI.TimingClock
         bne _exitNMI
-        ; inc $d021        
-        inc vidram+29+40+40+40+40+40
+                
+        inc vidram+29+40+40+40+40+80+40
         lda #1
         jsr playadapter.playsubb
         jsr playadapter.followplay
@@ -104,7 +103,6 @@ VESSELNMI
         inc playadapter.seqrefr ;refresh also when playing changes SEQCNT,x
         inc display.insrefr+1
         jsr playadapter.padapter
-        dec $d020
 
 _exitNMI
         pla
@@ -243,7 +241,6 @@ _VNMI_PlayBeg
         
         jsr vessel_NMI_ON
         cli
-
         ldy #0
         sty NMI_MIDI_STOP
         sty NMI_MIDI_START
@@ -254,6 +251,8 @@ _VNMI_PlayBeg
         jsr playadapter.ptploff
         jsr playadapter.inisubb
 
+        inc menu.clearmenu
+        jsr menu.dispmenu
         jsr menu.menuback
 
         ; reset y scrl, 25rows
@@ -261,8 +260,22 @@ _VNMI_PlayBeg
         ora #%00001011
         sta $d011
 
-        ldx #1
+        lda #$ff
+        sta $d015 ; sprites ON
+
+        ; lda #52
+        ; ; sta $d001; spr 0
+        ; sta $d003 ; spr 1
+        ; sta $d005 ; spr 1
+        ; sta $d007 ; spr 1
+        ; sta $d009 ; spr 1
+        ; sta $d00b ; spr 1
+        ; sta $d00d ; spr 1
+        ; sta $d00f ; spr 1
+
+        ldx #0
         stx $d020
+        ldx #1
         lda #2
              
 _menup_sync_mode_ret
@@ -271,3 +284,30 @@ _menup_sync_mode_ret
         sta menu.m64btx
 _menupoint_back   
         jmp vessel
+
+clrscrn1 
+        ldy #0
+-       lda #$20        
+        sta $0400,y
+        sta $0500,y
+        sta $0600,y
+        sta $0700,y 
+        iny
+        bne -
+        rts
+
+clrscrn2 ldy #0
+        sty $d015       ;switch off sprites to prevent rastertime-cycles being stolen from CPU
+-       lda #$20        ;clear screen
+        sta $0400,y
+        sta $0500,y
+        sta $0600,y
+        sta $0700,y
+        lda #EXETEXTCOL
+        sta $d800,y
+        sta $d900,y
+        sta $da00,y
+        sta $db00,y
+        iny
+        bne -
+        rts
