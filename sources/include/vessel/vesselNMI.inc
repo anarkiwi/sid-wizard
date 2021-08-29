@@ -102,8 +102,6 @@ VESSELNMI
         inc display.insrefr+1
         jsr playadapter.padapter
 
-        ; jsr MIDIC64.GetData.vesselReadMIDI ; checks for start, too
-
 _exitNMI
         pla
         tay
@@ -227,14 +225,7 @@ run_menupoint_syncmode
 _VNMI_PlayBeg 
         lda #$35
         sta banksel
-        lda #2
-        sta menu.m64btx
-        ldx #1
-        stx $d020
-        stx plybcol
-        stx plybcol+1
-
-        ; ; ; disable raster irq    
+        
         sei
 
         ldy #0
@@ -261,14 +252,11 @@ _VNMI_PlayBeg
 
         jsr menu.menuback
 
+        
 
-
-        jmp vessel
-
-        ; sei
-        ; lda #$35
-        ; sta banksel 
-        ; jmp menu.retoedi
+        ldx #1
+        stx $d020
+        lda #2
              
 _menup_sync_mode_ret
         stx plybcol

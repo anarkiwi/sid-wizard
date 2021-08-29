@@ -55,11 +55,7 @@ playchk ldy playadapter.playmod
         jsr commonsubs.barcolo
         tya ;lda playmod
         beq +           ;if playmode is 0, tune doesn't play
-        lda VESSELMODE
-        cmp #2
-        beq _skipPlayback
         jsr playadapter.playsubb ;runtime:$10..$28 rasterlines; call singlespeed part of the player routine ($1003),measure rastertime
-_skipPlayback      
         lda framesp
         cmp #(SID_AMOUNT==1)? 6 : (SID_AMOUNT==2)? 3 : 2 ;need gap before next multispeed-call
         bcs singlnd
@@ -299,11 +295,7 @@ mplychk lda fastfwd+1   ;fast-forward
 
 .if (MIDI_support!=0)
 .if (MIDIC64.Vessel_support!=0)
-        lda VESSELMODE
-        cmp #2
-        beq +
         jsr MIDIC64.GetData
-        +
 .else
 .if (HerMIDI_support!=0 && HerMIDI_TX_MODE==MIDIC64.HerMIDI.SynchMode)
         jsr midisubs.HerMIDI_Synchron_GetData
