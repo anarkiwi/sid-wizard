@@ -87,20 +87,24 @@ VESSELNMI
         sta banksel
 
         bit $dd0d
+
+        inc $d020
         
-        ; inc $d021
-        inc vidram+29+40+40
+        inc vidram+29+40+40+40+40
 
         jsr NMIReadMIDI
         cpy #MIDI.TimingClock
         bne _exitNMI
-        
+        ; inc $d021        
+        inc vidram+29+40+40+40+40+40
+        lda #1
         jsr playadapter.playsubb
         jsr playadapter.followplay
 
         inc playadapter.seqrefr ;refresh also when playing changes SEQCNT,x
         inc display.insrefr+1
         jsr playadapter.padapter
+        dec $d020
 
 _exitNMI
         pla
