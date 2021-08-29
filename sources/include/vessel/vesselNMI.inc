@@ -252,7 +252,10 @@ _VNMI_PlayBeg
 
         jsr menu.menuback
 
-        
+        ; reset y scrl, 25rows
+        lda $d011
+        ora #%00001011
+        sta $d011
 
         ldx #1
         stx $d020
