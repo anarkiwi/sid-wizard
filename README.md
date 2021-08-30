@@ -8,6 +8,7 @@ The first proof of concept is working! In the menu you can select "SYNC MODE".
 ```
 ![Choose SYNC mode](http://m64.rocks/2-2.png "SID-Wizard VESSEL: choose sync mode")
 ``` 
+Image: showing new menu point: SYNC MODE
 
 MODE 0: normal mode (default)
 MODE 1: external MIDI sync in (by polling)
@@ -32,6 +33,8 @@ editor:
 ```
 ![NMI PLAYBACK](http://m64.rocks/2-3.png "Playback in NMI")
 ``` 
+Image: SW in SYNC MODE 2 (NMI SYNC) - waiting for MIDI START
+
 SW now waits for a MIDI START message. When it is received, synchronized
 playback starts, in follow play mode.
 
@@ -72,12 +75,13 @@ First poc for external MIDI sync IN
    
      - repeat
    
-   - Note: for keyboard F4 or <- to exit VESSEL SYNC mode:
+   - Note: for keyboard F4 to exit VESSEL SYNC mode:
      keyboard must be checked -> MIDI SYNC must be still sent
      should not be necessary, as MIDI STOP exits sync mode now.
 ```
 ![SID Wizard menu NMI mode on](http://m64.rocks/3.png "VESSEL SYNC")
 ```   
+Image: showing new menu point: SYNC MODE
 
 
 ;===============================================================================
