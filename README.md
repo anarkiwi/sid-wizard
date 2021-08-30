@@ -16,11 +16,12 @@ MODE 0: normal mode (default, original MIDI support by anarkiwi)
 MODE 1: external MIDI sync in (by polling)
 MODE 2: NMI sync: external MIDI sync in via NMI
 
-Mode 0 is the default behavior of SID-Wizard (SW). This means playback is
-running in IRQ, and no sync is done. When you have your VESSEL enabled, and 
-ie press "Play" on your connected DAW, then SW will receive this MIDI status
-message, and will start playback (this is totally unsynchronized ofc, and of
-very limited use).
+Mode 0 is the default behavior of SID-Wizard (SW) with an attached MIDI device, 
+where anarkiwi has implemented the original VESSEL MIDI support ( see 
+https://github.com/anarkiwi/sid-wizard ) 
+Playback is running in IRQ, and no sync in is done. When you have your VESSEL 
+enabled (and all MIDI channels enabled, too), SW will react on MIDI messages,
+also for start and stop. It will start playback, but unsynchronized.
 
 Mode 1 represents the previous update:
 ( https://github.com/M64GitHub/sid-wizard/tree/m64/add-external-midi-sync )
