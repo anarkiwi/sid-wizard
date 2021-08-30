@@ -34,7 +34,20 @@ MODE 2: NMI sync:
  - NMI SYNC can only be EXITED via MIDI STOP message ! 
    (for now, this shall change, too)
  
-branch "add-external MIDI sync" is usable (but w/o hardrestart correction)
+
+```
+![SID Wizard VESSEL](http://m64.rocks/2-1.png "SID-Wizard VESSEL")
+``` 
+
+```
+![Choose SYNC mode](http://m64.rocks/2-2.png "SID-Wizard VESSEL: choose sync mode")
+``` 
+
+```
+![NMI PLAYBACK](http://m64.rocks/2-3.png "Playback in NMI")
+``` 
+
+
 
 ;===============================================================================
 ;--- M64 update I: ext MIDI sync IN ---
