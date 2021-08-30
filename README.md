@@ -1,6 +1,8 @@
 ```
 ;===============================================================================
-;--- M64 update II: ext NMI SYNC ---
+;--- Update II --- external MIDI SYNC IN via NMI -------------------------------
+; 08/21                                                                      M64
+;-------------------------------------------------------------------------------
 
 The first proof of concept is working! In the menu you can select "SYNC MODE".
 (You need to choose/activate MIDI interface VESSEL first)
