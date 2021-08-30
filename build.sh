@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-EV=3.1.0
+EV=3.1.1
 BR=$(pwd)
 
 sudo apt-get update && sudo apt-get -y install 64tass wget unzip build-essential vice gcc-multilib g++-multilib wine
