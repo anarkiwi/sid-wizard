@@ -91,6 +91,9 @@ Image: synchronized playback on a minimal UI. The UI shows current pattern row,
 patterns of each tracks, played instrument of each track, position in orderlist,
 note on/off and channel mute status.
 
+```
+
+``` 
 ;===============================================================================
 ;--- SID-WIZARD for VESSEL ---
 
