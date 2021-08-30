@@ -52,6 +52,10 @@ SYNC MODE 2: NMI SYNC. The "0" or "1" below represents the playback status
  why all start / stop operations from MIDI are used. 
  
 
+```
+
+``` 
+
 ;===============================================================================
 ;--- M64 update I: ext MIDI sync IN ---
 
