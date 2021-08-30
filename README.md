@@ -12,7 +12,7 @@ The first proof of concept is working! In the menu you can select "SYNC MODE".
 ``` 
 ^ menu point to switch sync modes ^
 
-MODE 0: normal mode (default)
+MODE 0: normal mode (default, original MIDI support by anarkiwi)
 MODE 1: external MIDI sync in (by polling)
 MODE 2: NMI sync: external MIDI sync in via NMI
 
