@@ -87,8 +87,9 @@ First poc for external MIDI sync IN
 ```
 ![SID Wizard menu NMI mode on](http://m64.rocks/3.png "VESSEL SYNC")
 ```   
-Image: showing new menu point: SYNC MODE
-
+Image: synchronized playback on a minimal UI. The UI shows current pattern row,
+patterns of each tracks, played instrument of each track, position in orderlist,
+note on/off and channel mute status.
 
 ;===============================================================================
 ;--- SID-WIZARD for VESSEL ---
