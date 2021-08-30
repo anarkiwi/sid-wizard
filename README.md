@@ -1,4 +1,7 @@
 ```
+
+... feature overlay-display for NMI sync playback is being developed here
+
 ;===============================================================================
 ;--- Update II --- external MIDI SYNC IN via NMI -------------------------------
 ; 08/21                                                                      M64
