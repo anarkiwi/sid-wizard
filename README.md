@@ -8,7 +8,7 @@ The first proof of concept is working! In the menu you can select "SYNC MODE":
 ( You need to enable the VESSEL MIDI interface first )
 
 ```
-![Choose SYNC mode](http://m64.rocks/2-2.png "SID-Wizard VESSEL: choose sync mode")
+![Choose SYNC mode](http://m64.rocks/2-2.1.png "SID-Wizard VESSEL: choose sync mode")
 ``` 
 ^ menu point to switch sync modes ^
 
