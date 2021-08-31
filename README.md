@@ -52,7 +52,7 @@ variables (play-status, sync-mode, main, NMI, IRQ, playbacks, ...) - this is
 temporary, until a proper new display section is created.
 The "2" immediately on the left besides the instrument window, indicates 
 SYNC MODE 2: NMI SYNC. The "0" or "1" below represents the playback status
-("0" = stopped, "1" = song playback"). 
+( 0 = stopped, 1 = play tune, 2 pattern play ). 
 
          ! NMI SYNC can only be EXITED via MIDI STOP message ! 
 
