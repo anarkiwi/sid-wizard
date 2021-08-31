@@ -74,7 +74,7 @@ do_sync jsr playadapter.playsubb
         
         jsr vesseldisp
         jsr keyhandler.keyer
-        jmp vessel
+        jmp vesselz
 
         ; stop all else and go back
 midistop lda #1
