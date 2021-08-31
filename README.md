@@ -13,7 +13,7 @@ The first proof of concept is working! In the menu you can select "SYNC MODE":
 ^ menu point to switch sync modes ^
 
 MODE 0: normal mode (default, original VESSEL MIDI support by anarkiwi)
-MODE 1: external MIDI sync in (by polling)
+MODE 1: external MIDI sync in (via polling)
 MODE 2: NMI sync: external MIDI sync in via NMI
 
 Mode 0 is the default behavior of SID-Wizard (SW) with an attached MIDI device, 
