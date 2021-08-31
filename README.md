@@ -63,7 +63,7 @@ SYNC MODE 2: NMI SYNC. The "0" or "1" below represents the playback status
 ``` 
 
 ;===============================================================================
-;--- Update II --- external MIDI SYNC IN via polling ---------------------------
+;--- Update I --- external MIDI SYNC IN via polling ----------------------------
 ;                                                                            M64
 ;-------------------------------------------------------------------------------
 
