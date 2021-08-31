@@ -46,17 +46,17 @@ values, etc. This is done during the wait for start and playback as well.
 You can mute tracks, and change instrument parameters on the fly.
 
 There are a few new visible indicators - for debugging mainly. At the patterns 
-very top row, on the right end - just before the instrument table: various characters 
-animate, to show the status of the various code levels, and some variables 
-(play-status, sync-mode, main, NMI, IRQ, playbacks, ...) - this is temporary, until 
-a proper new display section is created.
+very top row, on the right end - just before the instrument table: various 
+characters animate, to show the status of the various code levels, and some 
+variables (play-status, sync-mode, main, NMI, IRQ, playbacks, ...) - this is 
+temporary, until a proper new display section is created.
 The "2" immediately on the left besides the instrument window, indicates 
 SYNC MODE 2: NMI SYNC. The "0" or "1" below represents the playback status
 ("0" = stopped, "1" = song playback"). 
 
          ! NMI SYNC can only be EXITED via MIDI STOP message ! 
 
- Have fun! 
+ Have a lot of fun!  =8] 
 
 ```
 
