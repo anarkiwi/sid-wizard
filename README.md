@@ -24,7 +24,7 @@ enabled (and all MIDI channels enabled, too), SW will react on MIDI messages,
 also for start and stop. It will start playback, but unsynchronized.
 
 Mode 1 represents the previous update:
-( https://github.com/M64GitHub/sid-wizard/tree/m64/add-external-midi-sync )
+( see description below )
 Activating this sync mode waits for a play event, and then enters a polling
 based playback, replacing the UI with a very basic info on playback operation.
 
