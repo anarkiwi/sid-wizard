@@ -63,9 +63,13 @@ SYNC MODE 2: NMI SYNC. The "0" or "1" below represents the playback status
 ``` 
 
 ;===============================================================================
-;--- M64 update I: ext MIDI sync IN ---
+;--- Update II --- external MIDI SYNC IN via polling ---------------------------
+;                                                                            M64
+;-------------------------------------------------------------------------------
 
-First poc for external MIDI sync IN
+The first proof of concept for external MIDI sync IN is working!
+
+Changes to SID-Wizard:
 
  - when no MIDI device is selected, no changes
  
@@ -88,6 +92,7 @@ First poc for external MIDI sync IN
    - Note: for keyboard F4 to exit VESSEL SYNC mode:
      keyboard must be checked -> MIDI SYNC must be still sent
      should not be necessary, as MIDI STOP exits sync mode now.
+    
 ```
 ![SID Wizard menu NMI mode on](http://m64.rocks/3.png "VESSEL SYNC")
 ```   
