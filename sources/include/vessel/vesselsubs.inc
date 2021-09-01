@@ -7,7 +7,16 @@ VMODE_OFF           .var 0
 VMODE_EXT_MIDI_SYNC .var 1
 VMODE_NMI_SYNC      .var 2
 
-VESSELMODE      .byte 0         ; 0 = off / 1 = vessel sync playing mode 
+VESSELMODE      .byte 0         ; 0 = off 
+                                ; 1 = vessel sync playing mode 
+                                ; 2 = vessel NMI sync
+
+VESSEL_OVERLAY_PTN .byte 0
+
+DISP_SLOW_SKIP_SPEED = 6
+
+DISP_SLOW_SKIP_CNT .byte DISP_SLOW_SKIP_SPEED
+
 
 ; main loop 
 
@@ -26,6 +35,7 @@ _not_playing
         lda VESSELMODE
         cmp #VMODE_NMI_SYNC
         bne goback
+
         jmp _vnmi_play
 
 ; PLAYING HERE        
@@ -37,15 +47,36 @@ _playing lda VESSELMODE
         bne goback
         
 _vnmi_play        
+        dec DISP_SLOW_SKIP_CNT
+        bne +
+
         jsr keyhandler.keyer
+        
         lda #1
         sta display.syncscr+1
-        jsr display  
+
+        lda #DISP_SLOW_SKIP_SPEED
+        sta DISP_SLOW_SKIP_CNT
+
++       jsr display  
         jsr playadapter.jamplay
         jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
         jsr display2
-
         jsr vessel_statusdisp
+        
+        ; this has to be moved into the ptndisplay function, since:
+        ; the ptn disp func takes a "long" time. the effect in this 
+        ; loop would be, that (more or less) directly after 
+        ;   jsr vessel_overlay_disp_patterns
+        ; the loop finishes and calls ptn disp again, which overwrites
+        ; the just drawn characters -> the overlay disp is flickery and 
+        ; barely visible.
+        ;
+        ; next problem: ptndisp is drawn bottom up
+        ;
+        ; 
+        ; jsr vessel_overlay_disp_patterns 
+
         inc vidram+29+40+40+40+40
 
         jmp vessel      ; NMI or IRQ will play
@@ -74,7 +105,7 @@ do_sync jsr playadapter.playsubb
         
         jsr vesseldisp
         jsr keyhandler.keyer
-        jmp vesselz
+        jmp vessel
 
         ; stop all else and go back
 midistop lda #1
@@ -339,6 +370,78 @@ vessel_statusdisp
         lda playadapter.playmod
         sta vidram+29+40
         inc vidram+29+40+40+40
+        rts
+
+.enc 'screen'
+PT .text "PT"      
+.enc 'none'
+
+
+
+vessel_overlay_disp_patterns
+        ; draw overlay on patterns window
+
+;         ; clr 1st row + color
+;         lda #' '
+;         ldy #1
+;         ldx #29
+; -       sta vidram,x
+;         sty $d800,x
+;         dex
+;         bne -
+
+        lda VESSEL_OVERLAY_PTN
+        bne +
+        rts
+
+        ; print static part:
++       lda PT+0
+        sta vidram+5
+        sta vidram+5+10
+        sta vidram+5+20
+        lda PT+1
+        sta vidram+5+1
+        sta vidram+5+1+10
+        sta vidram+5+1+20
+
+        ; pattern numbers on tracks:
+        ; disp 3x pat nr
+_ptns   lda player.CURPTN+0
+        tax
+        and #$f0
+        lsr
+        lsr
+        lsr
+        lsr 
+        sta vidram+5+2
+        txa
+        and #$0f
+        sta vidram+5+2+1
+
+        lda player.CURPTN+7
+        tax
+        and #$f0
+        lsr
+        lsr
+        lsr
+        lsr 
+        sta vidram+5+2+10
+        txa
+        and #$0f
+        sta vidram+5+2+10+1
+
+        lda player.CURPTN+14
+        tax
+        and #$f0
+        lsr
+        lsr
+        lsr
+        lsr 
+        sta vidram+5+2+20
+        txa
+        and #$0f
+        sta vidram+5+2+20+1
+        
         rts
 
 VESSELEND

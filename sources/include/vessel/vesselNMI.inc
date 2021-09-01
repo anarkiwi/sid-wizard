@@ -128,6 +128,7 @@ VESSEL_NMISTOP
         sta $d021
         sta NMI_MIDI_STOP
         sta VESSELMODE
+        sta VESSEL_OVERLAY_PTN
         lda #1
         sta wait4play+1
         ; re init vessel disp
@@ -236,7 +237,7 @@ _VNMI_PlayBeg
         
         ; disable raster irq    
         lda $d01a
-        and #$fez
+        and #$fe
         sta $d01a
         
         jsr vessel_NMI_ON
@@ -247,6 +248,7 @@ _VNMI_PlayBeg
         ldx #1
         stx playadapter.followp+1
         lda #1
+        sta VESSEL_OVERLAY_PTN
         sta playadapter.playmod
         jsr playadapter.ptploff
         jsr playadapter.inisubb
@@ -254,6 +256,12 @@ _VNMI_PlayBeg
         inc menu.clearmenu
         jsr menu.dispmenu
         jsr menu.menuback
+
+        lda #1
+        sta display.syncscr+1
+        
+        lda #DISP_SLOW_SKIP_SPEED
+        sta DISP_SLOW_SKIP_CNT
 
         ; reset y scrl, 25rows
         lda $d011
