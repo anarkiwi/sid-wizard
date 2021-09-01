@@ -236,7 +236,7 @@ _VNMI_PlayBeg
         
         ; disable raster irq    
         lda $d01a
-        and #$fe
+        and #$fez
         sta $d01a
         
         jsr vessel_NMI_ON
