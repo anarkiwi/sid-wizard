@@ -33,10 +33,9 @@ hilrefr lda #1          ;self-written, checks if highlight-step was adjusted
         sta hilrefr+1
         beq refstep     ;jump
 +       jsr ptndisp     ;display selected patterns
-        jsr vessel_overlay_disp_patterns 
-refstep jsr stpdisp     ;display step-highlighted bars for track 1..3
-
-        jsr vessel_overlay_disp_patterns 
+refstep        
+        jsr stpdisp     ;display step-highlighted bars for track 1..3
+        ; jsr vessel_overlay_disp_patterns 
 
 noptrfr lda playadapter.seqrefr ;signs if orderlist needs to be refreshed (change subtune / we're in orderlist)
         .if POS_DISP_MOD==2
@@ -92,7 +91,7 @@ selinst lda #1          ;self-written variable, number of selected instrument
         sty vidram+31
         tax
         lda commonsubs.hexchar,x
-        sta vidram+29
+        sta vidram+30
 
         jsr commonsubs.setinsptr ;load selected instrumet's basepointer to zeropage pointers
         jsr commonsubs.reftpos ;refresh table-base positions in jmtbase to add them in displayer/datawriter

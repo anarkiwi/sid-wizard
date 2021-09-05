@@ -13,7 +13,9 @@ VESSELMODE      .byte 0         ; 0 = off
 
 VESSEL_OVERLAY_PTN .byte 0
 
-DISP_SLOW_SKIP_SPEED = 6
+DISP_SLOW_SKIP_SPEED = 6        ; every X loops: ptndisp (+everything slow) 
+                                ; will be called,
+                                ; else skipped 
 
 DISP_SLOW_SKIP_CNT .byte DISP_SLOW_SKIP_SPEED
 
@@ -59,27 +61,14 @@ _vnmi_play
         sta DISP_SLOW_SKIP_CNT
 
 +       jsr display  
+        jsr vessel_overlay_disp_patterns ; switched to inst window
         jsr playadapter.jamplay
         jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
         jsr display2
-        jsr vessel_statusdisp
-        
-        ; this has to be moved into the ptndisplay function, since:
-        ; the ptn disp func takes a "long" time. the effect in this 
-        ; loop would be, that (more or less) directly after 
-        ;   jsr vessel_overlay_disp_patterns
-        ; the loop finishes and calls ptn disp again, which overwrites
-        ; the just drawn characters -> the overlay disp is flickery and 
-        ; barely visible.
-        ;
-        ; next problem: ptndisp is drawn bottom up
-        ;
-        ; 
-        ; jsr vessel_overlay_disp_patterns 
+        ; jsr vessel_statusdisp ; not necessary anymore, but keeping 4 enable 2 dbg
+        ; inc vidram+29+40+40+40+40
 
-        inc vidram+29+40+40+40+40
-
-        jmp vessel      ; NMI or IRQ will play
+        jmp vessel      ; NMI will play
 
 wait4play lda #1
         beq vessel_read_midi   ; first run toggle
@@ -129,7 +118,7 @@ midistop lda #1
         jmp menu.retoedi 
 
 goback  jsr display     ;considers menu-display over patterns (based on 'menumode' variable) 
-        jsr vessel_statusdisp
+        ; jsr vessel_statusdisp
         lda menu.menupoint ;check selected menupoint (value is 0 if no menupoint was launched)
         beq +           ;if no menu was launched, main loop continues
         jmp menu.runmenup
@@ -379,7 +368,7 @@ PT .text "PT"
 
 
 vessel_overlay_disp_patterns
-        ; draw overlay on patterns window
+; draw overlay on patterns window
 
 ;         ; clr 1st row + color
 ;         lda #' '
@@ -404,6 +393,16 @@ vessel_overlay_disp_patterns
         sta vidram+5+1+10
         sta vidram+5+1+20
 
+                ; colors
+
+        lda #11
+        sta $d800+5
+        sta $d800+5+10
+        sta $d800+5+20
+        sta $d800+5+1
+        sta $d800+5+1+10
+        sta $d800+5+1+20
+
         ; pattern numbers on tracks:
         ; disp 3x pat nr
 _ptns   lda player.CURPTN+0
@@ -413,10 +412,13 @@ _ptns   lda player.CURPTN+0
         lsr
         lsr
         lsr 
+        ldy #12
         sta vidram+5+2
+        sty $d800 +5+2
         txa
         and #$0f
         sta vidram+5+2+1
+        sty $d800 +5+2+1
 
         lda player.CURPTN+7
         tax
@@ -426,9 +428,11 @@ _ptns   lda player.CURPTN+0
         lsr
         lsr 
         sta vidram+5+2+10
+        sty $d800 +5+2+10
         txa
         and #$0f
         sta vidram+5+2+10+1
+        sty $d800 +5+2+10+1
 
         lda player.CURPTN+14
         tax
@@ -438,9 +442,11 @@ _ptns   lda player.CURPTN+0
         lsr
         lsr 
         sta vidram+5+2+20
+        sty $d800 +5+2+20
         txa
         and #$0f
         sta vidram+5+2+20+1
+        sty $d800 +5+2+20+1
         
         rts
 
