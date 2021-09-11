@@ -32,6 +32,8 @@ start   sei
         sta $d012
         lda #$7f
         sta $dc0d
+        ;;; NMI
+        lda #$90
         sta $dd0d
         lda $dc0d
         lda $dd0d

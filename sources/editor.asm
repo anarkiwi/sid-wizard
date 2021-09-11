@@ -107,8 +107,8 @@ appiniter               ;(this section was contained by initer.inc before)
 
 ;---------------------- display-refresher main loop (outside IRQ) ------------------
 mainloop
-inirequ lda #1                          ;selfmod variable ; if not 0, signs tune initialization request for main routine
-beq goto_vessel                         ;check init request from IRQ
+        inirequ lda #1                          ;selfmod variable ; if not 0, signs tune initialization request for main routine
+        beq goto_vessel                         ;check init request from IRQ
 initune jsr playadapter.inisubb         ;player-adapter version of initer ($1000) of player routine
         lda #0
         sta inirequ+1      
@@ -308,7 +308,7 @@ mutesolo .fill CHN_AMOUNT,$FF
 ;======================== RUNTIME CONFIGURATION ========================
 Config .block ;is saved to disk (in this order) if possible, and loaded at startup if possible
 ChnOff=$11 ;"OFF" MIDI-channel
-confbits .byte %00001001 ;ON/OFF configurations, each bit corresponds to a particular SID-Wizard ON/OFF-setting
+confbits .byte %00011001 ;ON/OFF configurations, each bit corresponds to a particular SID-Wizard ON/OFF-setting
  ;bit0 (1) - bind tracks ON/OFF (ON=1) - move track together wherever possible, or not at all
  ;bit1 (2) - rasterbar-display ON/OFF ('ON=0' to keep compatibility with previous SWM files) (some people get annoyed by player-rasterbars)
  ;bit2 (4) - followplay as default?  ('ON=1' to keep compatibility) - toggle follow-play for simple F1 play
@@ -367,13 +367,13 @@ defFIba .byte $ff       ;FILTER-PROGRAM
         .include "include/displayer2.inc" ;display cursor and textual content (mainly orderlist)
         .include "include/menu.inc"       ;menu and file-dialog and file-operations
         .include "include/packdepack.inc" ;compresses/decompresses the tune to prepare for loading/saving by wiping out empty area
-        .include "include/vesselsubs.inc"
         .dsection data	;tables/variables being displayed and used ;all data from other sources (between '.section data' and '.send data' comes here
 
 .if (MIDI_support!=0)
 MIDIdev=Config.MIDIdev ;use this external label instead of MIDI-C64.asm's built-in label
         .include "MIDI-C64.asm" ;library with MIDI-devices' usage routines
         .include "include/midisubs.inc" ;contains SW-related MIDI routines
+        .include "include/vessel/vesselsubs.inc"
 .fi
 
 ;.if (FINAL_CARTRIDGE_3_FIX!=0)

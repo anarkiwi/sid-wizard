@@ -1,22 +1,60 @@
-; vesselsubs.inc 2021 m64
+; vesselsubs.inc 2021 m64 
+.dsection VESSEL
+.section VESSEL
+VESSELSTART
 
-VESSELMODE .byte 0      ; 1 = vessel sync playing mode 
+VMODE_OFF           .var 0
+VMODE_EXT_MIDI_SYNC .var 1
+VMODE_NMI_SYNC      .var 2
+
+VESSELMODE      .byte 0         ; 0 = off / 1 = vessel sync playing mode 
 
 ; main loop 
 
-vessel  lda playadapter.playmod
-        beq +           ; if playmode is 0, tune doesn't play
+vessel  lda MIDIdev     ; by checking for MIDI dev present, no further need to check VESSELMODE
+        bne +
+        jmp goback
 
-        lda MIDIdev
-        beq goback
++       lda NMI_MIDI_STOP
+        beq + ; continue, if no STOP
+        jmp VESSEL_NMISTOP
+        
++       lda playadapter.playmod
+        bne _playing
+
+_not_playing
+        lda VESSELMODE
+        cmp #VMODE_NMI_SYNC
+        bne goback
+        jmp _vnmi_play
+
+; PLAYING HERE        
+_playing lda VESSELMODE
+        cmp #VMODE_EXT_MIDI_SYNC
+        beq wait4play           ; ext sync will play 
+
+        cmp #VMODE_NMI_SYNC
+        bne goback
+        
+_vnmi_play        
+        jsr keyhandler.keyer
+        lda #1
+        sta display.syncscr+1
+        jsr display  
+        jsr playadapter.jamplay
+        jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
+        jsr display2
+
+        jsr vessel_statusdisp
+        inc vidram+29+40+40+40+40
+
+        jmp vessel      ; NMI or IRQ will play
 
 wait4play lda #1
-        beq do_vessel   ; first run toggle
+        beq vessel_read_midi   ; first run toggle
 
         lda #0
         sta wait4play+1 ; 1st run: wait4play: wait for incoming MIDI sync messages
-        lda #1
-        sta VESSELMODE  ; turn on vessel sync playing mode
 
         ; disable raster irq    
         lda $d01a
@@ -25,33 +63,30 @@ wait4play lda #1
 
         jsr vesseldisp
 
-do_vessel  
-        ;
-        ; VESSEL MIDI READ HERE
-        ;
+vessel_read_midi  
         jsr MIDIC64.GetData.vesselReadMIDI
+        cpy #MIDI.StopSeqPlay
+        beq midistop
         cpy #MIDI.TimingClock
-        bne do_vessel
+        bne vessel_read_midi
 
-        jsr playadapter.playsubb        
+do_sync jsr playadapter.playsubb        
         
         jsr vesseldisp
         jsr keyhandler.keyer
         jmp vessel
 
-+       lda VESSELMODE
-        beq goback
-
-; stop
-        lda #0
-        sta VESSELMODE
-
-        lda #1
+        ; stop all else and go back
+midistop lda #1
         sta wait4play+1
 
         ; re init vessel disp
         lda #1
         sta vesseldisp+1
+
+        ; in case of MIDI stop
+        lda #0
+        sta playadapter.playmod
 
         ; re-enable raster irq
         lda $d01a
@@ -63,10 +98,11 @@ do_vessel
         jmp menu.retoedi 
 
 goback  jsr display     ;considers menu-display over patterns (based on 'menumode' variable) 
+        jsr vessel_statusdisp
         lda menu.menupoint ;check selected menupoint (value is 0 if no menupoint was launched)
-        beq gotomainloop    ;if no menu was launched, main loop continues
+        beq +           ;if no menu was launched, main loop continues
         jmp menu.runmenup
-gotomainloop jmp mainloop
++       jmp mainloop
 
 ; display code 
 
@@ -74,15 +110,16 @@ vesseldisp lda #1 ; selfmod 1st chk
         beq notfirst 
         lda #0 
         sta vesseldisp+1
+        sta $d020
         sta $d015
-        
+         
         ; clrscr
         ldy #0
 -       lda #$20        
         sta $0400,y
         sta $0500,y
         sta $0600,y
-        sta $0700,y
+        sta $0700,y 
         lda #0
         sta $d800,y
         sta $d900,y
@@ -90,8 +127,8 @@ vesseldisp lda #1 ; selfmod 1st chk
         sta $db00,y
         iny
         bne -
-
-        ; colors for numbers
+    
+        ; colors for numbers  
         lda #$0b ; SEQPOS
         sta $d800+40*(3)+5+0
         sta $d800+40*(3)+5+1
@@ -295,9 +332,24 @@ stap3   sta vidram+40*(5+10)+10+0+1
         sta $d020
         rts
 
+; used as overlay in main loop
+vessel_statusdisp
+        lda VESSELMODE
+        sta vidram+29
+        lda playadapter.playmod
+        sta vidram+29+40
+        inc vidram+29+40+40+40
+        rts
+
+VESSELEND
+
+.include "vesselnmi.inc"
+.include "vesselsubmenu.inc"
+
+.send VESSEL
 .section data
     .enc 'screen'
     vessellogo .text "             <-VESSEL/SYNC=>             "
 .send data
 
-.warn format(" vessel TMP WARNING IGNORE: Vesselsubs end: %x", *)
+.warn format(" vessel TMP WARNING IGNORE: Vesselsubs end: $%04x ($%04x remaining)", *, $D000 - *)

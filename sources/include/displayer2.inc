@@ -133,6 +133,11 @@ cury    lda #1          ;self-written variable ;cursor y coordinate (0..25..28)
         asl
         clc
         adc #$22
+        ldx VESSELMODE
+        cpx #2
+        bne +
+        adc #3 
++
         sta $d001
 justxdis
         ;cursor-sprite display (coordinates,colour)

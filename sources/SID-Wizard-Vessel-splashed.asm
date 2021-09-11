@@ -2,7 +2,7 @@
 ;===============================================
 ;add SPLASH-SCREEN for SID-Wizard decompression
 ;-----------------------------------------------
-; $Id: SID-Wizard-splashed.asm 382 2014-06-23 17:53:01Z hermitsoft $
+; $Id: SID-Wizard-Vessel-splashed.asm 382 2014-06-23 17:53:01Z hermitsoft $
 
 ;used zeropage-addresses:
 banksel=$01             ;C64 bank-selection register at zeropage
@@ -44,19 +44,19 @@ fadeend=30              ;peak brightness
 
 .if (SID_AMOUNT==1)
  .if (KERNAL_LOADSAVE==0)
-        .binary "../application/SID-Wizard-packed.prg",2
+        .binary "../application/SID-Wizard-Vessel-packed.prg",2
  .else
-        .binary "../application/SID-Wizard-packed-KERNAL.prg",2
+        .binary "../application/SID-Wizard-Vessel-packed-KERNAL.prg",2
  .fi
 .elsif (SID_AMOUNT==2)
-        .binary "../application/SID-Wizard-2SID-packed.prg",2
+        .binary "../application/SID-Wizard-Vessel-2SID-packed.prg",2
 .elsif (SID_AMOUNT>=3)
-        .binary "../application/SID-Wizard-3SID-packed.prg",2
+        .binary "../application/SID-Wizard-Vessel-3SID-packed.prg",2
 .fi
 endpacked
 
 ;-------------------------------------------------------------------------------
-;splash-screen displayer (after the included 'SID-Wizard-packed.prg' binary)
+;splash-screen displayer (after the included 'SID-Wizard-Vessel-packed.prg' binary)
 
 SPLASHER lda #$A0
          sta $080d      ;restore exomizer launcher's destructed byte

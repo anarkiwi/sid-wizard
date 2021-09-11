@@ -293,6 +293,7 @@ chLegac cpx #Legacy_max+1
         .if (MIDI_Legacy_support!=0)
          .if (Vessel_support!=0)
          ;Reset PA2 to signal INPUT mode
+
          lda $dd00
          and #%11111011 ;Set bit2 to 0
          sta $dd00
@@ -320,7 +321,13 @@ vesselReadMIDI ; read without changing border color
 RxByte   lda $dd01 ;Read MIDI byte from Port B
 WrIndex  ldx #selfmod
          sta MIDIbuffer,x
-         inx
+         cmp #MIDI.StopSeqPlay
+         bne _x
+         inc NMI_MIDI_STOP
+_x       cmp #MIDI.StartSqPlay
+         bne _y
+         inc NMI_MIDI_START
+_y       inx
          cpx #MIDIbuffer_size
          bcc +
          ldx #0        ; this makes it behave as a ring-buffer

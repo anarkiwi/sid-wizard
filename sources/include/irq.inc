@@ -39,7 +39,9 @@ rastsig and #$FF ;selfmod ;and don't allow nested raster-interrupts
 ;----------------------- SELECT SINGLE/MULTI RASTERBAR -------------------------
 fspdctr lda #selfmod    ;multispeed frame-position timer
         beq rast1st
+        
         jsr singmul
+ 
         jmp dendply
 
 ;----------------------- SINGLE-SPEED PLAYBACK-PART HANDLING -------------------
