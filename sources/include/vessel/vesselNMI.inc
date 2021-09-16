@@ -268,18 +268,26 @@ _VNMI_PlayBeg
         ora #%00001011
         sta $d011
 
-        lda #$ff
+        lda #128+64
         sta $d015 ; sprites ON
 
-        ; lda #52
-        ; ; sta $d001; spr 0
+        ; spr y pos
+        lda #60
+        ; sta $d001; spr 0
         ; sta $d003 ; spr 1
-        ; sta $d005 ; spr 1
-        ; sta $d007 ; spr 1
-        ; sta $d009 ; spr 1
-        ; sta $d00b ; spr 1
-        ; sta $d00d ; spr 1
-        ; sta $d00f ; spr 1
+        ; sta $d005 ; spr 2
+        ; sta $d007 ; spr 3
+        ; sta $d009 ; spr 4
+        ; sta $d00b ; spr 5
+        sta $d00d ; spr 6
+        sta $d00f ; spr 7
+
+        ; spr color
+        lda #1
+        sta $d02e
+        sta $d02d
+
+        jsr clr_v_scrn
 
         ldx #0
         stx $d020

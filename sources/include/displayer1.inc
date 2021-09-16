@@ -88,6 +88,12 @@ insdisp lda #0          ;display instrument-data
 selinst lda #1          ;self-written variable, number of selected instrument
         jsr commonsubs.hexdis2
         ldy commonsubs.hexchar,x
+        ldx VESSELMODE
+        cmp #2
+        bne _noskipinst
+        rts
+
+_noskipinst
         sty vidram+31
         tax
         lda commonsubs.hexchar,x

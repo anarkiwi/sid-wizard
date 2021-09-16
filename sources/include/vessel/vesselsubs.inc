@@ -60,7 +60,8 @@ _vnmi_play
         lda #DISP_SLOW_SKIP_SPEED
         sta DISP_SLOW_SKIP_CNT
 
-+       jsr display  
++       ; jsr ptndisp
+        ; jsr display  
         jsr vessel_overlay_disp_patterns ; switched to inst window
         jsr playadapter.jamplay
         jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
@@ -368,87 +369,162 @@ PT .text "PT"
 
 
 vessel_overlay_disp_patterns
-; draw overlay on patterns window
 
-;         ; clr 1st row + color
-;         lda #' '
-;         ldy #1
-;         ldx #29
-; -       sta vidram,x
-;         sty $d800,x
-;         dex
-;         bne -
+;           ..........
+;           
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
 
         lda VESSEL_OVERLAY_PTN
         bne +
         rts
 
         ; print static part:
-+       lda PT+0
-        sta vidram+5
-        sta vidram+5+10
-        sta vidram+5+20
-        lda PT+1
-        sta vidram+5+1
-        sta vidram+5+1+10
-        sta vidram+5+1+20
++       jsr clr_v_scrn 
 
-                ; colors
+;         lda PT+0
+;         sta vidram+5
+;         sta vidram+5+10
+;         sta vidram+5+20
+;         lda PT+1
+;         sta vidram+5+1
+;         sta vidram+5+1+10
+;         sta vidram+5+1+20
 
-        lda #11
-        sta $d800+5
-        sta $d800+5+10
-        sta $d800+5+20
-        sta $d800+5+1
-        sta $d800+5+1+10
-        sta $d800+5+1+20
+;                 ; colors
 
-        ; pattern numbers on tracks:
-        ; disp 3x pat nr
-_ptns   lda player.CURPTN+0
-        tax
-        and #$f0
-        lsr
-        lsr
-        lsr
-        lsr 
-        ldy #12
-        sta vidram+5+2
-        sty $d800 +5+2
-        txa
-        and #$0f
-        sta vidram+5+2+1
-        sty $d800 +5+2+1
+;         lda #11
+;         sta $d800+5
+;         sta $d800+5+10
+;         sta $d800+5+20
+;         sta $d800+5+1
+;         sta $d800+5+1+10
+;         sta $d800+5+1+20
 
-        lda player.CURPTN+7
-        tax
-        and #$f0
-        lsr
-        lsr
-        lsr
-        lsr 
-        sta vidram+5+2+10
-        sty $d800 +5+2+10
-        txa
-        and #$0f
-        sta vidram+5+2+10+1
-        sty $d800 +5+2+10+1
+;         ; pattern numbers on tracks:
+;         ; disp 3x pat nr
+; _ptns   lda player.CURPTN+0
+;         tax
+;         and #$f0
+;         lsr
+;         lsr
+;         lsr
+;         lsr 
+;         ldy #12
+;         sta vidram+5+2
+;         sty $d800 +5+2
+;         txa
+;         and #$0f
+;         sta vidram+5+2+1
+;         sty $d800 +5+2+1
 
-        lda player.CURPTN+14
-        tax
-        and #$f0
-        lsr
-        lsr
-        lsr
-        lsr 
-        sta vidram+5+2+20
-        sty $d800 +5+2+20
-        txa
-        and #$0f
-        sta vidram+5+2+20+1
-        sty $d800 +5+2+20+1
+;         lda player.CURPTN+7
+;         tax
+;         and #$f0
+;         lsr
+;         lsr
+;         lsr
+;         lsr 
+;         sta vidram+5+2+10
+;         sty $d800 +5+2+10
+;         txa
+;         and #$0f
+;         sta vidram+5+2+10+1
+;         sty $d800 +5+2+10+1
+
+;         lda player.CURPTN+14
+;         tax
+;         and #$f0
+;         lsr
+;         lsr
+;         lsr
+;         lsr 
+;         sta vidram+5+2+20
+;         sty $d800 +5+2+20
+;         txa
+;         and #$0f
+;         sta vidram+5+2+20+1
+;         sty $d800 +5+2+20+1
         
         rts
+
+clr_v_scrn
+         lda # <(vidram+30) 
+         sta smod00+1
+         lda # >(vidram+30) 
+         sta smod00+2
+
+         lda #24
+         sta vdisp_rowctr
+
+         ldx #0
+-        ldy #0
+-        lda v_scrn, x
+smod00   sta vidram+30
+         inx
+         iny
+
+         inc smod00+1
+         bne +
+         inc smod00+2
+
++        cpy #10
+         bne -
+         clc
+         lda #30
+         adc smod00+1
+         bcc +
+         inc smod00+2
+
++        sta smod00+1
+         dec vdisp_rowctr
+         bne --
+
+         rts
+vdisp_rowctr .byte 00
+
+v_scrn
+.enc 'screen'
+        ; .text "VESSEL    "
+        ; .text "   NMI    "
+        ; .text "          "
+
+        .text "VESSEL NMI"
+        .text "          "
+        .text "          "
+        .text "          "
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+        .byte $c2,$00,$10,$00,$90,$00,$10,$c2,$00,$90
+.enc 'none'
+
 
 VESSELEND
 
