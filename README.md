@@ -61,6 +61,8 @@ SYNC MODE 2: NMI SYNC. The "0" or "1" below represents the playback status
 
          ! NMI SYNC can only be EXITED via MIDI STOP message ! 
 
+                                (for now)
+
  Have a lot of fun!  =8] 
 
 ```
