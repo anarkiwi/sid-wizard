@@ -2000,6 +2000,13 @@ f3er .proc              ;F3 key handler (play current pattern from its beginning
 f4er    ;F4 (Shift+F3) key handler (stop playback / ? continue (play/pause))
 +
 .if (MIDI_support!=0)
+        lda VESSELMODE
+        cmp #2
+        bne +
+        lda #0
+        sta playadapter.playmod
+        jmp VESSEL_NMISTOP
++
         lda #MIDI.StopSeqPlay
         jsr midisubs.sendMID ;start-command to other MIDI-controlled sequencer
 .fi

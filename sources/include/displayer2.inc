@@ -1066,7 +1066,7 @@ itaemphcol  .byte 15    ;(default:3)  emphasized instrument-table numbers' colou
 gateoffcol  .byte 11    ;(default:11) gateoff-pointers' colours in instrument-tables
 ;---menu user-modifiable colour scheme
 menubgcol   .byte 14    ;(default:14) menu background colour
-menucurcol  .byte 15    ;(default:13) menu cursor/highlight-colour
+menucurcol  .byte 11    ;(default:13) menu cursor/highlight-colour
 ColorSetEnd
         .send
 
@@ -1074,7 +1074,7 @@ ColorSetEnd
 ColorThemes .section data  ;order is based on 'ColorSet' above
         .byte 12,  15, 3,12,  11,12,15,  13,15,12,15, 3,15,11, 14,15
         .byte  5,  13, 3, 5,   5,13, 1,   3, 7, 5,13, 3,13, 7, 13, 3
-        .byte 14,   1, 3, 14, 11,12,15,  13,15,12,15,   4  ,15,11, 14,15       
+        .byte 14,   1, 3, 14, 11,12,15,   7,15,12,15,   4  ,15,11, 14,4 ; M64 / VESSEL MODE      
         .byte  3,  15, 3, 5,  11,12,15,   3,13, 3,13,15,13,13,  3, 1
         .byte 14,  15,14, 6,   6,14,13,  14,15,14, 3,15,13,15, 14, 3
         .byte  4,  10,14, 4,   4,10, 7,  10,12, 4,15,10, 7,10,  4, 7

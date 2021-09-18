@@ -89,13 +89,10 @@ VESSELNMI
 
         bit $dd0d
         
-        inc vidram+29+40+40+40+40+80
-
         jsr NMIReadMIDI
         cpy #MIDI.TimingClock
         bne _exitNMI
                 
-        inc vidram+29+40+40+40+40+80+40
         lda #1
         jsr playadapter.playsubb
         jsr playadapter.followplay
@@ -141,6 +138,8 @@ VESSEL_NMISTOP
         stx $d020
         lda #0
         sta menu.m64btx
+
+        jsr v_scrn_restore
 
         lda #$35
         sta banksel 
@@ -268,11 +267,11 @@ _VNMI_PlayBeg
         ora #%00001011
         sta $d011
 
-        lda #128+64
+        lda #128+64+1 ; +32
         sta $d015 ; sprites ON
 
         ; spr y pos
-        lda #60
+        lda #60 + 1
         ; sta $d001; spr 0
         ; sta $d003 ; spr 1
         ; sta $d005 ; spr 2
@@ -283,11 +282,14 @@ _VNMI_PlayBeg
         sta $d00f ; spr 7
 
         ; spr color
-        lda #1
-        sta $d02e
+        lda #$0b
+        ; sta $d02c
         sta $d02d
+        sta $d02e
 
+        jsr v_scrn_save
         jsr clr_v_scrn
+        jsr do_v_scrn
 
         ldx #0
         stx $d020
@@ -300,30 +302,3 @@ _menup_sync_mode_ret
         sta menu.m64btx
 _menupoint_back   
         jmp vessel
-
-clrscrn1 
-        ldy #0
--       lda #$20        
-        sta $0400,y
-        sta $0500,y
-        sta $0600,y
-        sta $0700,y 
-        iny
-        bne -
-        rts
-
-clrscrn2 ldy #0
-        sty $d015       ;switch off sprites to prevent rastertime-cycles being stolen from CPU
--       lda #$20        ;clear screen
-        sta $0400,y
-        sta $0500,y
-        sta $0600,y
-        sta $0700,y
-        lda #EXETEXTCOL
-        sta $d800,y
-        sta $d900,y
-        sta $da00,y
-        sta $db00,y
-        iny
-        bne -
-        rts

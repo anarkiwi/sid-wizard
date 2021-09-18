@@ -433,7 +433,6 @@ stp3plc .byte $c0
 trk3plc .byte $5D,$5C,$5D,$5C,$5D,$5C,$5D,$5C,$bd
 
 ;*=$E01E
-VESSEL_SUBDISP_LOGO
         .text "01INSTRUM."
         *= INSPOS+$28
         .byte $c1,$80,$A0,$00,$10,$00,$10,$00,$10,$bd
@@ -462,7 +461,6 @@ VESSEL_SUBDISP_LOGO
         .byte $c1,$80,$A0,$00,$10,$00,$10,$00,$10,$bd
         .byte $c1,$80,$A0,$00,$10,$00,$10,$00,$10,$bd
         .byte $c1,$5D,$5C,$5D,$5C,$5D,$5C,$5D,$5C,$bd
-VESSEL_SUBDISP
         .text "WFARPDT"
         .byte $7a,$7b,$c1       ; Chord01
 

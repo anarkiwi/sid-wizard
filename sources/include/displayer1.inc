@@ -48,11 +48,18 @@ titledi lda #selfmod    ;if title should be left in row 26
 +       jsr ordldis     ;display orderlist data (low border spritedata)
 
 insrefr lda #1          ;self-written variable ;signs if instrument table needs to be refreshed (if we-re in instrument window or change instrument)
+        tay
         beq +
+        
+        lda VESSELMODE
+        cmp #2 
+        beq +
+
         jsr insdisp     ;display instrument data
         jsr chtmdis
 
-+       jsr miscdis     ;display subtune-specific data
++       tya
+        jsr miscdis     ;display subtune-specific data
         jsr upbordisp   ;display upper border data in upper-border sprites
 
 msorefr ldy #selfmod    ;signs if refresh of mute/solo is needed
@@ -88,12 +95,7 @@ insdisp lda #0          ;display instrument-data
 selinst lda #1          ;self-written variable, number of selected instrument
         jsr commonsubs.hexdis2
         ldy commonsubs.hexchar,x
-        ldx VESSELMODE
-        cmp #2
-        bne _noskipinst
-        rts
-
-_noskipinst
+        
         sty vidram+31
         tax
         lda commonsubs.hexchar,x
