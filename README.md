@@ -32,7 +32,7 @@ When this mode is selected, SW drops back to the editor:
 ``` 
  ^ SW in SYNC MODE (NMI SYNC) ^
 
-To make up for the missing border sprites,a playback status window is 
+To make up for the missing border sprites, a playback status window is 
 displayed over the instrument window - showing SID WF registers, the 
 posistion in the current pattern, currently playing instruments,
 the channel 3 oscilloscope, and the pulswewidth-/filter bars.
