@@ -29,23 +29,31 @@ Activating this sync mode waits for a play event, and then enters a polling
 based playback, replacing the UI with a very basic info on playback operation.
 
 Mode 2: NMI SYNC! In this mode VESSEL is configured to trigger NMIs on CIA2s
-/FLAG input. Playback is running in NMI, the UI stays visible and functional,
-except of border sprites. When this mode is selected, SW drops back to the
+/FLAG input on MIDI start/stop/sync messages. Playback is running in NMI, 
+the UI stays visible and functional, except of border sprites. 
+When this mode is selected, SW drops back to the
 editor:
 
 ```
 ![NMI](http://m64.rocks/githubimgs/2-empty.png "NMI")
-
-![NMI](http://m64.rocks/githubimgs/2-song.png "NMI")
 ``` 
  ^ SW in SYNC MODE 2 (NMI SYNC) ^
+
+To make up for the missing border sprites,a playback status window is 
+displayed over the instrument window - showing SID WF registers, the 
+posistion in the current pattern, currently playing instruments,
+the channel 3 oscilloscope, and the pulswewidth-/filter bars.
+
+The keyboard is checked, and you can move around the cursor, enter notes/
+values, etc. This is done during the wait for start and playback as well.
+You can mute tracks, and use editor functions in the pattern window.
 
 SW now waits for a MIDI START message. When it is received, synchronized
 playback starts, in follow play mode.
 
-The keyboard is checked, and you can move around the cursor, enter notes/
-values, etc. This is done during the wait for start and playback as well.
-You can mute tracks, and change instrument parameters on the fly.
+```
+![NMI](http://m64.rocks/githubimgs/2-song.png "NMI")
+```
 
   Have a lot of fun!  =8] 
 
