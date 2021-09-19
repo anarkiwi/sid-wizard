@@ -52,47 +52,7 @@ playback starts, in follow play mode.
 
 ```
 
-``` 
 
-;===============================================================================
-;--- Update I --- external MIDI SYNC IN via polling ----------------------------
-;                                                                            M64
-;-------------------------------------------------------------------------------
-
-The first proof of concept for external MIDI sync IN is working!
-
-Changes to SID-Wizard:
-
- - when no MIDI device is selected, no changes
- 
- - when MIDI device VESSEL is selected playback changes:
-
-   - starting playback via F1/F2/F3 / MIDI START: 
-     will start playback in VESSEL SYNC mode:
-   
-   - wait for incoming MIDI SYNC message 
-     (24ppqn, when SW single speed tune tempo == 6: 1 row = 1/16th note)
-   
-     - call player routine
-
-     - check keyboard (SHIFT 1..3 channel mute/unmute should work)
-
-     - if keyboard F4, <-, or MIDI STOP : exit VESSEL SYNC mode 
-   
-     - repeat
-   
-   - Note: for keyboard F4 to exit VESSEL SYNC mode:
-     keyboard must be checked -> MIDI SYNC must be still sent
-     should not be necessary, as MIDI STOP exits sync mode now.
-    
-```
-![SID Wizard menu NMI mode on](http://m64.rocks/3.png "VESSEL SYNC")
-```   
- ^ Image: synchronized playback on a minimal UI. The UI shows current pattern ^
-   row, patterns of each tracks, played instrument of each track, position in 
-   orderlist, note on/off and channel mute status.
-
-```
 
 ``` 
 ;===============================================================================
