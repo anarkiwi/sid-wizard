@@ -94,6 +94,7 @@ VESSELNMI
         bne _exitNMI
                 
         lda #1
+        sta VESSELPLAYING
         jsr playadapter.playsubb
         jsr playadapter.followplay
 
@@ -119,6 +120,7 @@ VESSEL_NMISTOP
         ; MIDI STOP: stop playback
         lda #0
         sta playadapter.playmod
+        sta VESSELPLAYING
         sei
         jsr vessel_NMI_OFF
 
@@ -148,6 +150,7 @@ VESSEL_NMISTOP
         jmp menu.retoedi 
         
         jmp goback
+VESSELPLAYING .byte 0
 
 ; NMI MIDI READ Routine
 NMIReadMIDI ; read without changing border color
@@ -285,9 +288,8 @@ _VNMI_PlayBeg
 
         ; spr color
         lda #$0b
-        ; sta $d02c
         sta $d02d
-        lda #$0f
+        lda #$04
         sta $d02e
 
         jsr v_scrn_save

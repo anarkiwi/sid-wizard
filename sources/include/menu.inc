@@ -198,7 +198,15 @@ initedi jsr inidisp
         jmp started
 
 dispaut .proc
-        ldy #authorilen-2 ;hardwired author-info length
+        lda VESSELMODE
+        cmp #2
+        bne +
+
+        lda #0
+        sta menumode
+        rts       
+        
++       ldy #authorilen-2 ;hardwired author-info length
 -       lda authorinfo,y ;display author-info after loading tune
         sta row26,y
         dey

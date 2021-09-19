@@ -36,8 +36,14 @@ vessel  lda MIDIdev     ; by checking for MIDI dev present, no further need to c
 _not_playing
         lda VESSELMODE
         cmp #VMODE_NMI_SYNC
-        bne goback
+        bne +
         jmp _vnmi_play
+
++       lda VESSELPLAYING
+        beq +
+        jmp midistop
+
++       jmp goback 
 
 ; PLAYING HERE        
 _playing lda VESSELMODE
@@ -45,8 +51,9 @@ _playing lda VESSELMODE
         beq wait4play           ; ext sync will play 
 
         cmp #VMODE_NMI_SYNC
-        bne goback
-        
+        beq +
+        jmp goback
++
 _vnmi_play        
         dec DISP_SLOW_SKIP_CNT
         bne +
@@ -55,6 +62,8 @@ _vnmi_play
         
         lda #1
         sta display.syncscr+1
+        lda #0
+        sta curwind
 
         lda #DISP_SLOW_SKIP_SPEED
         sta DISP_SLOW_SKIP_CNT
@@ -82,6 +91,9 @@ wait4play lda #1
 
         jsr vesseldisp
 
+        lda #1
+        sta VESSELPLAYING
+
 vessel_read_midi  
         jsr MIDIC64.GetData.vesselReadMIDI
         cpy #MIDI.StopSeqPlay
@@ -106,6 +118,8 @@ midistop lda #1
         ; in case of MIDI stop
         lda #0
         sta playadapter.playmod
+        sta VESSELPLAYING
+        sta VESSELMODE
 
         ; re-enable raster irq
         lda $d01a
@@ -372,8 +386,6 @@ vessel_overlay_disp
         rts
 
 +       jsr do_v_scrn 
-        jsr v_orderlist_disp
-
         rts
 
 do_v_scrn
@@ -447,15 +459,28 @@ do_v_scrn
         jsr v_disp_trackrow2
         jsr v_disp_trackrow3
 
+        jsr blink_vessel
 
         rts
 
 
-v_orderlist_disp
+blink_vessel
+        lda VESSELPLAYING
+        beq +
 
-        jsr v_disp_trackrow1
+        lda $D027 ; spr 0 color
+        ldy #4
+        ldx #0
 
-        rts
+-       sta $D800+36,x
+        inx
+        dey 
+        bne -
+
++       rts
+
+; v_orderlist_disp
+;         rts
 
 v_disp_trackrow1
         ; init vidramptr to write to 
