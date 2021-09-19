@@ -1,15 +1,15 @@
 ```
 
-... feature overlay-display for NMI sync playback is being developed here
+... updated NMI sync display
 
 ```
 ```
 ;===============================================================================
 ;--- Update II --- external MIDI SYNC IN via NMI -------------------------------
-; 08/21                                                                      M64
+; 09/21                                                                      M64
 ;-------------------------------------------------------------------------------
 
-The first proof of concept is working! In the menu you can select "SYNC MODE":
+NMI MIDI sync in is working! In the menu you can select "SYNC MODE":
 ( You need to enable the VESSEL MIDI interface first )
 
 ```
@@ -50,20 +50,7 @@ The keyboard is checked, and you can move around the cursor, enter notes/
 values, etc. This is done during the wait for start and playback as well.
 You can mute tracks, and change instrument parameters on the fly.
 
-There are a few new visible indicators - for debugging mainly. At the patterns 
-very top row, on the right end - just before the instrument table: various 
-characters animate, to show the status of the various code levels, and some 
-variables ( play-status, sync-mode, main, NMI, IRQ, playbacks, ... ) - this is 
-temporary, until a proper new display section is created.
-The "2" immediately on the left besides the instrument window, indicates 
-SYNC MODE 2: NMI SYNC. The "0" or "1" below represents the playback status
-( 0 = stopped, 1 = play tune, 2 pattern play ). 
-
-         ! NMI SYNC can only be EXITED via MIDI STOP message ! 
-
-                                (for now)
-
- Have a lot of fun!  =8] 
+  Have a lot of fun!  =8] 
 
 ```
 
