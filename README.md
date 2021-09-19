@@ -1,8 +1,8 @@
 ```
-;===============================================================================
-;--- Update II --- external MIDI SYNC IN via NMI -------------------------------
-; 09/21                                                                      M64
-;-------------------------------------------------------------------------------
+;==============================================================================
+;--- external MIDI SYNC IN via NMI --------------------------------------------
+;09/21                                                                      M64
+;------------------------------------------------------------------------------
 
 NMI MIDI sync IN feature: in the menu you can select "SYNC MODE":
      ( You need to enable the VESSEL MIDI interface first )
@@ -10,34 +10,27 @@ NMI MIDI sync IN feature: in the menu you can select "SYNC MODE":
 ```
 ![Choose SYNC mode](http://m64.rocks/githubimgs/2-menu3.png "SID-Wizard VESSEL: choose sync mode")
 ``` 
-^ menu point to switch sync modes ^
+^ menu point to switch sync mode ON ^
 
-MODE 0: normal mode ( default, original VESSEL MIDI support by anarkiwi )
-MODE 1: external MIDI sync in ( via polling )
-MODE 2: NMI sync: external MIDI sync in via NMI
+MODE 0: sync OFF - normal mode ( default, original VESSEL MIDI support by anarkiwi )
+MODE 1: sync ON  - external MIDI sync in via NMI
 
-Mode 0 is the default behavior of SID-Wizard (SW) with an attached MIDI device, 
+sync OFF: is the default behavior of SID-Wizard (SW) with an attached MIDI device, 
 where anarkiwi has implemented the original VESSEL MIDI support. 
 ( see https://github.com/anarkiwi/sid-wizard ) 
 Playback is running in IRQ, and no sync in is done. When you have your VESSEL 
 enabled (and all MIDI channels enabled, too), SW will react on MIDI messages,
 also for start and stop. It will start playback, but unsynchronized.
 
-Mode 1 represents the previous update:
-( see description below )
-Activating this sync mode waits for a play event, and then enters a polling
-based playback, replacing the UI with a very basic info on playback operation.
-
-Mode 2: NMI SYNC! In this mode VESSEL is configured to trigger NMIs on CIA2s
+sync ON: NMI SYNC mode! In this mode VESSEL is configured to trigger NMIs on CIA2s
 /FLAG input on MIDI start/stop/sync messages. Playback is running in NMI, 
 the UI stays visible and functional, except of border sprites. 
-When this mode is selected, SW drops back to the
-editor:
+When this mode is selected, SW drops back to the editor:
 
 ```
 ![NMI](http://m64.rocks/githubimgs/2-empty.png "NMI")
 ``` 
- ^ SW in SYNC MODE 2 (NMI SYNC) ^
+ ^ SW in SYNC MODE (NMI SYNC) ^
 
 To make up for the missing border sprites,a playback status window is 
 displayed over the instrument window - showing SID WF registers, the 
