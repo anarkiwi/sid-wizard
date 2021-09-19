@@ -1,5 +1,0 @@
- - does not receive MIDI (start)
-
- - playback not called / nmi vector overwritten (?)
-
- 

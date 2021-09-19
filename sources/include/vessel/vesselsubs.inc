@@ -61,7 +61,7 @@ _vnmi_play
 
 +       ; jsr ptndisp
         jsr display  
-        jsr vessel_overlay_disp_patterns ; switched to inst window
+        jsr vessel_overlay_disp ; switched to inst window
         jsr playadapter.jamplay
         jsr cursord     ;time:3 rasterlines; put cursor to coordinate & flash colour
         jsr display2
@@ -366,12 +366,13 @@ PT .text "PT"
 
 
 
-vessel_overlay_disp_patterns
+vessel_overlay_disp
         lda VESSEL_OVERLAY_PTN
         bne +
         rts
 
 +       jsr do_v_scrn 
+        jsr v_orderlist_disp
 
         rts
 
@@ -442,58 +443,198 @@ do_v_scrn
         ldy #>(vidram+30+40*7+4+4)
         jsr print_hex
 
-        lda #$35
-        sta banksel
+        jsr v_disp_trackrow1
+        jsr v_disp_trackrow2
+        jsr v_disp_trackrow3
+
 
         rts
 
-print_hex_fat
-        stx storehi+1
-        sty storehi+2
-        stx storelo+1
-        sty storelo+2
 
-        inc storelo+1
-        bne +
-        inc storelo+2
+v_orderlist_disp
 
-+       tax
+        jsr v_disp_trackrow1
 
-        and #$f0
-        lsr
-        lsr
-        lsr
-        lsr
+        rts
 
-        cmp #10
-        bcc +
+v_disp_trackrow1
+        ; init vidramptr to write to 
+        lda # <(vidram+30+40*9+4) 
+        sta v_ptr+0
+        lda # >(vidram+30+40*9+4) 
+        sta v_ptr+1
 
-        clc
-        adc #55
-        jmp storehi
+        lda #16 - 1
+        sta vdisp_rowctr        ; max 16 rows
 
-+       clc
-        adc #$30
+        ldy player.SEQPOS ; ORDERLIST SEQUENCE PLAYPOSITION
+        iny
 
-storehi sta vidram+30+40*6+4
+-       tya
+        pha
+
+        lda SEQUENCES, y ; ORDERLIST T1
+        ldx v_ptr
+        ldy v_ptr+1
+        jsr print_hex
         
-       
-        txa
-
-        and #$0f
-        cmp #10
-        bcc +
-
         clc
-        adc #55
-        jmp storelo
+        lda #40
+        adc v_ptr+0
+        bcc +
+        inc v_ptr+1
++       sta v_ptr+0
 
-+       clc
-        adc #$30
+        pla
+        tay
+        ; check for FE
+        lda SEQUENCES, y
+        cmp #$FE
+        beq _pr_spc
 
-storelo sta vidram+30+40*6+4+1
++       iny 
+        cpy #seqbound
+        bne +
+
+_pr_spc jsr print_spc_border
+        rts
+
++       dec vdisp_rowctr
+        bne -
 
         rts
+
+v_disp_trackrow2
+        ; init vidramptr to write to 
+        lda # <(vidram+30+40*9+4+2) 
+        sta v_ptr+0
+        lda # >(vidram+30+40*9+4+2) 
+        sta v_ptr+1
+
+        lda #16 - 1
+        sta vdisp_rowctr        ; max 16 rows
+
+        ldy player.SEQPOS+7 ; ORDERLIST SEQUENCE PLAYPOSITION
+        iny
+
+-       tya
+        pha
+
+        lda SEQUENCES+seqbound, y ; ORDERLIST T1
+        ldx v_ptr
+        ldy v_ptr+1
+        jsr print_hex
+        
+        clc
+        lda #40
+        adc v_ptr+0
+        bcc +
+        inc v_ptr+1
++       sta v_ptr+0
+
+        pla
+        tay
+        ; check for FE
+        lda SEQUENCES, y
+        cmp #$FE
+        beq _pr_spc
+
+        iny 
+        cpy #seqbound
+        bne +
+_pr_spc jsr print_spc_border
+        rts
+
++       dec vdisp_rowctr
+        bne -
+
+        rts
+
+v_disp_trackrow3
+        ; init vidramptr to write to 
+        lda # <(vidram+30+40*9+4+4) 
+        sta v_ptr+0
+        lda # >(vidram+30+40*9+4+4) 
+        sta v_ptr+1
+
+        lda #16 - 1
+        sta vdisp_rowctr        ; max 16 rows
+
+        ldy player.SEQPOS+14 ; ORDERLIST SEQUENCE PLAYPOSITION
+        iny
+
+-       tya
+        pha
+
+        lda SEQUENCES+2*seqbound, y ; ORDERLIST T1
+        ldx v_ptr
+        ldy v_ptr+1
+        jsr print_hex
+        
+        clc
+        lda #40
+        adc v_ptr+0
+        bcc +
+        inc v_ptr+1
++       sta v_ptr+0
+
+        pla
+        tay
+        ; check for FE
+        lda SEQUENCES, y
+        cmp #$FE
+        beq _pr_spc
+        iny 
+        cpy #seqbound
+        bne +
+_pr_spc jsr print_spc_border
+        rts
+
++       dec vdisp_rowctr
+        bne -
+
+        rts
+
+v_ptr   .byte 00, 00
+
+print_spc
+        ldx v_ptr+0
+        ldy v_ptr+1
+        stx storespc1+1
+        sty storespc1+2
+        stx storespc2+1
+        sty storespc2+2
+        inc storespc2+1
+        bne +
+        inc storespc2+2
++       ; lda #$BD
+        lda #$61
+storespc1 sta vidram+30+40*6+4
+        lda #$62
+storespc2 sta vidram+30+40*6+4
+
+        rts
+
+print_spc_border
+        ldx v_ptr+0
+        ldy v_ptr+1
+        stx storespc3+1
+        sty storespc3+2
+        stx storespc4+1
+        sty storespc4+2
+        inc storespc4+1
+        bne +
+        inc storespc4+2
++       ; lda #$BD
+        lda #$61
+
+storespc3 sta vidram+30+40*6+4
+        ; lda #$90
+        lda #$63
+storespc4 sta vidram+30+40*6+4
+
+        rts
+
 
 print_hex
         stx storehi2+1
@@ -504,25 +645,60 @@ print_hex
         inc storelo2+1
         bne +
         inc storelo2+2
-
 +       tax
-
         and #$f0
         lsr
         lsr
         lsr
         lsr
 
-storehi2 sta vidram+30+40*6+4
-        
+storehi2 sta vidram+30+40*6+4  
         txa
-
         and #$0f
         ora #$90
 
 storelo2 sta vidram+30+40*6+4+1
-
         rts
+
+
+print_hex_fat
+        stx storehi+1
+        sty storehi+2
+        stx storelo+1
+        sty storelo+2
+        inc storelo+1
+        bne +
+        inc storelo+2
++       tax
+        and #$f0
+        lsr
+        lsr
+        lsr
+        lsr
+        cmp #10
+        bcc +
+        clc
+        adc #55
+        jmp storehi
+
++       clc
+        adc #$30
+
+storehi sta vidram+30+40*6+4
+        txa
+        and #$0f
+        cmp #10
+        bcc +
+        clc
+        adc #55
+        jmp storelo
+
++       clc
+        adc #$30
+
+storelo sta vidram+30+40*6+4+1
+        rts
+
 
 clr_v_scrn
         lda # <(vidram+30) 
@@ -741,21 +917,24 @@ v_scrn_osc_text
         .text "POS 101010"
         .text "PTN 102030"
 
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
-        .byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63
+        .byte $20,$00,$10,$00,$61,$63,$61,$63,$61,$63        
+        ; .byte $20,$00,$10,$00,$bd,$bd,$bd,$bd,$bd,$90
+        ;.byte $20,$00,$10,$00,$00,$10,$00,$10,$00,$90
         .enc 'none'
 
 v_colors

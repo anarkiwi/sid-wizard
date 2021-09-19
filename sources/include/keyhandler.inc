@@ -2003,8 +2003,6 @@ f4er    ;F4 (Shift+F3) key handler (stop playback / ? continue (play/pause))
         lda VESSELMODE
         cmp #2
         bne +
-        lda #0
-        sta playadapter.playmod
         jmp VESSEL_NMISTOP
 +
         lda #MIDI.StopSeqPlay

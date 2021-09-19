@@ -117,6 +117,8 @@ NMI_MIDI_START .byte 0
 
 VESSEL_NMISTOP
         ; MIDI STOP: stop playback
+        lda #0
+        sta playadapter.playmod
         sei
         jsr vessel_NMI_OFF
 
@@ -267,7 +269,7 @@ _VNMI_PlayBeg
         ora #%00001011
         sta $d011
 
-        lda #128+64+1 ; +32
+        lda #128+64+1 
         sta $d015 ; sprites ON
 
         ; spr y pos
@@ -285,6 +287,7 @@ _VNMI_PlayBeg
         lda #$0b
         ; sta $d02c
         sta $d02d
+        lda #$0f
         sta $d02e
 
         jsr v_scrn_save

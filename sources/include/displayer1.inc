@@ -35,7 +35,6 @@ hilrefr lda #1          ;self-written, checks if highlight-step was adjusted
 +       jsr ptndisp     ;display selected patterns
 refstep        
         jsr stpdisp     ;display step-highlighted bars for track 1..3
-        ; jsr vessel_overlay_disp_patterns 
 
 noptrfr lda playadapter.seqrefr ;signs if orderlist needs to be refreshed (change subtune / we're in orderlist)
         .if POS_DISP_MOD==2
