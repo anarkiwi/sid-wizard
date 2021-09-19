@@ -4,8 +4,8 @@
 ; 09/21                                                                      M64
 ;-------------------------------------------------------------------------------
 
-NMI MIDI sync in is working! In the menu you can select "SYNC MODE":
-( You need to enable the VESSEL MIDI interface first )
+NMI MIDI sync IN feature: in the menu you can select "SYNC MODE":
+     ( You need to enable the VESSEL MIDI interface first )
 
 ```
 ![Choose SYNC mode](http://m64.rocks/githubimgs/2-menu2.png "SID-Wizard VESSEL: choose sync mode")
