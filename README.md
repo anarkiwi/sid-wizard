@@ -34,7 +34,8 @@ except of border sprites. When this mode is selected, SW drops back to the
 editor:
 
 ```
-![NMI PLAYBACK](http://m64.rocks/2-1.1.png "Playback in NMI")
+![NMI](http://m64.rocks/2-song.png "NMI")
+![NMI](http://m64.rocks/2-empty.png "NMI")
 ``` 
  ^ SW in SYNC MODE 2 (NMI SYNC) ^
 
