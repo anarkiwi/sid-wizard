@@ -89,14 +89,12 @@ VESSELNMI
 
         bit $dd0d
         
-        inc vidram+29+40+40+40+40+80
-
         jsr NMIReadMIDI
         cpy #MIDI.TimingClock
         bne _exitNMI
                 
-        inc vidram+29+40+40+40+40+80+40
         lda #1
+        sta VESSELPLAYING
         jsr playadapter.playsubb
         jsr playadapter.followplay
 
@@ -120,6 +118,9 @@ NMI_MIDI_START .byte 0
 
 VESSEL_NMISTOP
         ; MIDI STOP: stop playback
+        lda #0
+        sta playadapter.playmod
+        sta VESSELPLAYING
         sei
         jsr vessel_NMI_OFF
 
@@ -128,6 +129,7 @@ VESSEL_NMISTOP
         sta $d021
         sta NMI_MIDI_STOP
         sta VESSELMODE
+        sta VESSEL_OVERLAY_PTN
         lda #1
         sta wait4play+1
         ; re init vessel disp
@@ -141,11 +143,14 @@ VESSEL_NMISTOP
         lda #0
         sta menu.m64btx
 
+        jsr v_scrn_restore
+
         lda #$35
         sta banksel 
         jmp menu.retoedi 
         
         jmp goback
+VESSELPLAYING .byte 0
 
 ; NMI MIDI READ Routine
 NMIReadMIDI ; read without changing border color
@@ -247,6 +252,7 @@ _VNMI_PlayBeg
         ldx #1
         stx playadapter.followp+1
         lda #1
+        sta VESSEL_OVERLAY_PTN
         sta playadapter.playmod
         jsr playadapter.ptploff
         jsr playadapter.inisubb
@@ -255,23 +261,40 @@ _VNMI_PlayBeg
         jsr menu.dispmenu
         jsr menu.menuback
 
+        lda #1
+        sta display.syncscr+1
+        
+        lda #DISP_SLOW_SKIP_SPEED
+        sta DISP_SLOW_SKIP_CNT
+
         ; reset y scrl, 25rows
         lda $d011
         ora #%00001011
         sta $d011
 
-        lda #$ff
+        lda #128+64+1 
         sta $d015 ; sprites ON
 
-        ; lda #52
-        ; ; sta $d001; spr 0
+        ; spr y pos
+        lda #60 + 1
+        ; sta $d001; spr 0
         ; sta $d003 ; spr 1
-        ; sta $d005 ; spr 1
-        ; sta $d007 ; spr 1
-        ; sta $d009 ; spr 1
-        ; sta $d00b ; spr 1
-        ; sta $d00d ; spr 1
-        ; sta $d00f ; spr 1
+        ; sta $d005 ; spr 2
+        ; sta $d007 ; spr 3
+        ; sta $d009 ; spr 4
+        ; sta $d00b ; spr 5
+        sta $d00d ; spr 6
+        sta $d00f ; spr 7
+
+        ; spr color
+        lda #$0b
+        sta $d02d
+        lda #$04
+        sta $d02e
+
+        jsr v_scrn_save
+        jsr clr_v_scrn
+        jsr do_v_scrn
 
         ldx #0
         stx $d020
@@ -284,30 +307,3 @@ _menup_sync_mode_ret
         sta menu.m64btx
 _menupoint_back   
         jmp vessel
-
-clrscrn1 
-        ldy #0
--       lda #$20        
-        sta $0400,y
-        sta $0500,y
-        sta $0600,y
-        sta $0700,y 
-        iny
-        bne -
-        rts
-
-clrscrn2 ldy #0
-        sty $d015       ;switch off sprites to prevent rastertime-cycles being stolen from CPU
--       lda #$20        ;clear screen
-        sta $0400,y
-        sta $0500,y
-        sta $0600,y
-        sta $0700,y
-        lda #EXETEXTCOL
-        sta $d800,y
-        sta $d900,y
-        sta $da00,y
-        sta $db00,y
-        iny
-        bne -
-        rts

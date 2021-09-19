@@ -462,7 +462,7 @@ trk3plc .byte $5D,$5C,$5D,$5C,$5D,$5C,$5D,$5C,$bd
         .byte $c1,$80,$A0,$00,$10,$00,$10,$00,$10,$bd
         .byte $c1,$5D,$5C,$5D,$5C,$5D,$5C,$5D,$5C,$bd
         .text "WFARPDT"
-        .byte $7a,$7b,$c1
+        .byte $7a,$7b,$c1       ; Chord01
 
         *= INSPOS+$f0
         .byte $c1,$80,$A0,$00,$10,$00,$10,$00,$10,$bd

@@ -27,12 +27,12 @@ menujmp .word dummymp,savetun,loadtun,saveins,loadins,seldriv
 	.word AutoDir
 .fi
         .word SetFspd,SetDefPtLen,initunt,iniinsc 
-        .word SwitchTheme,KeyLayout,AutoIns,AutoFollow,RasterBar,m64mode
+        .word SwitchTheme,KeyLayout,AutoIns,AutoFollow,RasterBar
 .if (SID_AMOUNT==1)
         .word ChordNoteMode
 .fi
 .if (MIDI_support!=0)
-        .word SelectMIDIdevice,SelectMIDIchannel
+        .word SelectMIDIdevice,SelectMIDIchannel,m64mode
 .fi
 .if (SID_AMOUNT>=2)
         .word SetSID2address
@@ -198,7 +198,15 @@ initedi jsr inidisp
         jmp started
 
 dispaut .proc
-        ldy #authorilen-2 ;hardwired author-info length
+        lda VESSELMODE
+        cmp #2
+        bne +
+
+        lda #0
+        sta menumode
+        rts       
+        
++       ldy #authorilen-2 ;hardwired author-info length
 -       lda authorinfo,y ;display author-info after loading tune
         sta row26,y
         dey
@@ -877,8 +885,7 @@ autistx .text "FF *"
 autfltx .text "FF *"
         .text "* HIDE RBARS: O"
 rastbtx .text "N  *"
-        .text "* SYNC MODE :  "
-        m64btx .text "0  *"
+       
 .if (SID_AMOUNT==1)
         .text "* CHORD-NOTE: O"
 notectx .text "N  *"
@@ -888,6 +895,8 @@ notectx .text "N  *"
 MIDItxt .text ":  OFF   *"
         .text "* MIDICHANNEL:"
 MIDCtxt .text "OFF *"
+ .text "* SYNC MODE :  "
+        m64btx .text "0  *"
 .fi
 .if (SID_AMOUNT>=2)
 SID2row .text "* SID2 ADDR:$"

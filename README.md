@@ -1,4 +1,9 @@
 ```
+
+... feature overlay-display for NMI sync playback is being developed here
+
+```
+```
 ;===============================================================================
 ;--- Update II --- external MIDI SYNC IN via NMI -------------------------------
 ; 08/21                                                                      M64
@@ -55,6 +60,8 @@ SYNC MODE 2: NMI SYNC. The "0" or "1" below represents the playback status
 ( 0 = stopped, 1 = play tune, 2 pattern play ). 
 
          ! NMI SYNC can only be EXITED via MIDI STOP message ! 
+
+                                (for now)
 
  Have a lot of fun!  =8] 
 
@@ -184,3 +191,4 @@ Assemble/compile/install (in Linux):
 ; 2018 Hermit Software Hungary  - contact:   by messagebox at hermit.sidrip.com
 ;===============================================================================
 ```
+
