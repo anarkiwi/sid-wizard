@@ -5,7 +5,7 @@
 ;------------------------------------------------------------------------------
 
 This is the first release candidate, the first feature: MIDI SYNC IN has matured
-andi is provided via VESSEL/NMI:
+and is provided via VESSEL/NMI:
 in the menu you can select "SYNC MODE": ON (1) or OFF (0)
      ( You need to enable the VESSEL MIDI interface first )
 
