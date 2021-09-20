@@ -130,12 +130,6 @@ VESSEL_NMISTOP
         sta NMI_MIDI_STOP
         sta VESSELMODE
         sta VESSEL_OVERLAY_PTN
-        lda #1
-        sta wait4play+1
-        ; re init vessel disp
-        lda #1
-        sta vesseldisp+1
-
         ldx #4 ; normal is purple
         stx plybcol
         stx plybcol+1 ; restore border
@@ -195,39 +189,8 @@ run_menupoint_syncmode
         bne +
         jmp _menupoint_back             ; no MIDI no SYNC
 
-+       ; before switching to next mode:
-        ; if NMI MODE is on, disable it first
-        lda VESSELMODE
-        cmp #2
-        bne +
-        jsr vessel_NMI_OFF
-       
-+       inc VESSELMODE                  ; circular switch to next mode
-        lda VESSELMODE                  ; 
-        cmp #3                          ; last?
-        bne +
-
-        ldx #4                          ; restart at 0
-        lda #0
++       lda #VMODE_NMI_SYNC
         sta VESSELMODE
-        jmp _menup_sync_mode_ret        ; and go back
-
-+       cmp #VMODE_EXT_MIDI_SYNC        ; if EXT MIDI SYNC
-        bne +
-        ; nothing special to prepare here
-        ldx #6 ; ext MIDI sync is blu
-        jmp _menup_sync_mode_ret
-        
-+       cmp #VMODE_NMI_SYNC
-        beq _VNMI_PlayBeg
-
-        ; unknown mode:
-        lda #0
-        sta VESSELMODE
-        ldx #4
-        jmp _menup_sync_mode_ret 
-        
-
 
 _VNMI_PlayBeg 
         lda #$35
@@ -268,9 +231,11 @@ _VNMI_PlayBeg
         sta DISP_SLOW_SKIP_CNT
 
         ; reset y scrl, 25rows
-        lda $d011
-        ora #%00001011
-        sta $d011
+        ; lda $d011
+        ; ora #%00001011
+        ; sta $d011
+        lda #$1b
+        sta $D011
 
         lda #128+64+1 
         sta $d015 ; sprites ON

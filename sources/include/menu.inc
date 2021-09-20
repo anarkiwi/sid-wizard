@@ -199,8 +199,7 @@ initedi jsr inidisp
 
 dispaut .proc
         lda VESSELMODE
-        cmp #2
-        bne +
+        beq +
 
         lda #0
         sta menumode

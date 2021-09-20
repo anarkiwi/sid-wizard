@@ -51,8 +51,7 @@ insrefr lda #1          ;self-written variable ;signs if instrument table needs 
         beq +
         
         lda VESSELMODE
-        cmp #2 
-        beq +
+        bne +
 
         jsr insdisp     ;display instrument data
         jsr chtmdis

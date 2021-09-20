@@ -2001,11 +2001,9 @@ f4er    ;F4 (Shift+F3) key handler (stop playback / ? continue (play/pause))
 +
 .if (MIDI_support!=0)
         lda VESSELMODE
-        cmp #2
-        bne +
+        beq +
         jmp VESSEL_NMISTOP
-+
-        lda #MIDI.StopSeqPlay
++       lda #MIDI.StopSeqPlay
         jsr midisubs.sendMID ;start-command to other MIDI-controlled sequencer
 .fi
 pauseco jsr commonsubs.setFlwP
