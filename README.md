@@ -4,12 +4,10 @@
 ;09/21                                                                      M64
 ;------------------------------------------------------------------------------
 
-This is the first release candidate, the first feature: MIDI SYNC IN has matured
-and is provided via VESSEL/NMI:
-in the menu you can select "SYNC MODE": ON (1) or OFF (0)
-     ( You need to enable the VESSEL MIDI interface first )
-     
-This is the first fully synchronizable C64 SID-Tracker ever (!!) BAM!
+First release candidate: MIDI SYNC IN has matured and now uses VESSEL/NMI only:
+in the menu you can select "SYNC MODE": ON (1) or OFF (0) to enable the playback
+synchronisation via incoming MIDI SYNC messages.
+Timing is only correct for tune tempo 6.
 
 ```
 ![Choose SYNC mode](http://m64.rocks/githubimgs/2-menu3.png "SID-Wizard VESSEL: choose sync mode")
