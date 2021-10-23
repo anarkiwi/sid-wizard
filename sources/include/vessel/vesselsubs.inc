@@ -118,8 +118,6 @@ do_v_scrn
         ldy #>(vidram+30+40*6+4+4)
         jsr print_hex
 
-
-
         lda player.WFGHOST
         ldx #<(vidram+30+40*5+4)
         ldy #>(vidram+30+40*5+4)
@@ -134,8 +132,6 @@ do_v_scrn
         ldx #<(vidram+30+40*5+4+4)
         ldy #>(vidram+30+40*5+4+4)
         jsr print_hex
-
-
 
         lda player.PTNPOS
         ldx #<(vidram+30+40*7+4)
@@ -162,7 +158,7 @@ do_v_scrn
 
 
 blink_vessel
-        lda VESSELPLAYING
+        lda NMI_MIDI_START
         beq +
 
         lda $D027 ; spr 0 color
@@ -745,9 +741,5 @@ VESSELEND
 .include "vesselsubmenu.inc"
 
 .send VESSEL
-.section data
-    .enc 'screen'
-    vessellogo .text "             <-VESSEL/SYNC=>             "
-.send data
 
 .warn format(" vessel TMP WARNING IGNORE: Vesselsubs end: $%04x ($%04x remaining)", *, $D000 - *)

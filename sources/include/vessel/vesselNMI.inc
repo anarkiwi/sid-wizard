@@ -1,5 +1,4 @@
 ; vesselnmi.inc 2021 m64
-
 ; NMI code
 
 vessel_NMI_ON
@@ -90,11 +89,14 @@ VESSELNMI
         bit $dd0d
         
         jsr NMIReadMIDI
+
+        lda NMI_MIDI_START
+        beq _exitNMI
+
         cpy #MIDI.TimingClock
         bne _exitNMI
                 
-        lda #1
-        sta VESSELPLAYING
+_do_play       
         jsr playadapter.playsubb
         jsr playadapter.followplay
 
@@ -107,7 +109,7 @@ _exitNMI
         tay
         pla
         tax
-        pla             ;written at NMI entry, stored value of $01 ROM/RAM bank switcher
+        pla
         sta banksel
         pla   
 
@@ -120,7 +122,6 @@ VESSEL_NMISTOP
         ; MIDI STOP: stop playback
         lda #0
         sta playadapter.playmod
-        sta VESSELPLAYING
         sei
         jsr vessel_NMI_OFF
 
@@ -144,7 +145,6 @@ VESSEL_NMISTOP
         jmp menu.retoedi 
         
         jmp goback
-VESSELPLAYING .byte 0
 
 ; NMI MIDI READ Routine
 NMIReadMIDI ; read without changing border color
