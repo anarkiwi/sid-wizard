@@ -737,7 +737,7 @@ v_colors_bak
 
 VESSELEND
 
-.include "vesselnmi.inc"
+.include "vesselNMI.inc"
 .include "vesselsubmenu.inc"
 
 .send VESSEL
