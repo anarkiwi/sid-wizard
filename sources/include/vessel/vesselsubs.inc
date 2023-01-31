@@ -343,7 +343,7 @@ vessel_statusdisp
 
 VESSELEND
 
-.include "vesselnmi.inc"
+.include "vesselNMI.inc"
 .include "vesselsubmenu.inc"
 
 .send VESSEL
