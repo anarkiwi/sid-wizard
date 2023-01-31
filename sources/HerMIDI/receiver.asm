@@ -742,9 +742,9 @@ DisNote ldx #(NoteBuffer_end-NoteBuffer)-1
         bpl -  
         rts
         
-        .enc screen
+        .enc 'screen'
 WFnames .text "----","TRIA","SAW ","TR+S","PULS","P+TR","P+S ","P+TS","NOISE"
-        .enc none
+        .enc 'none'
 
 hexdisp pha ;input: Accu, output: digit1 in Accu, digit2 in X
         lsr
@@ -814,7 +814,7 @@ scrinit
 
 
 ;------------------------------------------------------------------------------
-.enc screen
+.enc 'screen'
 hexchar .text"0123456789ABCDEF","GHIJKLMNOPQRSTUV"
 noteCh1 .text ".CCDDEFFGGAAHCCDDEFFGGAAHCCDDEFFGGAAHCCDDEFFGGAAHCCDDEFFGGAAHCCDDEFFGGAAHCCDDEFFGGAAHCCDDEFFGGAAH...."
 noteCh2 .text ".-#-#--#-#-#--#-#--#-#-#--#-#--#-#-#--#-#--#-#-#--#-#--#-#-#--#-#--#-#-#--#-#--#-#-#--#-#--#-#-#-...."
@@ -833,6 +833,6 @@ mode2txt .text "ASYNCHRON TX-MODE, RASTERTIME:$00"
 allrigtxt .text "HERMIDI-INTERFACE IS DETECTED AND USED. "
 error1txt .text "  ERROR: HERMIDI DEVICE WAS NOT FOUND!  " 
 error2txt .text "BUSERROR:NOT FOUND,DATALINE CAN'T BE SET" 
-.enc none
+.enc 'none'
 ;=======================================================================
 ; vim: sw=4 ts=4 syntax=asm:

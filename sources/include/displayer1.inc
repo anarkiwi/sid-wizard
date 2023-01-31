@@ -33,7 +33,8 @@ hilrefr lda #1          ;self-written, checks if highlight-step was adjusted
         sta hilrefr+1
         beq refstep     ;jump
 +       jsr ptndisp     ;display selected patterns
-refstep jsr stpdisp     ;display step-highlighted bars for track 1..3
+refstep        
+        jsr stpdisp     ;display step-highlighted bars for track 1..3
 
 noptrfr lda playadapter.seqrefr ;signs if orderlist needs to be refreshed (change subtune / we're in orderlist)
         .if POS_DISP_MOD==2
@@ -46,11 +47,17 @@ titledi lda #selfmod    ;if title should be left in row 26
 +       jsr ordldis     ;display orderlist data (low border spritedata)
 
 insrefr lda #1          ;self-written variable ;signs if instrument table needs to be refreshed (if we-re in instrument window or change instrument)
+        tay
         beq +
+        
+        lda VESSELMODE
+        bne +
+
         jsr insdisp     ;display instrument data
         jsr chtmdis
 
-+       jsr miscdis     ;display subtune-specific data
++       tya
+        jsr miscdis     ;display subtune-specific data
         jsr upbordisp   ;display upper border data in upper-border sprites
 
 msorefr ldy #selfmod    ;signs if refresh of mute/solo is needed
@@ -86,6 +93,7 @@ insdisp lda #0          ;display instrument-data
 selinst lda #1          ;self-written variable, number of selected instrument
         jsr commonsubs.hexdis2
         ldy commonsubs.hexchar,x
+        
         sty vidram+31
         tax
         lda commonsubs.hexchar,x

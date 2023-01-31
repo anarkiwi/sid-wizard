@@ -3,7 +3,7 @@
 ;// $Id: SWM-spec.src 382 2014-06-23 17:53:01Z hermitsoft $
 ;//maximum amount of SWM tune-elements (patterns, instruments, etc.)
 maxsubtuneamount=8-1 ;//max. $1F! - amount of subtunes ;counted from 0, so e.g 20 means 21 subtunes (0..$14) 
-maxptnamount=100 ;//maximum number of patterns ;will depend on how much pattern-memory must be stolen for code
+maxptnamount=90 ;//maximum number of patterns ;will depend on how much pattern-memory must be stolen for code
 maxinstamount=36+1 ;//maximum number of instruments
 seqlength=126 ;//$7e ;max. $7e - max. storage lenth of a sequence in orderlist
 seqbound=128 ;//seqlength+2 ;max.$80 - sequence-boundary size - leave a little space at end of sequence for possible jumpaddress and $00

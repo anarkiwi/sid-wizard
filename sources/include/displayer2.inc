@@ -133,7 +133,10 @@ cury    lda #1          ;self-written variable ;cursor y coordinate (0..25..28)
         asl
         clc
         adc #$22
-        sta $d001
+        ldx VESSELMODE
+        beq +
+        adc #4 
++       sta $d001
 justxdis
         ;cursor-sprite display (coordinates,colour)
 curx    lda #selfmod    ;cursor x coordinate (0..39)
@@ -1061,35 +1064,29 @@ itaemphcol  .byte 15    ;(default:3)  emphasized instrument-table numbers' colou
 gateoffcol  .byte 11    ;(default:11) gateoff-pointers' colours in instrument-tables
 ;---menu user-modifiable colour scheme
 menubgcol   .byte 14    ;(default:14) menu background colour
-menucurcol  .byte 15    ;(default:13) menu cursor/highlight-colour
+menucurcol  .byte 11    ;(default:13) menu cursor/highlight-colour
 ColorSetEnd
         .send
 
 ;-------------------------predefined editor color-schemes-----------------------
 ColorThemes .section data  ;order is based on 'ColorSet' above
         .byte 12,  15, 3,12,  11,12,15,  13,15,12,15, 3,15,11, 14,15
-        .byte 15,   1,15,12,  11,15, 1,  13, 1,15,15,12, 3,11, 14,13
         .byte  5,  13, 3, 5,   5,13, 1,   3, 7, 5,13, 3,13, 7, 13, 3
+        .byte 14,   1, 3, 14, 11,12,15,   7,15,12,15,   4  ,15,11, 14,4 ; M64 / VESSEL MODE      
         .byte  3,  15, 3, 5,  11,12,15,   3,13, 3,13,15,13,13,  3, 1
         .byte 14,  15,14, 6,   6,14,13,  14,15,14, 3,15,13,15, 14, 3
         .byte  4,  10,14, 4,   4,10, 7,  10,12, 4,15,10, 7,10,  4, 7
-        .byte  8,  10, 8, 9,   9, 8, 7,   8,10, 8,10,10, 7, 7,  8, 7
-        .byte  2,  15,10, 2,  11,12,15,  10,15, 2,10,15, 1,10,  2,10
-        .byte 15,  15,12,15,  11,15, 1,  12,15,15,15,15,15,11, 12, 1
 ColorThemesEnd
         .send data
 ThemeNames .section DataUnderIO
-         .enc screen
+         .enc 'screen'
           .text "DEFAULT "
-          .text "BRIGHTER"
           .text "GREENISH"
+          .text "VESSEL  "
           .text "TURKISH "
           .text " BLUISH "
           .text " PURPLE "
-          .text "BROWNISH"
-          .text "RED&GREY"
-          .text "AMISH :)"
-         .enc none
+         .enc 'none'
 ThemeNamesEnd
         .send DataUnderIO
 

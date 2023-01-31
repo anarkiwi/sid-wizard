@@ -638,7 +638,7 @@ selection = Config.PlayerType
 ;selection .byte 0 ;the currently selected menupoint 0..4
 norepeat  .byte 0 ;if value is 0, repeat is disabled
 
-        .enc screen
+        .enc 'screen'
 .if (SID_AMOUNT==1)
 titletx .text"      SID-WIZARD ",SWversion,"  STARTUP-MENU      ","  "
 .elsif (SID_AMOUNT==2)
@@ -657,9 +657,9 @@ tuNormTx  .text           ": Equal-tempered, A5=440Hz "
 tuVerdTx  .text           ": Verdi-tuning ,  A5=432Hz "
 tuJustTx  .text           ":Just-inton.keyC,A=436.05Hz"
 tuDreanTx .text           ":Drean(PALtiming,NTSCpitch)" 
-        .enc none
+        .enc 'none'
 
-        .enc gfx
+        .enc 'gfx'
         .cdef "az",1, " ?",32, "AZ",65
         .cdef "^^",$70, "__",$40, "[[",$5d, "@@",$7a
         .cdef "~~",$6d, "]]",$7d, "\\",$6e
@@ -676,11 +676,11 @@ menurow1  .text "@ Transpose-FX [ NORMAL [ HR. types    @"
           .text "@ PW/Fil.reset [        [ FiltContrlFX @"
           .text "@ Keybrd.track [  DEMO  [ No tableskip @"
           .text "@ FiltShift-FX ~________] SmalFx9,B..F @"
-          .enc none
+          .enc 'none'
 menuend
-        .enc screen
+        .enc 'screen'
 rastitext .text "RasterTime: $1C  Player-Size: $A00"
-        .enc none
+        .enc 'none'
 
 menumempos=40*stmenuYpos+stmenuXpos
 stmenuXsize=menurow1-menugraph

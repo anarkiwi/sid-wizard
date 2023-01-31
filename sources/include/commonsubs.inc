@@ -68,7 +68,7 @@ barcolo ;input: color in X - displays/hides rasterbar or not, depending on confi
 ;------------------------------------------------------
 disNote 
 .if (MIDI_support!=0)
-.enc screen
+.enc 'screen'
 disPoly ldx #"D" ;'De-
         ldy #"T" ;Tune'
         lda Config.confbits
@@ -81,7 +81,7 @@ disPoly ldx #"D" ;'De-
         ldy #$bf ;LY
 +       stx vidram+5*40+35
         sty vidram+5*40+36
-.enc none
+.enc 'none'
 .fi
         lda #$7a ;"Chords" table-top
         ldy #$7b
@@ -576,9 +576,9 @@ div16 .proc
         rts
         .pend
 
-        .enc screen
+        .enc 'screen'
 hexchar .text "0123456789ABCDEF"
-        .enc none
+        .enc 'none'
 
 div12 .proc             ;divide Accumulator by 12, result is in Y, remainder in Accumulator 
         ldy #7          ;loop to divide by 12

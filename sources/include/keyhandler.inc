@@ -1956,6 +1956,7 @@ f1er .proc              ;F1 key handler (reset and play whole tune from beginnin
         jmp spacer.shifSpc
 +
 .if (MIDI_support!=0)
+        ; M64 NOTE: MAKE THIS CONFIGURABLE
         jsr midisubs.sendSt ;start-command to other MIDI-controlled sequencer
 .fi
 PlayBeg ldx #0 ;reset tune and play from beginning
@@ -1999,7 +2000,10 @@ f3er .proc              ;F3 key handler (play current pattern from its beginning
 f4er    ;F4 (Shift+F3) key handler (stop playback / ? continue (play/pause))
 +
 .if (MIDI_support!=0)
-        lda #MIDI.StopSeqPlay
+        lda VESSELMODE
+        beq +
+        jmp VESSEL_NMISTOP
++       lda #MIDI.StopSeqPlay
         jsr midisubs.sendMID ;start-command to other MIDI-controlled sequencer
 .fi
 pauseco jsr commonsubs.setFlwP

@@ -11,7 +11,7 @@ BINARYDIR=../application
 EXASWMDIR=../examples
 EXASWIDIR=$(EXASWMDIR)/instruments
 DOCDIR=../manuals
-APPNAME1=SID-Wizard
+APPNAME1=SID-Wizard-Vessel
 APPVERSION=1.8
 APPNAME2=SID-Maker
 APPNAME3=SW-$(APPVERSION)-UserManual
@@ -24,7 +24,7 @@ SW-SOURCES+=include/menu.inc include/packdepack.inc include/commonsubs.inc
 SW-SOURCES+=graphics/graphics.inc include/displayer2.inc
 SW-SOURCES+=include/keyhandler.inc include/datawriter.inc include/insdelcopy.inc
 SW-SOURCES+=graphics/sw-charset.prg graphics/sw-header.prg
-SW-SOURCES+=include/midisubs.inc MIDI-C64.asm HerMIDI/HerMIDI-C64.asm
+SW-SOURCES+=include/midisubs.inc include/vessel/vesselsubs.inc include/vessel/vesselsubmenu.inc include/vessel/vesselnmi.inc MIDI-C64.asm HerMIDI/HerMIDI-C64.asm
 SM-SOURCES=settings.cfg SWM-spec.src include/player.asm include/packdepack.inc
 SM-SOURCES+=include/keyhandler.inc include/menu.inc include/altplayers.inc
 UM-SOURCES=../manuals/SID-Wizard-$(APPVERSION)-UserManual.txt $(EXASWMDIR)/sid-exports/flashitback.sid
@@ -91,6 +91,15 @@ all: $(BINARYDIR)/$(SW-SPLASH) $(BINARYDIR)/$(SW-SPLASH-KERNAL) $(BINARYDIR)/$(S
 
 upload: $(BINARYDIR)/$(APPNAME1)-$(APPVERSION).prg
 	ncftpput -p "" -Cv c64 $(BINARYDIR)/$(APPNAME1)-$(APPVERSION).prg /Temp/$(APPNAME1)-$(APPVERSION).prg
+
+wizard: $(BINARYDIR)/$(SW-SPLASH)
+wizardlabels: $(SW-SOURCE) $(SW-SOURCES)
+	$(AS) $(AFLAGS) -l WIZARDLABELS.txt --vice-labels -D SID_AMOUNT=1 -D SWversion="'$(APPVERSION)'" -o tmp.out $<
+	$(RM) tmp.out
+
+wizarddump: $(SW-SOURCE) $(SW-SOURCES)
+	$(AS) $(AFLAGS) -L WIZARD.asm -D SID_AMOUNT=1 -D SWversion="'$(APPVERSION)'" -o tmp.out $<
+	$(RM) tmp.out
 
 #C64 executables
 $(BINARYDIR)/$(SW-SPLASH): $(SWS-SOURCE) $(BINARYDIR)/$(SW-PACK) $(SWS-SOURCES)
@@ -201,7 +210,7 @@ Conversion-Examples: $(BINARYDIR)/$(SWM-CONVERTER) $(BINARYDIR)/$(SNG-CONVERTER)
 
 .IGNORE = $(NULL)
 
-#SID-Wizard disk
+#SID-Wizard-Vessel disk
 $(BINARYDIR)/$(APPNAME1)-$(APPVERSION)-disk1.d64: $(BINARYDIR)/$(SW-SPLASH) $(BINARYDIR)/$(SM-PACK) $(BINARYDIR)/$(SW-2SID-SPLASH) $(BINARYDIR)/$(SM-2SID-PACK) $(BINARYDIR)/$(UM-PACK) $(EXASWMDIR)/ $(EXASWMDIR)/sng-imports/todisk
 	$(CBMDISK) -format "sid-wizard $(APPVERSION),s1" d64 $@
 	$(CBMDISK) -attach $@ -write $(BINARYDIR)/$(SW-SPLASH) sid-wizard-$(APPVERSION)
@@ -242,7 +251,7 @@ $(BINARYDIR)/$(APPNAME1)-$(APPVERSION)-disk2.d64: $(BINARYDIR)/$(SW-3SID-SPLASH)
 	for inputfile in $(EXASWMDIR)/*.swt ; do outputfile=$${inputfile##*/} ; \
          $(CBMDISK) -attach $@ -write $$inputfile $${outputfile} ; done;
 
-#SID-Wizard instrument-disk
+#SID-Wizard-Vessel instrument-disk
 $(BINARYDIR)/$(APPNAME1)-instruments.d64: $(EXASWIDIR)/
 	$(CBMDISK) -format "sw$(APPVERSION)-instrument,s3" d64 $@
 	for inputfile in $(EXASWIDIR)/*.swi ; do outputfile=$${inputfile##*/} ; \
@@ -263,12 +272,11 @@ exporter.prg: $(SM-SOURCE) $(SM-SOURCES)
 	$(AS) $(AFLAGS) -D SID_AMOUNT=1 -D SFX_SUPPORT=0 -D SLOWDOWN_SUPP=0 -D SWP_EXPORT=0 -D SWversion="'$(APPVERSION)'" -o exporter-nopack.prg $<
 	$(PACKER) sfx sys -q -o exporter.prg exporter-nopack.prg
 
-SID-Wizard-splashed: SID-Wizard-splashed.prg
+SID-Wizard-Vessel-splashed: SID-Wizard-Vessel-splashed.prg
 	$(X64) $(XFLAGS) $<
 
-SID-Wizard-splashed.prg: $(SWS-SOURCE) $(SWS-SOURCES)
+SID-Wizard-Vessel-splashed.prg: $(SWS-SOURCE) $(SWS-SOURCES)
 	$(AS) $(AFLAGS) -D SID_AMOUNT=1 -o $@ $<
-
 
 clean:
 	$(RM) $(BINARYDIR)/$(SW-SPLASH) $(BINARYDIR)/$(SW-SPLASH-KERNAL) $(BINARYDIR)/$(SW-2SID-SPLASH) $(BINARYDIR)/$(SW-3SID-SPLASH)
@@ -283,13 +291,14 @@ clean:
 	$(RM) $(EXASWMDIR)/xm-imports/*.swm.prg $(EXASWMDIR)/xm-imports/*.swm.P00 $(EXASWMDIR)/xm-imports/*.swm 
 	$(RM) $(EXASWMDIR)/mid-imports/*.swm.prg $(EXASWMDIR)/mid-imports/*.swm.P00 $(EXASWMDIR)/mid-imports/*.swm
 	$(RM) $(EXASWMDIR)/sng-imports/*.swm $(EXASWMDIR)/sng-imports/todisk/*.swm
-	$(RM) editor.prg exporter.prg SID-Wizard-splashed.prg
-
+	$(RM) editor.prg exporter.prg SID-Wizard-Vessel-splashed.prg
+	$(RM) WIZARDLABELS.txt
+	$(RM) WIZARD.asm
 
 install: 
 	$(CP) $(BINARYDIR)/$(SWM-CONVERTER) $(APPDIR)/
 	$(CP) $(BINARYDIR)/$(SNG-CONVERTER) $(APPDIR)/
-#Create application-entry and folder for SID-Wizard for easy access on Linux
+#Create application-entry and folder for SID-Wizard-Vessel for easy access on Linux
 	$(CP) $(APPNAME1).desktop $(DESKDIR)/
 	$(CP) ./graphics/$(SW-ICON) $(ICONDIR)/
 	$(MD) -p $(APPDIR3)

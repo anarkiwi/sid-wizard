@@ -1,3 +1,62 @@
+```
+;==============================================================================
+;--- external MIDI SYNC IN via NMI --------------------------------------------
+;09/21                                                                      M64
+;------------------------------------------------------------------------------
+
+First release candidate: MIDI SYNC IN has matured and now uses VESSEL/NMI only:
+in the menu you can select "SYNC MODE": ON (1) or OFF (0) to enable the playback
+synchronisation via incoming MIDI SYNC messages.
+Timing is only correct for tune tempo 6.
+
+```
+![Choose SYNC mode](http://m64.rocks/githubimgs/2-menu3.png "SID-Wizard VESSEL: choose sync mode")
+``` 
+^ menu point to switch sync mode ON ^
+
+MODE 0: sync OFF - normal mode ( default, original VESSEL MIDI support by anarkiwi )
+MODE 1: sync ON  - external MIDI sync in via NMI
+
+sync OFF: is the default behavior of SID-Wizard (SW) with an attached MIDI device, 
+where anarkiwi has implemented the original VESSEL MIDI support. 
+( see https://github.com/anarkiwi/sid-wizard ) 
+Playback is running in IRQ, and no sync in is done. When you have your VESSEL 
+enabled (and all MIDI channels enabled, too), SW will react on MIDI messages,
+also for start and stop. It will start playback, but unsynchronized.
+
+sync ON: NMI SYNC mode! In this mode VESSEL is configured to trigger NMIs on CIA2s
+/FLAG input on MIDI start/stop/sync messages. Playback is running in NMI, 
+the UI stays visible and functional, except of border sprites. 
+When this mode is selected, SW drops back to the editor:
+
+```
+![NMI](http://m64.rocks/githubimgs/2-empty.png "NMI")
+``` 
+ ^ SW in SYNC MODE (NMI SYNC) ^
+
+To make up for the missing border sprites, a playback status window is 
+displayed over the instrument window - showing SID WF registers, the 
+posistion in the current pattern, currently playing instruments,
+the channel 3 oscilloscope, and the pulswewidth-/filter bars.
+
+The keyboard is checked, and you can move around the cursor, enter notes/
+values, etc. This is done during the wait for start and playback as well.
+You can mute tracks, and use editor functions in the pattern window.
+
+SW now waits for a MIDI START message. When it is received, synchronized
+playback starts, in follow play mode.
+
+```
+![NMI](http://m64.rocks/githubimgs/2-song.png "NMI")
+```
+
+  Have a lot of fun!  =8] 
+
+```
+
+
+
+``` 
 ;===============================================================================
 ;--- SID-WIZARD for VESSEL ---
 
@@ -78,3 +137,5 @@ Assemble/compile/install (in Linux):
 
 ; 2018 Hermit Software Hungary  - contact:   by messagebox at hermit.sidrip.com
 ;===============================================================================
+```
+

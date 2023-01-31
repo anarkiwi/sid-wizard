@@ -11,7 +11,7 @@ menu .block             ;private stuff
 runmenup                ;run selected menupoint (jumped here from main loop)
         lda menupoint
         asl             ;multiply by 2 to get word-jumpaddress for menupoint
-        tay
+        tay             
         lda menujmp,y
         sta mjumper+1
         lda menujmp+1,y
@@ -26,13 +26,13 @@ menujmp .word dummymp,savetun,loadtun,saveins,loadins,seldriv
 .if (SID_AMOUNT<3) 
 	.word AutoDir
 .fi
-        .word SetFspd,SetDefPtLen,initunt,iniinsc
+        .word SetFspd,SetDefPtLen,initunt,iniinsc 
         .word SwitchTheme,KeyLayout,AutoIns,AutoFollow,RasterBar
 .if (SID_AMOUNT==1)
         .word ChordNoteMode
 .fi
 .if (MIDI_support!=0)
-        .word SelectMIDIdevice,SelectMIDIchannel
+        .word SelectMIDIdevice,SelectMIDIchannel,m64mode
 .fi
 .if (SID_AMOUNT>=2)
         .word SetSID2address
@@ -198,7 +198,14 @@ initedi jsr inidisp
         jmp started
 
 dispaut .proc
-        ldy #authorilen-2 ;hardwired author-info length
+        lda VESSELMODE
+        beq +
+
+        lda #0
+        sta menumode
+        rts       
+        
++       ldy #authorilen-2 ;hardwired author-info length
 -       lda authorinfo,y ;display author-info after loading tune
         sta row26,y
         dey
@@ -210,9 +217,9 @@ dispaut .proc
         lda drvsig,y
         sta row26+39 ;player-type abbreviation
         rts
-        .enc screen
+        .enc 'screen'
 drvsig .text "N","M","L","E","B","D"
-        .enc none
+        .enc 'none'
         .pend
 
 
@@ -373,6 +380,8 @@ AutoIns jsr keyhandler.toggIns
 AutoFollow jsr keyhandler.autoFlw
         jmp mainloop
 
+;--------------------------------------------
+m64mode jmp run_menupoint_syncmode
 
 ;--------------------------------------------
 RasterBar lda #2        ;rasterbar-displaying on/off
@@ -767,7 +776,7 @@ disAins lda #$80        ;auto-instrument?
         stx autistx+0
         sty autistx+1
 .if (MIDI_support!=0)
-       .enc screen
+       .enc 'screen'
 disMIDI ldx #"?"
         lda Config.MIDIdev
         beq +           ;if MIDI-device is not switched on, don't have 'Status' of it
@@ -803,7 +812,7 @@ chnNumb jsr decdis2
 showChn stx MIDCtxt+0
         sty MIDCtxt+1
         sta MIDCtxt+2
-       .enc none
+       .enc 'none'
 .fi
 .if (SID_AMOUNT>=2)
         jsr SID23set.CalcSID2addID
@@ -829,7 +838,7 @@ showChn stx MIDCtxt+0
 .fi
 retmdis rts
 
-        .enc screen
+        .enc 'screen'
 diOnOff ldx #"N" ;"N "  ;on/off text endings
         ldy #" "
         and Config.confbits ;display confbit ON/OFF status in X and Y based on value of A
@@ -842,14 +851,13 @@ diOnOf2 ldx #"N" ;"N "  ;on/off text endings
         and Config.confbits2 ;display confbit ON/OFF status in X and Y based on value of A
         beq -
         rts
-        .enc none
+        .enc 'none'
 
 
 ;------------------------------------------------
-        .enc screen
+        .enc 'screen'
 menutxt .text "*******************"
 menurow .text "*  - MAIN MENU -  *"
-        .text "* --------------- *"
 firstmp .text "*    SAVE TUNE    *"
         .text "*    LOAD TUNE    *"
         .text "* SAVE INSTRUMENT *"
@@ -876,6 +884,7 @@ autistx .text "FF *"
 autfltx .text "FF *"
         .text "* HIDE RBARS: O"
 rastbtx .text "N  *"
+       
 .if (SID_AMOUNT==1)
         .text "* CHORD-NOTE: O"
 notectx .text "N  *"
@@ -885,6 +894,8 @@ notectx .text "N  *"
 MIDItxt .text ":  OFF   *"
         .text "* MIDICHANNEL:"
 MIDCtxt .text "OFF *"
+ .text "* SYNC MODE :  "
+        m64btx .text "0  *"
 .fi
 .if (SID_AMOUNT>=2)
 SID2row .text "* SID2 ADDR:$"
@@ -899,7 +910,7 @@ cfgstat .text "  *" ;will be used to display if config-saving was unsuccessful
 lastmpt .text "*  INSTANT HELP!  *"
         .text "*******************"
 menutxtend
-        .enc none
+        .enc 'none'
 
 menuxsize = menurow-menutxt ;menu X size
 menuysize = (menutxtend-menutxt)/menuxsize ;menu Y size
@@ -918,7 +929,7 @@ menucurpos .byte firstcpos+0 ;cursorposition in menu
 menupoint .byte 0       ;selected menupoint - for main loop - if 0, nothing done, otherwise jump depending on value
 
 ;-----------text for help------------------------------------
-        .enc screen
+        .enc 'screen'
 helptxt .text "F1/F2 PLAY ALL/MARK"
 helprow .text "F3/F4 PLAYPATT/STOP"
         .text " <-   FAST-FORWARD "
@@ -942,18 +953,18 @@ helprow .text "F3/F4 PLAYPATT/STOP"
         .text "FX8,$10:VIBRA,TEMPO"
 .fi
         .text "-------------------"
-        .text " ",^Year," HERMIT SOFT. "
-        .enc none
+        .text " ", format("%d", Year)," HERMIT SOFT. "
+        .enc 'none'
 helptxend
 helpYsize = (helptxend-helptxt)/(helprow-helptxt) ;help-text vertical size
 
 ;-----------------------------------------------
-        .enc screen
+        .enc 'screen'
 KeyTypes .text "SIDW"   ;default SID-Wizard piano key-layout (2 octaves: Z,X,C,V,.. and Q,W,E,R,T,Y,.. , octave: C=+1..8)
          .text " DMC"   ;FC/GMC/DMC piano key-layout (1 octave: A,S,D,F,..., select octave: 1..8 numerical keys)
          .text " SDI"   ;'SID DUZZ IT' like keyboard-layout (not only piano keys)
          .text "JANK"   ;Janko-keyboard (chromatic approach, invented by Paul von Janko at the end of 1800s)
-        .enc none
+        .enc 'none'
 
 
         .fi             ;end of part that's not included in SID-Maker
@@ -999,7 +1010,7 @@ CheckSWM                ;check filetype version of SWM module in 1st 4 bytes, if
 retchkv rts             ;Carry bit is set to 1 if there's a mismatch
 
 ;=======================================DISK OPERATIONS========================================================
-        .enc screen
+        .enc 'screen'
 filetx1 .text "FILENAME:             "
         .byte $75       ;the ruler between filename and extension display
         .text "(FILETYPE:*";....
@@ -1013,7 +1024,7 @@ swftype .text ".SWT)" ;'SWT' stands for 'SID-Wizard Trio'
         .text SWMversion ;show current module-version in file-dialog
 readver .text SWMversion ;the read version-number of selected tune (for loading) - preset to current version
 filetx2 .text "DR:   F1,F3:DIR, CTRL:FIELD   FREE:...KB"
-        .enc none
+        .enc 'none'
 dirname .byte "$"       ;$ is the name of disk-directory
 
 ;scratch .text "S0:"    ;Scratch-signal (OPEN 15,8,15,"S0:file name":CLOSE 15) - will preceed filename when user want to overwrite a file (Save&Replace "@filename" is buggy in old 1541 drives)
@@ -1029,7 +1040,7 @@ filerwindow .byte 0     ;window in file-menu: 0-filename-typer , 1-authorinfo-ty
 fkeybout    .byte 0     ;keyboard-routine output of filer's keyboard handler - used by main loop to take some actions
 
 ;error messages in filer window, 29 character long each
-        .enc screen
+        .enc 'screen'
 nodevicep   .text " NO DISK OR DRIVE PRESENT!!! "
 fnotfound   .text " FILE NOT FOUND! PRESS SPACE."
 ;filexists  .text "ERROR! (EXISTS?) PRESS SPACE."
@@ -1037,11 +1048,11 @@ vermismatch .text " WRONG VERSION0! PRESS SPACE."
 saveerror   .text " SAVING ERROR 0! PRESS SPACE. "
 RyouSurTx   .text "* ARE YOU SURE? *"
 RyouSurT2   .text "*  (Y/N) (I/N)  *"
-        .enc none
+        .enc 'none'
 
         .if COMPILEDAPP==1
 moduledial              ;start file-dialog for .SWM module (Accu preset for filedialog)
-        .enc screen
+        .enc 'screen'
 .if (SID_AMOUNT==1)
         lda #"M"        ;for modules
 .elsif (SID_AMOUNT==2)
@@ -1049,7 +1060,7 @@ moduledial              ;start file-dialog for .SWM module (Accu preset for file
 .elsif (SID_AMOUNT==3)
         lda #"T"        ;for Trio (3SID) modules
 .fi
-        .enc none
+        .enc 'none'
 filedialog              ;input:Accu - extension read directory, typing filename, return filename in 'namebuf'
         sta swftype+3   ;set .SWM (SID-Wizard module) or .SWI (instrument) extension
 	lda #0

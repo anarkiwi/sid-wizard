@@ -421,7 +421,7 @@ sprtable                ;precalc.table for sprite-addresses of corresponding ord
 ;video ram content
         .cerror *>$e000,"TOO MUCH CODE BEFORE VIDEO-RAM ($e000) DOESN'T FIT IN MEMORY. MOVE SOME CODE TO FREE AREAS!"
         *= $e000
-        .enc screen
+        .enc 'screen'
 vidram
 INSPOS
 
@@ -462,7 +462,7 @@ trk3plc .byte $5D,$5C,$5D,$5C,$5D,$5C,$5D,$5C,$bd
         .byte $c1,$80,$A0,$00,$10,$00,$10,$00,$10,$bd
         .byte $c1,$5D,$5C,$5D,$5C,$5D,$5C,$5D,$5C,$bd
         .text "WFARPDT"
-        .byte $7a,$7b,$c1
+        .byte $7a,$7b,$c1       ; Chord01
 
         *= INSPOS+$f0
         .byte $c1,$80,$A0,$00,$10,$00,$10,$00,$10,$bd
@@ -573,7 +573,7 @@ TMPLACE .byte $c1,$00,$90
 stplace .byte $c1
         .text "-"
         .byte $7c,$7d,$c8,$c4,$7e
-        .enc none
+        .enc 'none'
 
         *= INSPOS+$3f8	;sprite-pointers
         .byte <(cursprite / $40) ;divided by spritesize, 256 sprites in a bank
