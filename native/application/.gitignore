@@ -1,0 +1,3 @@
+# Build outputs land here (make -C native/sources). Keep the dir, ignore artifacts.
+*
+!.gitignore

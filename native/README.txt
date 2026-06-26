@@ -1,28 +1,11 @@
 ;===============================================================================
-;--- SID-WIZARD for VESSEL ---
-
-This is a port of SID Wizard 1.97, for the Vessel MIDI interface (https://github.com/anarkiwi/vessel).
-
-Within SID Wizard, select MIDI device VESSEL.  Future versions will increase MIDI performance.
-
-For releases, see https://github.com/anarkiwi/sid-wizard/releases.
-
-Build (Ubuntu 24.04+): run ./build.sh, or `make -C native/sources`.
-Outputs land in native/application/ (e.g. SID-Wizard-1.9.prg,
-SID-Wizard-1.97-disk1.d64).  The upstream C64 sources live under native/ to
-match the SID-Wizard 1.97 release layout; the desktop GUI/TUI port is omitted.
-
-Vessel protocol tests live in test/sidwizard/ (see test/sidwizard/PROTOCOL.md).
-
-
-;===============================================================================
 ;--- SID-WIZARD --- A native C64 music editor (tracker) tool
 ;-------------------------------------------------------------------------------
 ;by Hermit Software (Mihaly Horvath) - with much help from Soci of Singular Crew
 ;-------------------------------------------------------------------------------
 
 The complete User Manual can be found in 'manuals' folder. The most recent version is
-'SID-Wizard-1.8-UserManual.txt'. You can find older versions in PDF format in the
+'SID-Wizard-1.9-UserManual.txt'. You can find older versions in PDF format in the
 older SID-Wizard releases like 1.7 , if you need a more verbose documentation.
 
 The latest Japanese translation is found here:
@@ -31,7 +14,7 @@ http://csdb.dk/release/?id=126819
 Also, don't forget to check out WitchMaster's perfect book about SID-Wizard at CSDb.
 
 You can find all executables in 'application' directory, including a d64 with instruments.
-There's a KERNALload version of SID-Maker and SID-Wizard now which can be used with
+There's a KERNALload version of SID-Maker and SID-Wizard now which can be used with SD2IEC and
 fastloader cartridges that couldn't work with SID-Wizard, like the Final Cartridge III.
 It completely turns off the cartridge fastloader and forces KERNAL loader and saver.
 If there's no binary or you want to re-compile all the .prg and .d64 files,
@@ -41,8 +24,7 @@ here :
 Assemble/compile/install (in Linux):
 ------------------------------------
  Prerequisites:
-  -64tass (V1.53.1515 was used) in system-directory* to compile .asm and .inc source files
-  -exomizer packer in system-directory* to compress the compiled binaries
+  -64tass (v1.59.3120 v1.60.3243 were used) in system-directory* to assemble asm/inc files
   -c1541 in system-directory* to create .d64 diskimages via program and examples
    (it is part of VICE, while x64 is the emulator executable but not necessary)
   *system directory /usr/local/bin might be a good option for Linux
@@ -83,5 +65,5 @@ Assemble/compile/install (in Linux):
 ;License: You know I'm not into licensing and legal stuff but for the sake of completeness
 ;let's declare SID-Wizard as a WTF-licensed tool, so you can do WTF you want with it.
 
-; 2018 Hermit Software Hungary  - contact:   by messagebox at hermit.sidrip.com
+; 2026 Hermit Software Hungary  - contact:   by Personal Message at CSDb
 ;===============================================================================

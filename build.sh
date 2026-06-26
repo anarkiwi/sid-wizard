@@ -1,16 +1,12 @@
 #!/bin/bash
 
 set -e
-EV=3.1.1
 BR=$(pwd)
 
-sudo apt-get update && sudo apt-get -y install 64tass wget unzip build-essential vice gcc-multilib g++-multilib wine
-rm -rf exomizer && \
-	mkdir exomizer && \
-	cd exomizer && \
-	wget https://bitbucket.org/magli143/exomizer/wiki/downloads/exomizer-$EV.zip && \
-	unzip exomizer-$EV.zip && \
-	cd src && \
-	make && \
-	sudo cp exomizer /usr/local/bin
-cd $BR/sources && make clean && make
+# 64tass >= 1.59 is required (1.97 was built with 1.59.3120 / 1.60.3243).
+# Ubuntu 24.04 ships 1.59.3120; 22.04 is too old, so build on 24.04/latest.
+# vice provides c1541 (used to build the .d64 images). The packer is now
+# bundled (native/sources/tools/compress64kSFX), so exomizer is no longer needed.
+sudo apt-get update && sudo apt-get -y install 64tass build-essential vice
+
+cd "$BR/native/sources" && make clean && make

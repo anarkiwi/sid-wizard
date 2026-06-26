@@ -1,0 +1,130 @@
+This is the 'SWMconvert' tool from SID-Wizard-1.96
+with SID-Wizard SWM to GoatTracker (v2.76) SNG conversion support.
+
+
+This new use-case has a simple syntax:
+SWMconvert  <surce>.swm  target.sng
+
+If running through 'swm2sng' symlink (or SWMconvert renamed to swm2sng),
+it will automatically use this convert-to-GoatTracker mode for the conversion
+even if no output-file is given (instead of the conversion-to-XM default):
+swm2sng  <surce>.swm  [target.sng]
+
+
+(Note: For converting SNG to SWM you can still use the separate 'sng2swm' tool
+ contained in SID-Wizard package.)
+
+
+History:
+
+The idea originated from a scener with the nickname 'RS-232' to have a
+SID-Wizard to GoatTracker conversion so tunes composed in the more featured
+and reportedly user-friendlier SID-Wizard can be converted into more
+size-optimized GoatTracker tunes (GT tune sizes are about 70..75% of SW sizes).
+He created a tool utilizing Claude AI and is based on the 'sng2swm' tool which
+I created upon Conrad's codebase, but in the opposite direction. (This swm2sng
+tool is announced at CSDb Forum with a link to the github resource.)
+
+While I was testing his tool as it was evolving I decided to create a handmade
+version aiming for precise human-controlled conversion, so I started from
+SWMconvert which already processes SWM tunes, then coded the conversion to SNG
+format into it, and here's the result. It will be included in the next version
+of SID-Wizard by default, but for now it's a separate release on its own.
+
+
+Usage hints, restrictions:
+As GoatTracker has far less features in its optimized player-code than what
+SID-Wizard's full-featured normal/extra-players provide, not everything can be
+converted into GoatTracker SNG format without a loss of information.
+So when you create a tune to be converted to SNG you'd better keep some limi-
+tations in mind, to avoid differences caused by lost effects (and check the
+converted output regularly).
+I collect these limitations here in a nutshell:
+
+TEMPO, FRAMESPEED:
+-Don't create multispeed tune (GT differs, examples: euphoria.swm, lenore.swm)
+-Avoid tempo-FX in the orderlist (GT has no direct tempo orderlist-FX support)
+-Don't set main tempo and track-tempo at the same time (on same pattern-rows)
+ (GT opposite order: left track has the priority, example: 'samar20-out.swm')
+-Don't set funktempo on a single channel (GT can only set it on all channels
+ and not individually, e.g.: 'fightunknown.swm' and 'nepzenek.swm' subtune1.)
+-Don't use tempo-programs (GT has no support for them at all)
+
+ORDERLIST, SUBTUNES:
+-Avoid using tempo/volume-setting Orderlist-FX, use only transpose and jump/loop
+ (Tempo/Volume-seqFX is baked into next pattern if possible, but no guarantee!)
+ (Transpose shouldn't exceed $9E as in rain8580.swm, gets octave-shifted down.)
+ (F0..FE numbered NOPs can be used in the orderlist, but they get removed.)
+-Don't use a subtune-jump (It will be substituted by simple loop to index $00.)
+
+INSTRUMENTS, CHORDS, FILTER:
+-Arp-speeds and Chords get expanded in Waveform-Arp-table, it gets bigger/full.
+-Avoid staccato setting (Hard-Restart gate-off control, mystic GT equivalent).
+-You can't use different HardRestart-ADSR values in GT, so prefer GT-default.
+-1st frame waveform bypass can only be mimiced by a decreased HR-timer in GT.
+ (Otherwise the delayed pitch-setting is quite audible for 2+ HR-timer frames.)
+-You can't use different vibrato-types, stick to the standard one
+ -Don't use vibrato with speed '0' (it's downslide in SW, but upslide in GT.)
+-Leave Detune/KeyboardTrack unused WF/Pulse/Filter-tables, except filter-KT:
+-Filter Keyboard-track column should contain the $80..$87 filter channel-switch
+ value at least in the 1st row, that can be converted to GT exactly.
+ (Don't rely on SID-Wizard's automatic filter-switch handling, or if you do so,
+  and don't want to add this KT-column switch-info, only use the filter on a
+  single channel, and if there's an unfiltered instrument is used too on that
+  channel, don't use it on other channel. So GT will be able to add a filter
+  turnoff into that instrument, and the unfiltered instrument doesn't get
+  muddled by the filtered instrument on the same channel.)
+-Filter-cutoff sweeps are only 8bit in GoatTracker, so don't use smaller than
+ 8 as cutoff-sweep add-value (avoid 0..7 and $F7..$FF regions) with SW-players
+ supporting 11bit filter (like 'normal' and 'extra' player-types).
+
+PATTERNS:
+-Don't use longer than 128-row patterns.(A GT limit, e.g. nepzenek.swm subtune5)
+-Don't use more than one pattern-FX on the same pattern-row (GT can do only 1).
+ (SW can have pattern-FX in all columns, including note & instrument column.)
+ (If you do more pattern-effects in the same pattern-row, the SWM-to-SNG conver-
+ sion has some hardwired priority. It usually overwrites pitch-slide/portamento
+ but chord-canges have priority above other effects. Best is not to use more...)
+ ($3F legato and smallFX in instrument-column, and noteFX, are pattern-FXes too)
+-If you reuse a pattern in the orderlist prefer doing it with the same instrum-
+ ent-set, because 'octave' setting is SID-Wizard is burned into the pattern-
+ notes in GT. (The best is setting instrument/chord inside the pattern.)
+-Gateoff-indexes in instruments are translated into instrument-table jump-
+ pattern-effects, so they count as pattern-effects.
+-Only use pattern-effects that have GT-equivalent. These are missing in GT and
+ not converted: chord-speed setting, per-channel funktempo, tempo-program,
+                and SW-pattern bigFX $16..$1E (filter-cutoff shift, delay, etc.)
+                smallFX: waveform, wavecontrol, vibrato-period ($9X),
+                         chord-speed, detune, filter-band, filter-resonance
+                note-column FX: sync-on, sync-off, ring-on, ring-off
+
+
+Implemented workarounds for SID-Wizard features not directly supported by GT:
+-The main tempo/funktempo of a SID-Wizard tune is set in an 1-row first pattern.
+-The orderlist-sequence END ($FE) is made by a jump to a last 1row pattern.
+-Volume/Tempo orderlist-FX is moved into the following generated SNG pattern
+ if the FX in its 1st row is empty, but that might not always be the case.
+ (An example of a lucky situation is 'pimpmycomm.swm' at orderlist-pos. $12.)
+-Instrument octave-shift is realized by converting the notes in patterns.
+-Calculated (note-dependent) vibrato and slide is used in GT where possible.
+ (If players like 'light'/'bare' are used, no caculated slides are generated.)
+ (GoatTracker has $8x in speedtable left column for calculated slides/vibratos.)
+ (Its speed is limited in GT, so fast slides are calculated in the pattern-FX.)
+ (Rarely GT-player has issues with it, like c0z-50shades.swm's solo near the end
+  which is pitched down a bit in GT, but it's OK in the exported SID-tune.)
+-Chords are turned into patternFX-callable WaveForm-Arpeggio-table chunks.
+ (Chord-selection pattern-FX have priority over other effects on the same row.)
+ -Arpeggio/chord-speeds are translated into '00..0F' wait commands in WF-table.
+ -Identical instrument-tables/parts are optimized out (selectable by defines).
+-The 1st filtertable-entry is for no-filter instruments on the filtered channel.
+ -Musicdata is scanned to decide on the filtered channel(s) automatically.
+  (Instrument's filter-table is set so, but prefer filter on only one channel.)
+  (Multi-channel filters can still be set in filtertable KT column: $80..$8F.)
+-Moving ADSR-setter effects up or gate-offs down when they're on the same row,
+ because without it GoatTracker might give silent sounds by its ADSR-set order.
+-Instrument Gate-off (rest) indexes are substituted by WF/PW/Filter-table jumps.
+-Instrument-table self-jumps (FE 40 in WF-table) are converted to $FF 00 'ends'.
+
+
+June 2026  Hermit (Mihaly Horvath)
+

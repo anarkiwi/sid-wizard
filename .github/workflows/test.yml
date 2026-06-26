@@ -1,10 +1,15 @@
-name: test
+name: build
 on: [push, pull_request]
 jobs:
-  test:
-    runs-on: ubuntu-24.04
+  build:
+    # ubuntu-24.04 ships 64tass 1.59 (1.97 needs >= 1.59); 22.04 is too old.
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-    - name: build 
+    - name: build
       run: |
         ./build.sh
+    - name: check expected artifacts exist
+      run: |
+        test -f native/application/SID-Wizard-1.9.prg
+        test -f native/application/SID-Wizard-1.97-disk1.d64
