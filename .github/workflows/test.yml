@@ -5,7 +5,7 @@ jobs:
     # ubuntu-24.04 ships 64tass 1.59 (1.97 needs >= 1.59); 22.04 is too old.
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: build
       run: |
         ./build.sh

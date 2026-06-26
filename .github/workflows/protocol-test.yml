@@ -5,7 +5,7 @@ jobs:
     # ubuntu-24.04 ships 64tass 1.59 (matches the version 1.97 was built with).
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Install 64tass and py65
       run: |
         sudo apt-get update
