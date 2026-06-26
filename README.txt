@@ -1,11 +1,18 @@
 ;===============================================================================
 ;--- SID-WIZARD for VESSEL ---
 
-This is a port of SID Wizard 1.8.7, for the Vessel MIDI interface (https://github.com/anarkiwi/vessel).
+This is a port of SID Wizard 1.97, for the Vessel MIDI interface (https://github.com/anarkiwi/vessel).
 
 Within SID Wizard, select MIDI device VESSEL.  Future versions will increase MIDI performance.
 
 For releases, see https://github.com/anarkiwi/sid-wizard/releases.
+
+Build (Ubuntu 24.04+): run ./build.sh, or `make -C native/sources`.
+Outputs land in native/application/ (e.g. SID-Wizard-1.9.prg,
+SID-Wizard-1.97-disk1.d64).  The upstream C64 sources live under native/ to
+match the SID-Wizard 1.97 release layout; the desktop GUI/TUI port is omitted.
+
+Vessel protocol tests live in test/sidwizard/ (see test/sidwizard/PROTOCOL.md).
 
 
 ;===============================================================================
